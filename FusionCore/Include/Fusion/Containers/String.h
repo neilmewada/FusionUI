@@ -2,6 +2,7 @@
 
 #include <string>
 #include <string_view>
+#include <format>
 #include <cstdint>
 
 namespace Fusion
@@ -37,20 +38,41 @@ namespace Fusion
         bool   IsEmpty()    const { return m_Size == 0; }
 
         FString& operator+=(const FString& other);
+        FString& operator+=(const std::string& str);
         FString& operator+=(std::string_view str);
         FString& operator+=(const char* str);
 
-        FString operator+(const FString& other)    const;
-        FString operator+(std::string_view other)  const;
-        FString operator+(const char* other)       const;
+        FString operator+(const FString& other)      const;
+        FString operator+(const std::string& other)  const;
+        FString operator+(std::string_view other)    const;
+        FString operator+(const char* other)         const;
 
-        bool operator==(const FString& other)   const;
-        bool operator==(std::string_view other) const;
-        bool operator==(const char* other)      const;
+        bool operator==(const FString& other)      const;
+        bool operator==(const std::string& other)  const;
+        bool operator==(std::string_view other)    const;
+        bool operator==(const char* other)         const;
 
-        bool operator!=(const FString& other)   const { return !(*this == other); }
-        bool operator!=(std::string_view other) const { return !(*this == other); }
-        bool operator!=(const char* other)      const { return !(*this == other); }
+        bool operator!=(const FString& other)      const { return !(*this == other); }
+        bool operator!=(const std::string& other)  const { return !(*this == other); }
+        bool operator!=(std::string_view other)    const { return !(*this == other); }
+        bool operator!=(const char* other)         const { return !(*this == other); }
+
+        // ----------------------------------------------------------------
+        // Formatting
+        // ----------------------------------------------------------------
+
+        // Compile-time checked format string. Usage: FString::Format("Hello {}!", name)
+        template<typename... Args>
+        static FString Format(std::format_string<Args...> fmt, Args&&... args)
+        {
+            return FString(std::format(fmt, std::forward<Args>(args)...));
+        }
+
+        // Runtime format string. Usage: FString::FormatV(runtimeFmt, std::make_format_args(a, b))
+        static FString FormatV(std::string_view fmt, std::format_args args)
+        {
+            return FString(std::vformat(fmt, args));
+        }
 
     private:
         static constexpr size_t SSO_CAPACITY = 15;
@@ -81,3 +103,14 @@ namespace Fusion
     };
 
 } // namespace Fusion
+
+// Allow FString to be used directly as a std::format argument.
+// Example: FString::Format("Value: {}", someString)
+template<>
+struct std::formatter<Fusion::FString> : std::formatter<std::string_view>
+{
+    auto format(const Fusion::FString& str, std::format_context& ctx) const
+    {
+        return std::formatter<std::string_view>::format(str.View(), ctx);
+    }
+};

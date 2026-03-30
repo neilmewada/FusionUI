@@ -328,8 +328,7 @@ TEST(FArrayTest, Pop)
 TEST(FArrayTest, PopEmpty)
 {
     FArray<int> arr;
-    arr.Pop(); // should not crash
-    EXPECT_EQ(arr.Size(), 0);
+    EXPECT_THROW(arr.Pop(), FException);
 }
 
 TEST(FArrayTest, RemoveAtOrdered)
@@ -530,3 +529,522 @@ TEST(FArrayTest, NonTrivialType)
 }
 
 #pragma endregion FArray
+
+#pragma region FVec2
+
+TEST(FVec2Test, DefaultConstructor)
+{
+    FVec2 v;
+    EXPECT_EQ(v.x, 0.0f);
+    EXPECT_EQ(v.y, 0.0f);
+}
+
+TEST(FVec2Test, ScalarConstructor)
+{
+    FVec2 v(3.0f);
+    EXPECT_EQ(v.x, 3.0f);
+    EXPECT_EQ(v.y, 3.0f);
+}
+
+TEST(FVec2Test, XYConstructor)
+{
+    FVec2 v(1.0f, 2.0f);
+    EXPECT_EQ(v.x, 1.0f);
+    EXPECT_EQ(v.y, 2.0f);
+}
+
+TEST(FVec2Test, UnionAliases)
+{
+    FVec2 v(3.0f, 4.0f);
+    EXPECT_EQ(v.width,  3.0f);
+    EXPECT_EQ(v.height, 4.0f);
+    EXPECT_EQ(v.left,   3.0f);
+    EXPECT_EQ(v.right,  4.0f);
+    EXPECT_EQ(v.top,    3.0f);
+    EXPECT_EQ(v.bottom, 4.0f);
+    EXPECT_EQ(v.xy[0],  3.0f);
+    EXPECT_EQ(v.xy[1],  4.0f);
+}
+
+TEST(FVec2Test, StaticConstants)
+{
+    EXPECT_EQ(FVec2::Zero(), FVec2(0.0f, 0.0f));
+    EXPECT_EQ(FVec2::One(),  FVec2(1.0f, 1.0f));
+}
+
+TEST(FVec2Test, Arithmetic)
+{
+    FVec2 a(1.0f, 2.0f);
+    FVec2 b(3.0f, 4.0f);
+
+    EXPECT_EQ(a + b, FVec2(4.0f, 6.0f));
+    EXPECT_EQ(b - a, FVec2(2.0f, 2.0f));
+    EXPECT_EQ(a * b, FVec2(3.0f, 8.0f));
+    EXPECT_EQ(a * 2.0f, FVec2(2.0f, 4.0f));
+    EXPECT_EQ(2.0f * a, FVec2(2.0f, 4.0f));
+    EXPECT_EQ(b / 2.0f, FVec2(1.5f, 2.0f));
+    EXPECT_EQ(-a, FVec2(-1.0f, -2.0f));
+}
+
+TEST(FVec2Test, CompoundAssignment)
+{
+    FVec2 v(2.0f, 4.0f);
+    v += FVec2(1.0f, 1.0f);
+    EXPECT_EQ(v, FVec2(3.0f, 5.0f));
+    v -= FVec2(1.0f, 1.0f);
+    EXPECT_EQ(v, FVec2(2.0f, 4.0f));
+    v *= 2.0f;
+    EXPECT_EQ(v, FVec2(4.0f, 8.0f));
+    v /= 2.0f;
+    EXPECT_EQ(v, FVec2(2.0f, 4.0f));
+}
+
+TEST(FVec2Test, Equality)
+{
+    EXPECT_EQ(FVec2(1.0f, 2.0f), FVec2(1.0f, 2.0f));
+    EXPECT_NE(FVec2(1.0f, 2.0f), FVec2(1.0f, 3.0f));
+}
+
+TEST(FVec2Test, IndexOperator)
+{
+    FVec2 v(5.0f, 6.0f);
+    EXPECT_EQ(v[0], 5.0f);
+    EXPECT_EQ(v[1], 6.0f);
+    v[0] = 9.0f;
+    EXPECT_EQ(v.x, 9.0f);
+}
+
+TEST(FVec2Test, IndexOutOfBounds)
+{
+    FVec2 v(1.0f, 2.0f);
+    EXPECT_THROW(v[2], FException);
+}
+
+TEST(FVec2Test, SqrMagnitude)
+{
+    FVec2 v(3.0f, 4.0f);
+    EXPECT_FLOAT_EQ(v.GetSqrMagnitude(), 25.0f);
+}
+
+TEST(FVec2Test, Magnitude)
+{
+    FVec2 v(3.0f, 4.0f);
+    EXPECT_FLOAT_EQ(v.GetMagnitude(), 5.0f);
+}
+
+TEST(FVec2Test, Normalized)
+{
+    FVec2 v(3.0f, 0.0f);
+    EXPECT_FLOAT_EQ(v.GetNormalized().GetMagnitude(), 1.0f);
+}
+
+TEST(FVec2Test, NormalizedZeroVector)
+{
+    // Zero vector should not crash — returns zero
+    EXPECT_EQ(FVec2::Zero().GetNormalized(), FVec2(0.0f, 0.0f));
+}
+
+TEST(FVec2Test, Dot)
+{
+    EXPECT_FLOAT_EQ(FVec2::Dot({ 1.0f, 0.0f }, { 0.0f, 1.0f }), 0.0f); // perpendicular
+    EXPECT_FLOAT_EQ(FVec2::Dot({ 1.0f, 0.0f }, { 1.0f, 0.0f }), 1.0f); // parallel
+}
+
+TEST(FVec2Test, Distance)
+{
+    EXPECT_FLOAT_EQ(FVec2::Distance({ 0.0f, 0.0f }, { 3.0f, 4.0f }), 5.0f);
+}
+
+TEST(FVec2Test, MinMax)
+{
+    FVec2 a(1.0f, 5.0f);
+    FVec2 b(3.0f, 2.0f);
+    EXPECT_EQ(FVec2::Min(a, b), FVec2(1.0f, 2.0f));
+    EXPECT_EQ(FVec2::Max(a, b), FVec2(3.0f, 5.0f));
+}
+
+TEST(FVec2Test, Lerp)
+{
+    FVec2 from(0.0f, 0.0f);
+    FVec2 to(10.0f, 20.0f);
+    EXPECT_EQ(FVec2::Lerp(from, to, 0.5f), FVec2(5.0f, 10.0f));
+    EXPECT_EQ(FVec2::Lerp(from, to, 0.0f), from);
+    EXPECT_EQ(FVec2::Lerp(from, to, 1.0f), to);
+}
+
+#pragma endregion FVec2
+
+#pragma region FVec2i
+
+TEST(FVec2iTest, DefaultConstructor)
+{
+    FVec2i v;
+    EXPECT_EQ(v.x, 0);
+    EXPECT_EQ(v.y, 0);
+}
+
+TEST(FVec2iTest, XYConstructor)
+{
+    FVec2i v(3, 7);
+    EXPECT_EQ(v.x, 3);
+    EXPECT_EQ(v.y, 7);
+}
+
+TEST(FVec2iTest, UnionAliases)
+{
+    FVec2i v(8, 16);
+    EXPECT_EQ(v.width,  8);
+    EXPECT_EQ(v.height, 16);
+    EXPECT_EQ(v.xy[0],  8);
+    EXPECT_EQ(v.xy[1],  16);
+}
+
+TEST(FVec2iTest, Arithmetic)
+{
+    FVec2i a(2, 3);
+    FVec2i b(4, 5);
+    EXPECT_EQ(a + b, FVec2i(6, 8));
+    EXPECT_EQ(b - a, FVec2i(2, 2));
+    EXPECT_EQ(a * b, FVec2i(8, 15));
+    EXPECT_EQ(a * 3, FVec2i(6, 9));
+    EXPECT_EQ(3 * a, FVec2i(6, 9));
+    EXPECT_EQ(b / 2, FVec2i(2, 2));
+    EXPECT_EQ(-a,    FVec2i(-2, -3));
+}
+
+TEST(FVec2iTest, IndexOutOfBounds)
+{
+    FVec2i v(1, 2);
+    EXPECT_THROW(v[2], FException);
+}
+
+TEST(FVec2iTest, ConversionToFVec2)
+{
+    FVec2i vi(3, 4);
+    FVec2  vf = static_cast<FVec2>(vi);
+    EXPECT_FLOAT_EQ(vf.x, 3.0f);
+    EXPECT_FLOAT_EQ(vf.y, 4.0f);
+}
+
+TEST(FVec2iTest, ConversionFromFVec2Truncates)
+{
+    FVec2  vf(3.9f, 4.1f);
+    FVec2i vi(vf);
+    EXPECT_EQ(vi.x, 3);
+    EXPECT_EQ(vi.y, 4);
+}
+
+TEST(FVec2iTest, MinMax)
+{
+    FVec2i a(1, 9);
+    FVec2i b(5, 3);
+    EXPECT_EQ(FVec2i::Min(a, b), FVec2i(1, 3));
+    EXPECT_EQ(FVec2i::Max(a, b), FVec2i(5, 9));
+}
+
+#pragma endregion FVec2i
+
+#pragma region FRect
+
+TEST(FRectTest, DefaultConstructor)
+{
+    FRect r;
+    EXPECT_EQ(r.left,   0.0f);
+    EXPECT_EQ(r.top,    0.0f);
+    EXPECT_EQ(r.right,  0.0f);
+    EXPECT_EQ(r.bottom, 0.0f);
+    EXPECT_TRUE(r.IsEmpty());
+}
+
+TEST(FRectTest, ConstructFromLTRB)
+{
+    FRect r(1.0f, 2.0f, 5.0f, 6.0f);
+    EXPECT_EQ(r.left,   1.0f);
+    EXPECT_EQ(r.top,    2.0f);
+    EXPECT_EQ(r.right,  5.0f);
+    EXPECT_EQ(r.bottom, 6.0f);
+}
+
+TEST(FRectTest, ConstructFromMinMax)
+{
+    FRect r(FVec2(1.0f, 2.0f), FVec2(5.0f, 6.0f));
+    EXPECT_EQ(r.min, FVec2(1.0f, 2.0f));
+    EXPECT_EQ(r.max, FVec2(5.0f, 6.0f));
+}
+
+TEST(FRectTest, UnionLayoutMatchesLTRB)
+{
+    // Verify memory aliases are correct
+    FRect r(1.0f, 2.0f, 5.0f, 6.0f);
+    EXPECT_EQ(r.min.x, r.left);
+    EXPECT_EQ(r.min.y, r.top);
+    EXPECT_EQ(r.max.x, r.right);
+    EXPECT_EQ(r.max.y, r.bottom);
+}
+
+TEST(FRectTest, FromSize)
+{
+    FRect r = FRect::FromSize(FVec2(1.0f, 2.0f), FVec2(4.0f, 6.0f));
+    EXPECT_EQ(r.left,   1.0f);
+    EXPECT_EQ(r.top,    2.0f);
+    EXPECT_EQ(r.right,  5.0f);
+    EXPECT_EQ(r.bottom, 8.0f);
+}
+
+TEST(FRectTest, FromSizeFloats)
+{
+    FRect r = FRect::FromSize(1.0f, 2.0f, 4.0f, 6.0f);
+    EXPECT_EQ(r.right,  5.0f);
+    EXPECT_EQ(r.bottom, 8.0f);
+}
+
+TEST(FRectTest, GetSizeAndCenter)
+{
+    FRect r(2.0f, 4.0f, 8.0f, 10.0f);
+    EXPECT_EQ(r.GetSize(),   FVec2(6.0f, 6.0f));
+    EXPECT_EQ(r.GetWidth(),  6.0f);
+    EXPECT_EQ(r.GetHeight(), 6.0f);
+    EXPECT_EQ(r.GetCenter(), FVec2(5.0f, 7.0f));
+    EXPECT_FLOAT_EQ(r.GetArea(), 36.0f);
+}
+
+TEST(FRectTest, IsEmpty)
+{
+    EXPECT_TRUE(FRect(0.0f, 0.0f, 0.0f, 0.0f).IsEmpty());  // degenerate
+    EXPECT_TRUE(FRect(5.0f, 0.0f, 3.0f, 1.0f).IsEmpty());  // inverted X
+    EXPECT_FALSE(FRect(0.0f, 0.0f, 1.0f, 1.0f).IsEmpty());
+}
+
+TEST(FRectTest, ContainsPoint)
+{
+    FRect r(0.0f, 0.0f, 10.0f, 10.0f);
+    EXPECT_TRUE(r.Contains({ 5.0f, 5.0f }));
+    EXPECT_TRUE(r.Contains({ 0.0f, 0.0f }));   // border — inside
+    EXPECT_TRUE(r.Contains({ 10.0f, 10.0f })); // border — inside
+    EXPECT_FALSE(r.Contains({ 11.0f, 5.0f }));
+}
+
+TEST(FRectTest, Overlaps)
+{
+    FRect a(0.0f, 0.0f, 5.0f, 5.0f);
+    FRect b(3.0f, 3.0f, 8.0f, 8.0f);
+    FRect c(6.0f, 6.0f, 9.0f, 9.0f);
+    EXPECT_TRUE(a.Overlaps(b));
+    EXPECT_FALSE(a.Overlaps(c));
+}
+
+TEST(FRectTest, Translate)
+{
+    FRect r(1.0f, 2.0f, 4.0f, 6.0f);
+    FRect t = r.Translate({ 1.0f, 2.0f });
+    EXPECT_EQ(t.left,   2.0f);
+    EXPECT_EQ(t.top,    4.0f);
+    EXPECT_EQ(t.right,  5.0f);
+    EXPECT_EQ(t.bottom, 8.0f);
+}
+
+TEST(FRectTest, Expand)
+{
+    FRect r(2.0f, 3.0f, 8.0f, 9.0f);
+    FRect e = r.Expand(1.0f);
+    EXPECT_EQ(e.left,   1.0f);
+    EXPECT_EQ(e.top,    2.0f);
+    EXPECT_EQ(e.right,  9.0f);
+    EXPECT_EQ(e.bottom, 10.0f);
+}
+
+TEST(FRectTest, EncapsulatePoint)
+{
+    FRect r(1.0f, 1.0f, 5.0f, 5.0f);
+    FRect e = r.Encapsulate(FVec2{ 8.0f, 0.0f });
+    EXPECT_EQ(e.left,   1.0f);
+    EXPECT_EQ(e.top,    0.0f);
+    EXPECT_EQ(e.right,  8.0f);
+    EXPECT_EQ(e.bottom, 5.0f);
+}
+
+TEST(FRectTest, EncapsulateRect)
+{
+    FRect a(0.0f, 0.0f, 4.0f, 4.0f);
+    FRect b(2.0f, 2.0f, 8.0f, 8.0f);
+    FRect e = a.Encapsulate(b);
+    EXPECT_EQ(e, FRect(0.0f, 0.0f, 8.0f, 8.0f));
+}
+
+TEST(FRectTest, Union)
+{
+    FRect a(0.0f, 0.0f, 4.0f, 4.0f);
+    FRect b(2.0f, 2.0f, 8.0f, 8.0f);
+    FRect u = FRect::Union(a, b);
+    EXPECT_EQ(u, FRect(0.0f, 0.0f, 8.0f, 8.0f));
+}
+
+TEST(FRectTest, UnionWithEmpty)
+{
+    FRect a(1.0f, 1.0f, 5.0f, 5.0f);
+    FRect empty;
+    EXPECT_EQ(FRect::Union(a, empty), a);
+    EXPECT_EQ(FRect::Union(empty, a), a);
+}
+
+TEST(FRectTest, Intersection)
+{
+    FRect a(0.0f, 0.0f, 6.0f, 6.0f);
+    FRect b(3.0f, 3.0f, 9.0f, 9.0f);
+    FRect i = FRect::Intersection(a, b);
+    EXPECT_EQ(i, FRect(3.0f, 3.0f, 6.0f, 6.0f));
+}
+
+TEST(FRectTest, IntersectionNoOverlap)
+{
+    FRect a(0.0f, 0.0f, 3.0f, 3.0f);
+    FRect b(5.0f, 5.0f, 9.0f, 9.0f);
+    EXPECT_TRUE(FRect::Intersection(a, b).IsEmpty());
+}
+
+TEST(FRectTest, Equality)
+{
+    EXPECT_EQ(FRect(1.0f, 2.0f, 3.0f, 4.0f), FRect(1.0f, 2.0f, 3.0f, 4.0f));
+    EXPECT_NE(FRect(1.0f, 2.0f, 3.0f, 4.0f), FRect(1.0f, 2.0f, 3.0f, 5.0f));
+}
+
+#pragma endregion FRect
+
+#pragma region FColor
+
+TEST(FColorTest, DefaultConstructor)
+{
+    FColor c;
+    EXPECT_EQ(c.r, 0.0f);
+    EXPECT_EQ(c.g, 0.0f);
+    EXPECT_EQ(c.b, 0.0f);
+    EXPECT_EQ(c.a, 0.0f);
+}
+
+TEST(FColorTest, RGBAConstructor)
+{
+    FColor c(0.1f, 0.2f, 0.3f, 0.4f);
+    EXPECT_FLOAT_EQ(c.r, 0.1f);
+    EXPECT_FLOAT_EQ(c.g, 0.2f);
+    EXPECT_FLOAT_EQ(c.b, 0.3f);
+    EXPECT_FLOAT_EQ(c.a, 0.4f);
+}
+
+TEST(FColorTest, DefaultAlphaIsOne)
+{
+    FColor c(1.0f, 0.0f, 0.0f);
+    EXPECT_FLOAT_EQ(c.a, 1.0f);
+}
+
+TEST(FColorTest, MemoryLayoutIsABGR)
+{
+    // Verify in-memory order is [a][b][g][r]
+    FColor c(1.0f, 0.0f, 0.0f, 1.0f); // red, full alpha
+    EXPECT_FLOAT_EQ(c.abgr[0], 1.0f); // a
+    EXPECT_FLOAT_EQ(c.abgr[1], 0.0f); // b
+    EXPECT_FLOAT_EQ(c.abgr[2], 0.0f); // g
+    EXPECT_FLOAT_EQ(c.abgr[3], 1.0f); // r
+}
+
+TEST(FColorTest, IndexOperatorIsRGBAOrdered)
+{
+    FColor c(0.1f, 0.2f, 0.3f, 0.4f);
+    EXPECT_FLOAT_EQ(c[0], 0.1f); // r
+    EXPECT_FLOAT_EQ(c[1], 0.2f); // g
+    EXPECT_FLOAT_EQ(c[2], 0.3f); // b
+    EXPECT_FLOAT_EQ(c[3], 0.4f); // a
+}
+
+TEST(FColorTest, IndexOutOfBounds)
+{
+    FColor c;
+    EXPECT_THROW(c[4], FException);
+}
+
+TEST(FColorTest, RGBA8)
+{
+    FColor c = FColor::RGBA8(255, 128, 0, 255);
+    EXPECT_FLOAT_EQ(c.r, 1.0f);
+    EXPECT_NEAR(c.g, 128.0f / 255.0f, 1e-5f);
+    EXPECT_FLOAT_EQ(c.b, 0.0f);
+    EXPECT_FLOAT_EQ(c.a, 1.0f);
+}
+
+TEST(FColorTest, RGBHex)
+{
+    FColor c = FColor::RGBHex(0xFF8800);
+    EXPECT_FLOAT_EQ(c.r, 1.0f);
+    EXPECT_NEAR(c.g, 0x88 / 255.0f, 1e-5f);
+    EXPECT_FLOAT_EQ(c.b, 0.0f);
+    EXPECT_FLOAT_EQ(c.a, 1.0f);
+}
+
+TEST(FColorTest, RGBAHex)
+{
+    FColor c = FColor::RGBAHex(0xFF8800FF);
+    EXPECT_FLOAT_EQ(c.r, 1.0f);
+    EXPECT_NEAR(c.g, 0x88 / 255.0f, 1e-5f);
+    EXPECT_FLOAT_EQ(c.b, 0.0f);
+    EXPECT_FLOAT_EQ(c.a, 1.0f);
+}
+
+TEST(FColorTest, ToU32RoundTrip)
+{
+    FColor  original = FColor::RGBA8(255, 128, 64, 200);
+    uint32_t packed  = original.ToU32();
+
+    EXPECT_EQ((packed & 0xFF),         255u); // R
+    EXPECT_EQ(((packed >> 8)  & 0xFF), 128u); // G
+    EXPECT_EQ(((packed >> 16) & 0xFF),  64u); // B
+    EXPECT_EQ(((packed >> 24) & 0xFF), 200u); // A
+}
+
+TEST(FColorTest, WithAlpha)
+{
+    FColor c = FColors::Red.WithAlpha(0.5f);
+    EXPECT_FLOAT_EQ(c.r, 1.0f);
+    EXPECT_FLOAT_EQ(c.a, 0.5f);
+}
+
+TEST(FColorTest, MultiplyByScalar)
+{
+    FColor c(1.0f, 0.5f, 0.25f, 1.0f);
+    FColor result = c * 0.5f;
+    EXPECT_FLOAT_EQ(result.r, 0.5f);
+    EXPECT_FLOAT_EQ(result.g, 0.25f);
+    EXPECT_FLOAT_EQ(result.b, 0.125f);
+    EXPECT_FLOAT_EQ(result.a, 0.5f);
+}
+
+TEST(FColorTest, Equality)
+{
+    EXPECT_EQ(FColors::Red, FColor(1.0f, 0.0f, 0.0f, 1.0f));
+    EXPECT_NE(FColors::Red, FColors::Blue);
+}
+
+TEST(FColorTest, Lerp)
+{
+    FColor result = FColor::Lerp(FColors::Black, FColors::White, 0.5f);
+    EXPECT_FLOAT_EQ(result.r, 0.5f);
+    EXPECT_FLOAT_EQ(result.g, 0.5f);
+    EXPECT_FLOAT_EQ(result.b, 0.5f);
+    EXPECT_FLOAT_EQ(result.a, 1.0f);
+}
+
+TEST(FColorTest, HSV)
+{
+    // Pure red in HSV is (0, 1, 1)
+    FColor c = FColor::HSV(0.0f, 1.0f, 1.0f);
+    EXPECT_NEAR(c.r, 1.0f, 1e-5f);
+    EXPECT_NEAR(c.g, 0.0f, 1e-5f);
+    EXPECT_NEAR(c.b, 0.0f, 1e-5f);
+}
+
+TEST(FColorTest, PredefinedColors)
+{
+    EXPECT_EQ(FColors::White, FColor(1.0f, 1.0f, 1.0f, 1.0f));
+    EXPECT_EQ(FColors::Black, FColor(0.0f, 0.0f, 0.0f, 1.0f));
+    EXPECT_EQ(FColors::Clear, FColor(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+#pragma endregion FColor

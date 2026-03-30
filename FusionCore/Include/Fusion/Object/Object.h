@@ -25,7 +25,7 @@ namespace Fusion
 
         template<typename T> friend class Ptr;
         template<typename T> friend class WeakPtr;
-        friend class Internal::RefCountBlock;
+        friend struct Internal::RefCountBlock;
     };
 
 } // namespace Fusion

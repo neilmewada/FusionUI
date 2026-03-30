@@ -8,6 +8,8 @@
 #include <utility>
 #include <initializer_list>
 
+#include "Fusion/Misc/Assert.h"
+
 namespace Fusion
 {
     template<typename T, size_t InlineCapacity = 8>
@@ -87,14 +89,14 @@ namespace Fusion
         // Element access
         // ----------------------------------------------------------------
 
-        T&       operator[](size_t index)       { return m_Data[index]; }
-        const T& operator[](size_t index) const { return m_Data[index]; }
+        T&       operator[](size_t index)       { FUSION_ASSERT(index < m_Size, "FArray: index out of bounds"); return m_Data[index]; }
+        const T& operator[](size_t index) const { FUSION_ASSERT(index < m_Size, "FArray: index out of bounds"); return m_Data[index]; }
 
-        T&       First()       { return m_Data[0]; }
-        const T& First() const { return m_Data[0]; }
+        T&       First()       { FUSION_ASSERT(m_Size > 0, "FArray: First() called on empty array"); return m_Data[0]; }
+        const T& First() const { FUSION_ASSERT(m_Size > 0, "FArray: First() called on empty array"); return m_Data[0]; }
 
-        T&       Last()        { return m_Data[m_Size - 1]; }
-        const T& Last()  const { return m_Data[m_Size - 1]; }
+        T&       Last()        { FUSION_ASSERT(m_Size > 0, "FArray: Last() called on empty array"); return m_Data[m_Size - 1]; }
+        const T& Last()  const { FUSION_ASSERT(m_Size > 0, "FArray: Last() called on empty array"); return m_Data[m_Size - 1]; }
 
         T*       Data()        { return m_Data; }
         const T* Data()  const { return m_Data; }
@@ -172,16 +174,15 @@ namespace Fusion
 
         void Pop()
         {
-            if (m_Size > 0)
-            {
-                m_Data[m_Size - 1].~T();
-                --m_Size;
-            }
+            FUSION_ASSERT(m_Size > 0, "FArray: Pop() called on empty array");
+            m_Data[m_Size - 1].~T();
+            --m_Size;
         }
 
         // Ordered remove — preserves element order, O(n)
         void RemoveAt(size_t index)
         {
+            FUSION_ASSERT(index < m_Size, "FArray: RemoveAt() index out of bounds");
             m_Data[index].~T();
             for (size_t i = index; i < m_Size - 1; ++i)
             {
@@ -194,6 +195,7 @@ namespace Fusion
         // Unordered remove — swaps with last element, O(1)
         void RemoveAtSwap(size_t index)
         {
+            FUSION_ASSERT(index < m_Size, "FArray: RemoveAtSwap() index out of bounds");
             m_Data[index].~T();
             if (index != m_Size - 1)
             {

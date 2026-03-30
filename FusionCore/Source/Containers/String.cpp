@@ -167,6 +167,12 @@ namespace Fusion
         return *this;
     }
 
+    FString& FString::operator+=(const std::string& str)
+    {
+        AppendBytes(str.data(), str.size());
+        return *this;
+    }
+
     FString& FString::operator+=(std::string_view str)
     {
         AppendBytes(str.data(), str.size());
@@ -184,6 +190,13 @@ namespace Fusion
     {
         FString result(*this);
         result.AppendBytes(other.Data(), other.m_Size);
+        return result;
+    }
+
+    FString FString::operator+(const std::string& other) const
+    {
+        FString result(*this);
+        result.AppendBytes(other.data(), other.size());
         return result;
     }
 
@@ -205,6 +218,11 @@ namespace Fusion
     bool FString::operator==(const FString& other) const
     {
         return m_Size == other.m_Size && std::memcmp(Data(), other.Data(), m_Size) == 0;
+    }
+
+    bool FString::operator==(const std::string& other) const
+    {
+        return m_Size == other.size() && std::memcmp(Data(), other.data(), m_Size) == 0;
     }
 
     bool FString::operator==(std::string_view other) const
