@@ -29,6 +29,7 @@ option(FUSION_BUILD_SAMPLES "Build Fusion tests" ${PROJECT_IS_TOP_LEVEL})
 option(FUSION_ENABLE_EXCEPTIONS "Enable exceptions, for safe C++." ON)
 
 include(CMake/ThirdParty.cmake)
+include(CMake/Shaders.cmake)
 
 if (FUSION_BUILD_TESTS)
     include(CMake/Tests.cmake)
@@ -36,6 +37,7 @@ endif()
 
 add_subdirectory(FusionCore)
 add_subdirectory(FusionPlatform)
+add_subdirectory(FusionShaderLibrary)
 
 if(FUSION_USE_SDL3)
     add_subdirectory(FusionSDL3Platform)

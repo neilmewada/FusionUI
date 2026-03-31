@@ -5,6 +5,8 @@
 
 namespace Fusion
 {
+	using FResourceHandle = Handle<u32>;
+
 	struct FRenderCapabilities
 	{
 		

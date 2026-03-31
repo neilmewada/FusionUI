@@ -1,0 +1,3 @@
+file(GLOB_RECURSE FILES CONFIGURE_DEPENDS
+    Include/*.h
+)

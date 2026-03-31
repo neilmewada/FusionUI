@@ -16,6 +16,8 @@ namespace Fusion
 
 		void SetRenderBackend(IFRenderBackend* renderBackend) { m_RenderBackend = renderBackend; }
 
+        Ptr<FApplicationInstance> GetMainApplication() const { return m_MainApplication; }
+
         int Run();
 
     private:
