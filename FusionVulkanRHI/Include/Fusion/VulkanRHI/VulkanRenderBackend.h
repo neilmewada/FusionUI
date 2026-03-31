@@ -10,6 +10,8 @@ namespace Fusion
     {
     public:
 
+        void InitializeShaders() override;
+
         bool IsInitialized(FInstanceHandle instance) override
         {
             return true;
@@ -22,6 +24,7 @@ namespace Fusion
 	private:
 
 		VkInstance m_VulkanInstance = VK_NULL_HANDLE;
+
 
     };
 

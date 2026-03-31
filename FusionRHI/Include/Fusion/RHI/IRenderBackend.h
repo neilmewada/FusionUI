@@ -14,6 +14,8 @@ namespace Fusion
 
 		// - Lifecycle -
 
+		virtual void InitializeShaders() = 0;
+
 		virtual bool IsInitialized(FInstanceHandle instance) = 0;
 
 		virtual bool InitializeInstance(FInstanceHandle instance) = 0;

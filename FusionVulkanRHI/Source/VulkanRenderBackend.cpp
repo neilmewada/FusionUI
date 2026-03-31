@@ -5,6 +5,11 @@
 
 namespace Fusion
 {
+	void FVulkanRenderBackend::InitializeShaders()
+	{
+		
+	}
+
 	bool FVulkanRenderBackend::InitializeInstance(FInstanceHandle instance)
 	{
 		return true;
