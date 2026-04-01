@@ -34,7 +34,7 @@ namespace Fusion
 
 		IFRenderBackend(IFPlatformBackend* platformBackend) : m_PlatformBackend(platformBackend)
 		{
-			
+			FUSION_ASSERT(platformBackend != nullptr, "RenderBackend constructed without a platformBackend reference.");
 		}
 
 		virtual ~IFRenderBackend() = default;

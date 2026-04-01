@@ -63,6 +63,20 @@ namespace Fusion
 	}
 
 	// -----------------------------------------------------------------
+	// SwapChain
+
+	FSwapChain::FSwapChain(VkInstance instance, VkDevice device) : m_Instance(instance), m_Device(device)
+	{
+		
+	}
+
+	FSwapChain::~FSwapChain()
+	{
+		vkDestroySwapchainKHR(m_Device, m_SwapChain, VULKAN_CPU_ALLOCATOR);
+		vkDestroySurfaceKHR(m_Instance, m_Surface, VULKAN_CPU_ALLOCATOR);
+	}
+
+	// -----------------------------------------------------------------
 	// Graphics Pipeline
 
 	FGraphicsPipeline::FGraphicsPipeline(VkDevice device) : m_Device(device)
@@ -132,6 +146,8 @@ namespace Fusion
 
 	void FVulkanRenderBackend::InitializeVulkan()
 	{
+		m_PlatformBackend->SetRenderBackendEventSink(this);
+
 		// - Instance -
 
 		VkApplicationInfo appInfo{};
@@ -370,7 +386,7 @@ namespace Fusion
 			FUSION_ASSERT(result == VK_SUCCESS, "Failed to create VkRenderPass.");
 		}
 
-		// - Shader Library -
+		// - Graphics Pipeline -
 
 		{
 			const FShader* mainShader = Fusion::Shaders::FindShader("Fusion");
@@ -542,6 +558,12 @@ namespace Fusion
 
 	void FVulkanRenderBackend::ShutdownVulkan()
 	{
+		vkDeviceWaitIdle(m_Device);
+
+		m_SwapChainsByWindowHandle.Clear();
+
+		m_PlatformBackend->SetRenderBackendEventSink(nullptr);
+
 		if (m_RenderPass)
 		{
 			vkDestroyRenderPass(m_Device, m_RenderPass, VULKAN_CPU_ALLOCATOR);
@@ -571,4 +593,64 @@ namespace Fusion
 		vkDestroyInstance(m_VulkanInstance, VULKAN_CPU_ALLOCATOR);
 		m_VulkanInstance = VK_NULL_HANDLE;
 	}
+
+	void FVulkanRenderBackend::CreateOrUpdateSwapChain(FWindowHandle window)
+	{
+		IntrusivePtr<FSwapChain> swapChain = m_SwapChainsByWindowHandle[window];
+
+		if (swapChain == nullptr)
+		{
+			swapChain = new FSwapChain(m_VulkanInstance, m_Device);
+
+			swapChain->m_Surface = FVulkanPlatform::CreateSurface(this, window);
+		}
+
+		VkSwapchainKHR oldSwapChain = swapChain->m_SwapChain;
+
+		VkSurfaceCapabilitiesKHR surfaceCapabilities{};
+
+		auto result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_PhysicalDevice, swapChain->m_Surface, &surfaceCapabilities);
+		FUSION_ASSERT(result == VK_SUCCESS, "Failed to fetch surface capabilities");
+
+		VkSwapchainCreateInfoKHR swapChainCI{};
+		swapChainCI.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+
+		swapChainCI.oldSwapchain = oldSwapChain;
+		
+		// TODO:
+
+		m_SwapChainsByWindowHandle[window] = swapChain;
+	}
+
+	void FVulkanRenderBackend::OnWindowCreated(FWindowHandle window)
+	{
+
+		IFPlatformEventSink::OnWindowCreated(window);
+	}
+
+	void FVulkanRenderBackend::OnWindowDestroyed(FWindowHandle window)
+	{
+		IFPlatformEventSink::OnWindowDestroyed(window);
+	}
+
+	void FVulkanRenderBackend::OnWindowResized(FWindowHandle window, u32 newWidth, u32 newHeight)
+	{
+		IFPlatformEventSink::OnWindowResized(window, newWidth, newHeight);
+	}
+
+	void FVulkanRenderBackend::OnWindowMaximized(FWindowHandle window)
+	{
+		IFPlatformEventSink::OnWindowMaximized(window);
+	}
+
+	void FVulkanRenderBackend::OnWindowMinimized(FWindowHandle window)
+	{
+		IFPlatformEventSink::OnWindowMinimized(window);
+	}
+
+	void FVulkanRenderBackend::OnWindowRestored(FWindowHandle window)
+	{
+		IFPlatformEventSink::OnWindowRestored(window);
+	}
+
 }

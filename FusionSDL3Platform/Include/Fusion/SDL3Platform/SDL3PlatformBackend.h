@@ -54,6 +54,11 @@ namespace Fusion
 
         void SetEventSink(FInstanceHandle instance, IFPlatformEventSink* eventSink) override;
 
+        void SetRenderBackendEventSink(IFPlatformEventSink* genericEventSink) override
+        {
+            m_RenderBackendEventSink = genericEventSink;
+        }
+
         FWindowHandle CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info) override;
 
 		void DestroyWindow(FWindowHandle window) override;
@@ -66,9 +71,9 @@ namespace Fusion
 
         void ProcessWindowResizeEvent(FSDL3PlatformWindow* window);
 
-        HashMap<FInstanceHandle, FSDL3InstanceData> instances;
+        HashMap<FInstanceHandle, FSDL3InstanceData> m_Instances;
 
-		HashMap<FWindowHandle, FSDL3PlatformWindow*> windowsByHandle;
+		HashMap<FWindowHandle, FSDL3PlatformWindow*> m_WindowsByHandle;
 
 		HashMap<FUuid, bool> m_Displays;
 
@@ -76,8 +81,9 @@ namespace Fusion
         bool m_InitFailed = false;
 		bool m_UserRequestedExit = false;
 
-        FInstanceHandle instanceCounter = FInstanceHandle::NullValue;
+        FInstanceHandle m_InstanceCounter = FInstanceHandle::NullValue;
 
+        IFPlatformEventSink* m_RenderBackendEventSink = nullptr;
 
         // - Input -
 

@@ -4,7 +4,7 @@ namespace Fusion
 {
 	bool FSDL3PlatformBackend::IsInitialized(FInstanceHandle instance)
 	{
-		return instances.KeyExists(instance);
+		return m_Instances.KeyExists(instance);
 	}
 
 	FInstanceHandle FSDL3PlatformBackend::InitializeInstance()
@@ -37,18 +37,18 @@ namespace Fusion
 			m_UserRequestedExit = false;
 		}
 
-		if (instanceCounter == FInstanceHandle::NullValue)
+		if (m_InstanceCounter == FInstanceHandle::NullValue)
 		{
-			instanceCounter = 0;
+			m_InstanceCounter = 0;
 		}
 		else
 		{
-			instanceCounter = instanceCounter.Get() + 1;
+			m_InstanceCounter = m_InstanceCounter.Get() + 1;
 		}
 
-		FInstanceHandle handle = instanceCounter;
+		FInstanceHandle handle = m_InstanceCounter;
 
-		instances[handle] = FSDL3InstanceData{
+		m_Instances[handle] = FSDL3InstanceData{
 			handle
 		};
 
@@ -57,14 +57,14 @@ namespace Fusion
 
 	void FSDL3PlatformBackend::ShutdownInstance(FInstanceHandle instance)
 	{
-		if (!instances.KeyExists(instance))
+		if (!m_Instances.KeyExists(instance))
 		{
 			return;
 		}
 
-		instances.Remove(instance);
+		m_Instances.Remove(instance);
 
-		if (instances.IsEmpty())
+		if (m_Instances.IsEmpty())
 		{
 			m_IsInitialized = false;
 			SDL_Quit();
@@ -104,10 +104,10 @@ namespace Fusion
 
 	void* FSDL3PlatformBackend::GetNativeWindowHandle(FWindowHandle handle)
 	{
-		if (!windowsByHandle.KeyExists(handle))
+		if (!m_WindowsByHandle.KeyExists(handle))
 			return nullptr;
 
-		FSDL3PlatformWindow* platformWindow = windowsByHandle[handle];
+		FSDL3PlatformWindow* platformWindow = m_WindowsByHandle[handle];
 		if (!platformWindow)
 			return nullptr;
 
@@ -133,7 +133,7 @@ namespace Fusion
 			{
 				m_UserRequestedExit = true;
 
-				for (const auto& [instanceHandle, instanceData] : instances)
+				for (const auto& [instanceHandle, instanceData] : m_Instances)
 				{
 					if (instanceData.eventSink != nullptr)
 					{
@@ -158,13 +158,14 @@ namespace Fusion
 
 	void FSDL3PlatformBackend::SetEventSink(FInstanceHandle instance, IFPlatformEventSink* eventSink)
 	{
-		if (!instances.KeyExists(instance))
+		if (!m_Instances.KeyExists(instance))
 		{
 			return;
 		}
 
-		instances[instance].eventSink = eventSink;
+		m_Instances[instance].eventSink = eventSink;
 	}
+
 
 	FWindowHandle FSDL3PlatformBackend::CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info)
 	{
@@ -172,7 +173,18 @@ namespace Fusion
 		
 		if (newWindow->IsValid())
 		{
-			windowsByHandle[newWindow->GetWindowHandle()] = newWindow;
+			m_WindowsByHandle[newWindow->GetWindowHandle()] = newWindow;
+
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
+			{
+				if (instanceData.eventSink != nullptr)
+				{
+					instanceData.eventSink->OnWindowCreated(newWindow->GetWindowHandle());
+				}
+			}
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowCreated(newWindow->GetWindowHandle());
+
 			return newWindow->GetWindowHandle();
 		}
 		
@@ -183,12 +195,12 @@ namespace Fusion
 
 	void FSDL3PlatformBackend::DestroyWindow(FWindowHandle window)
 	{
-		if (!windowsByHandle.KeyExists(window))
+		if (!m_WindowsByHandle.KeyExists(window))
 		{
 			return;
 		}
 
-		for (const auto& [instanceHandle, instanceData] : instances)
+		for (const auto& [instanceHandle, instanceData] : m_Instances)
 		{
 			if (instanceData.eventSink != nullptr)
 			{
@@ -196,144 +208,177 @@ namespace Fusion
 			}
 		}
 
-		FSDL3PlatformWindow* platformWindow = windowsByHandle[window];
+		if (m_RenderBackendEventSink)
+			m_RenderBackendEventSink->OnWindowDestroyed(window);
+
+		FSDL3PlatformWindow* platformWindow = m_WindowsByHandle[window];
 		delete platformWindow;
 
-		windowsByHandle.Remove(window);
+		m_WindowsByHandle.Remove(window);
 	}
 
 	void FSDL3PlatformBackend::ProcessWindowEvents(SDL_Event& event)
 	{
 		if (event.window.type == SDL_EVENT_WINDOW_RESIZED)
 		{
-			if (windowsByHandle.KeyExists(event.window.windowID))
+			if (m_WindowsByHandle.KeyExists(event.window.windowID))
 			{
-				ProcessWindowResizeEvent(windowsByHandle[event.window.windowID]);
+				ProcessWindowResizeEvent(m_WindowsByHandle[event.window.windowID]);
 			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MOVED)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
 					instanceData.eventSink->OnWindowMoved(event.window.windowID, event.window.data1, event.window.data2);
 				}
 			}
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowMoved(event.window.windowID, event.window.data1, event.window.data2);
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) // Close a specific window
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			FSDL3PlatformWindow* window = m_WindowsByHandle[event.window.windowID];
+			if (window)
 			{
-				if (windowsByHandle.KeyExists(event.window.windowID))
+				if (FEnumHasFlag(window->GetInitialFlags(), FPlatformWindowFlags::DestroyOnClose))
 				{
-					FSDL3PlatformWindow* window = windowsByHandle[event.window.windowID];
-
-					if (window)
+					DestroyWindow(event.window.windowID);
+				}
+				else
+				{
+					for (const auto& [instanceHandle, instanceData] : m_Instances)
 					{
-						if (FEnumHasFlag(window->GetInitialFlags(), FPlatformWindowFlags::DestroyOnClose))
-						{
-							DestroyWindow(event.window.windowID);
-						}
-						else
+						if (m_WindowsByHandle.KeyExists(event.window.windowID))
 						{
 							instanceData.eventSink->OnWindowClosed(event.window.windowID);
 						}
 					}
+
+					if (m_RenderBackendEventSink)
+						m_RenderBackendEventSink->OnWindowClosed(event.window.windowID);
 				}
 			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MINIMIZED)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
 					instanceData.eventSink->OnWindowMinimized(event.window.windowID);
 				}
 			}
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowMinimized(event.window.windowID);
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_SHOWN)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
 					instanceData.eventSink->OnWindowShown(event.window.windowID);
 				}
 			}
+
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowShown(event.window.windowID);
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_RESTORED)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
 					instanceData.eventSink->OnWindowRestored(event.window.windowID);
 				}
 			}
+
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowRestored(event.window.windowID);
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MAXIMIZED)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
 					instanceData.eventSink->OnWindowMaximized(event.window.windowID);
 				}
 			}
+
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowMaximized(event.window.windowID);
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_DISPLAY_CHANGED)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			FDisplayId displayId = (FDisplayId)event.window.data1;
+
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
-					FDisplayId displayId = (FDisplayId)event.window.data1;
-
 					instanceData.eventSink->OnWindowDisplayChanged(event.window.windowID, displayId);
 				}
 			}
+
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowDisplayChanged(event.window.windowID, displayId);
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_FOCUS_GAINED)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
 					instanceData.eventSink->OnWindowKeyboardFocusChanged(event.window.windowID, true);
 				}
 			}
+
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowKeyboardFocusChanged(event.window.windowID, true);
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_FOCUS_LOST)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
-					instanceData.eventSink->OnWindowKeyboardFocusChanged(event.window.windowID, true);
+					instanceData.eventSink->OnWindowKeyboardFocusChanged(event.window.windowID, false);
 				}
 			}
+
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowKeyboardFocusChanged(event.window.windowID, false);
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MOUSE_ENTER)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
 					instanceData.eventSink->OnWindowMouseFocusChanged(event.window.windowID, true);
 				}
 			}
+
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowMouseFocusChanged(event.window.windowID, true);
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MOUSE_LEAVE)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
 					instanceData.eventSink->OnWindowMouseFocusChanged(event.window.windowID, false);
 				}
 			}
+
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowMouseFocusChanged(event.window.windowID, false);
 		}
 	}
 
@@ -422,13 +467,16 @@ namespace Fusion
 
 		if (w != 0 && h != 0)
 		{
-			for (const auto& [instanceHandle, instanceData] : instances)
+			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
 				{
 					instanceData.eventSink->OnWindowResized(window->GetWindowHandle(), w, h);
 				}
 			}
+
+			if (m_RenderBackendEventSink)
+				m_RenderBackendEventSink->OnWindowResized(window->GetWindowHandle(), w, h);
 		}
 	}
 

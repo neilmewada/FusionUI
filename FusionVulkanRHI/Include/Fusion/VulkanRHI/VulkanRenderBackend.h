@@ -26,6 +26,22 @@ namespace Fusion
         VkPipeline m_Pipeline = VK_NULL_HANDLE;
     };
 
+    struct FUSIONVULKANRHI_API FSwapChain : IntrusiveBase
+    {
+    public:
+
+        FSwapChain(VkInstance instance, VkDevice device);
+
+        ~FSwapChain();
+
+        VkInstance m_Instance = nullptr;
+        VkDevice m_Device = nullptr;
+
+        VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
+        VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
+
+    };
+
     // - Render Instance -
 
     struct FUSIONVULKANRHI_API FRenderInstance : IntrusiveBase
@@ -34,7 +50,7 @@ namespace Fusion
 
     };
     
-    class FUSIONVULKANRHI_API FVulkanRenderBackend : public IFRenderBackend
+    class FUSIONVULKANRHI_API FVulkanRenderBackend : public IFRenderBackend, public IFPlatformEventSink
     {
     public:
 
@@ -73,6 +89,22 @@ namespace Fusion
 		void InitializeVulkan();
 
 		void ShutdownVulkan();
+
+        // - Window & SwapChain -
+
+        void CreateOrUpdateSwapChain(FWindowHandle window);
+
+        void OnWindowCreated(FWindowHandle window) override;
+
+        void OnWindowDestroyed(FWindowHandle window) override;
+
+        void OnWindowResized(FWindowHandle window, u32 newWidth, u32 newHeight) override;
+
+        void OnWindowMaximized(FWindowHandle window) override;
+
+        void OnWindowMinimized(FWindowHandle window) override;
+
+        void OnWindowRestored(FWindowHandle window) override;
 
     private:
 
@@ -114,6 +146,10 @@ namespace Fusion
         // - Command Pools & Buffers -
 
         VkCommandPool m_CommandPool = VK_NULL_HANDLE;
+
+        // - SwapChain -
+
+        HashMap<FWindowHandle, IntrusivePtr<FSwapChain>> m_SwapChainsByWindowHandle;
 
         // - Render Pass -
 

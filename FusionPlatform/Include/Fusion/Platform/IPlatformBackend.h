@@ -57,6 +57,8 @@ namespace Fusion
 
 		virtual void SetEventSink(FInstanceHandle instance, IFPlatformEventSink* eventSink) = 0;
 
+        virtual void SetRenderBackendEventSink(IFPlatformEventSink* genericEventSink) = 0;
+
 		// - Window Management -
 
 		virtual FWindowHandle CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info) = 0;
