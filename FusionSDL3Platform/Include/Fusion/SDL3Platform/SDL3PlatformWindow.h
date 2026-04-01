@@ -19,6 +19,8 @@ namespace Fusion
 
 		FPlatformWindowFlags GetInitialFlags() const { return initialFlags; }
 
+		SDL_Window* GetSdlHandle() const { return sdlWindow; }
+
     private:
 
 		FWindowHandle windowHandle = FWindowHandle::NullValue;

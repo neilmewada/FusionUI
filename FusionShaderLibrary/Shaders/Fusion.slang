@@ -1,29 +1,33 @@
+
 struct VSInput
 {
-    float2 Position : POSITION;
-    float2 TexCoord : TEXCOORD0;
-    float4 Color    : COLOR0;
+    float2 position : POSITION;
+    float2 uv : TEXCOORD0;
+    float4 color : COLOR0;
+    uint   drawItemIndex : TEXCOORD1;
 };
 
 struct VSOutput
 {
-    float4 Position : SV_Position;
-    float2 TexCoord : TEXCOORD0;
-    float4 Color    : COLOR0;
+    float4 position : SV_Position;
+    float2 uv : TEXCOORD0;
+    float4 color : COLOR0;
+    nointerpolation uint drawItemIndex : TEXCOORD1;
 };
 
 [shader("vertex")]
 VSOutput VSMain(VSInput input)
 {
     VSOutput output;
-    output.Position = float4(input.Position, 0.0, 1.0);
-    output.TexCoord = input.TexCoord;
-    output.Color    = input.Color;
+    output.position = float4(input.position, 0.0, 1.0);
+    output.uv = input.uv;
+    output.color = input.color;
+    output.drawItemIndex = input.drawItemIndex;
     return output;
 }
 
 [shader("fragment")]
 float4 PSMain(VSOutput input) : SV_Target
 {
-    return input.Color;
+    return input.color;
 }

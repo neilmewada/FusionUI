@@ -18,19 +18,25 @@ namespace Fusion
 		}
 #endif
 
+		if (!m_PlatformBackend)
+		{
+			FUSION_LOG_ERROR("Backend", "No platform backend specified and no default available.");
+			return false;
+		}
+
 		m_RenderBackend = desc.renderBackend;
 
 #if FUSION_USE_VULKAN
 		if (!m_RenderBackend)
 		{
 			m_RenderBackendAllocated = true;
-			m_RenderBackend = new FVulkanRenderBackend();
+			m_RenderBackend = new FVulkanRenderBackend(m_PlatformBackend);
 		}
 #endif
 
-		if (!m_PlatformBackend)
+		if (!m_RenderBackend)
 		{
-			FUSION_LOG_ERROR("Backend", "No platform backend specified and no default available.");
+			FUSION_LOG_ERROR("Backend", "No render backend specified and no default available.");
 			return false;
 		}
 
@@ -76,7 +82,7 @@ namespace Fusion
 		m_PlatformBackendAllocated = m_RenderBackendAllocated = false;
 	}
 
-	void FApplicationInstance::OnWindowDestroyed(FWindowHandle window)
+	void FApplicationInstance::OnWindowDestroyed([[maybe_unused]] FWindowHandle window)
 	{
 		
 	}

@@ -102,6 +102,26 @@ namespace Fusion
 		focusLostWindows.Clear();
 	}
 
+	void* FSDL3PlatformBackend::GetNativeWindowHandle(FWindowHandle handle)
+	{
+		if (!windowsByHandle.KeyExists(handle))
+			return nullptr;
+
+		FSDL3PlatformWindow* platformWindow = windowsByHandle[handle];
+		if (!platformWindow)
+			return nullptr;
+
+		SDL_Window* sdlWindow = platformWindow->GetSdlHandle();
+
+		SDL_PropertiesID props = SDL_GetWindowProperties(sdlWindow);
+
+#if FUSION_PLATFORM_WINDOWS
+		return SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+#else
+		#error Platform Not Supported
+#endif
+	}
+
 	void FSDL3PlatformBackend::PumpEvents()
 	{
 		// Handle SDL Events

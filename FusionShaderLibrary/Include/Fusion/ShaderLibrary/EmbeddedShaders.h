@@ -13,10 +13,10 @@ namespace Fusion::Shaders {
 	//
 	//   for (const FShader& shader : Fusion::Shaders::All(FShaderFormat::SPIRV)) { ... }
 	//
-	FShaderLibrary All(FShaderFormat format);
+	FShaderLibrary All();
 
 	// Find a shader by name within a format set.
 	// Returns nullptr if the shader does not exist or was not compiled for that format.
-	const FShader* FindShader(const char* name, FShaderFormat format);
+	const FShader* FindShader(const char* name);
 
 } // namespace Fusion::Shaders

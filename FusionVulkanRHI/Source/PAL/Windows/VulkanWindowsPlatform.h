@@ -17,6 +17,8 @@ namespace Fusion
 
 		FVulkanWindowsPlatform() = delete;
 
+        ~FVulkanWindowsPlatform() = delete;
+
         static FArray<const char*> GetRequiredVulkanInstanceExtensions()
         {
             return {
@@ -87,6 +89,26 @@ namespace Fusion
                 DestroyWindow(tempSurface.hwnd);
                 tempSurface.hwnd = nullptr;
             }
+        }
+
+        static VkSurfaceKHR CreateSurface(FVulkanRenderBackend* renderBackend, FWindowHandle window)
+        {
+            if (window.IsNull() || !renderBackend)
+                return VK_NULL_HANDLE;
+
+            HWND hwnd = (HWND)renderBackend->GetPlatformBackend()->GetNativeWindowHandle(window);
+            if (!hwnd)
+                return VK_NULL_HANDLE;
+
+            VkSurfaceKHR surface = VK_NULL_HANDLE;
+
+            VkWin32SurfaceCreateInfoKHR surfaceInfo{};
+            surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+            surfaceInfo.hinstance = GetModuleHandleA(nullptr);
+            surfaceInfo.hwnd = hwnd;
+            vkCreateWin32SurfaceKHR(renderBackend->GetVkInstance(), &surfaceInfo, nullptr, &surface);
+
+            return surface;
         }
     };
 

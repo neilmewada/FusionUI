@@ -12,22 +12,22 @@ namespace Fusion
 
 	int FApplication::Run()
 	{
-		if (m_RenderBackend == nullptr)
-		{
-#if FUSION_USE_VULKAN
-			m_RenderBackend = new FVulkanRenderBackend();
-#else
-			FUSION_LOG_ERROR("Backend", "No render backend specified and no default available.");
-			return -1;
-#endif
-		}
-
 		if (m_PlatformBackend == nullptr)
 		{
 #if FUSION_USE_SDL3
 			m_PlatformBackend = new FSDL3PlatformBackend();
 #else
 			FUSION_LOG_ERROR("Backend", "No platform backend specified and no default available.");
+			return -1;
+#endif
+		}
+
+		if (m_RenderBackend == nullptr)
+		{
+#if FUSION_USE_VULKAN
+			m_RenderBackend = new FVulkanRenderBackend(m_PlatformBackend);
+#else
+			FUSION_LOG_ERROR("Backend", "No render backend specified and no default available.");
 			return -1;
 #endif
 		}

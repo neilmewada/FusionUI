@@ -36,7 +36,7 @@ namespace Fusion
         virtual ~IFPlatformBackend() = default;
 
 		// - Lifecycle -
-        
+
 		virtual bool IsInitialized(FInstanceHandle instance) = 0;
 
         virtual FInstanceHandle InitializeInstance() = 0;
@@ -46,6 +46,10 @@ namespace Fusion
         virtual void ShutdownInstance(FInstanceHandle instance) = 0;
 
 		virtual bool IsUserRequestingExit() = 0;
+
+        // - Native Handles -
+
+        virtual void* GetNativeWindowHandle(FWindowHandle handle) = 0;
 
 		// - Events -
 

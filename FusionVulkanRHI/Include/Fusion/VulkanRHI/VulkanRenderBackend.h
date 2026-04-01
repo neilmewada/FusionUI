@@ -5,6 +5,29 @@
 
 namespace Fusion
 {
+    // - Shader -
+
+    struct FUSIONVULKANRHI_API FGraphicsPipeline : IntrusiveBase
+    {
+    public:
+
+        FGraphicsPipeline(VkDevice device);
+
+        ~FGraphicsPipeline();
+
+        
+        VkDevice m_Device = nullptr;
+
+        VkShaderModule m_VertexModule = VK_NULL_HANDLE;
+        VkShaderModule m_FragmentModule = VK_NULL_HANDLE;
+
+        VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
+        
+        VkPipeline m_Pipeline = VK_NULL_HANDLE;
+    };
+
+    // - Render Instance -
+
     struct FUSIONVULKANRHI_API FRenderInstance : IntrusiveBase
     {
         // Per ApplicationInstance data goes here
@@ -16,6 +39,16 @@ namespace Fusion
     public:
 
         static constexpr u32 ImageCount = 2;
+
+        FVulkanRenderBackend(IFPlatformBackend* platformBackend) : IFRenderBackend(platformBackend)
+        {
+	        
+        }
+
+        VkInstance GetVkInstance()
+        {
+            return m_VulkanInstance;
+        }
 
         FGraphicsBackendType GetGraphicsBackendType() override
         {
@@ -78,9 +111,17 @@ namespace Fusion
         int m_QueueFamilyIndex = -1;
         VkQueue m_GraphicsQueue = VK_NULL_HANDLE;
 
-        // - Command Pool -
+        // - Command Pools & Buffers -
 
         VkCommandPool m_CommandPool = VK_NULL_HANDLE;
+
+        // - Render Pass -
+
+        VkRenderPass m_RenderPass = VK_NULL_HANDLE;
+
+        // - Pipeline -
+
+        IntrusivePtr<FGraphicsPipeline> m_MainGraphicsPipeline;
 
     };
 

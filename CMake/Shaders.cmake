@@ -90,8 +90,10 @@ function(fusion_compile_shader)
             OUTPUT  "${spv_file}"
             COMMAND "${FUSION_SLANGC}" "${hlsl_abs}"
                     -target spirv
+                    -profile spirv_1_0
                     -entry  "${ARG_ENTRY}"
                     -stage  "${ARG_STAGE}"
+                    -emit-spirv-via-glsl
                     ${slangc_include_args}
                     -o      "${spv_file}"
             DEPENDS ${slang_deps}
@@ -184,8 +186,8 @@ function(fusion_finalize_shader_registry target)
     if(NOT shader_list)
         # No shaders registered yet -- generate stubs so All() and FindShader() link.
         string(APPEND src "namespace Fusion::Shaders {\n\n")
-        string(APPEND src "FShaderLibrary All(FShaderFormat)                        { return {}; }\n")
-        string(APPEND src "const FShader* FindShader(const char*, FShaderFormat)    { return nullptr; }\n\n")
+        string(APPEND src "FShaderLibrary All()                        { return {}; }\n")
+        string(APPEND src "const FShader* FindShader(const char*)    { return nullptr; }\n\n")
         string(APPEND src "} // namespace Fusion::Shaders\n")
     else()
         # -- Forward-declare all embedded data accessors ----------------------
@@ -332,15 +334,9 @@ function(fusion_finalize_shader_registry target)
         endforeach()
 
         # -- All() -----------------------------------------------------------
-        string(APPEND src "FShaderLibrary All(FShaderFormat format) {\n")
-        string(APPEND src "    switch (format) {\n")
+        string(APPEND src "FShaderLibrary All() {\n")
 
-        if(spirv_groups)
-            string(APPEND src "        case FShaderFormat::SPIRV: return { s_SPIRV_Shaders, sizeof(s_SPIRV_Shaders) / sizeof(*s_SPIRV_Shaders) };\n")
-        else()
-            string(APPEND src "        case FShaderFormat::SPIRV: return {};\n")
-        endif()
-
+        string(APPEND src "    return { s_SPIRV_Shaders, sizeof(s_SPIRV_Shaders) / sizeof(*s_SPIRV_Shaders) };\n")
         #[[
         if(msl_groups)
             string(APPEND src "        case FShaderFormat::MSL:   return { s_MSL_Shaders, sizeof(s_MSL_Shaders) / sizeof(*s_MSL_Shaders) };\n")
@@ -348,14 +344,11 @@ function(fusion_finalize_shader_registry target)
             string(APPEND src "        case FShaderFormat::MSL:   return {};\n")
         endif()
         ]]#
-
-        string(APPEND src "    }\n")
-        string(APPEND src "    return {};\n")
         string(APPEND src "}\n\n")
 
         # -- FindShader() ----------------------------------------------------
-        string(APPEND src "const FShader* FindShader(const char* name, FShaderFormat format) {\n")
-        string(APPEND src "    for (const auto& s : All(format))\n")
+        string(APPEND src "const FShader* FindShader(const char* name) {\n")
+        string(APPEND src "    for (const auto& s : All())\n")
         string(APPEND src "        if (std::strcmp(s.m_Name, name) == 0) return &s;\n")
         string(APPEND src "    return nullptr;\n")
         string(APPEND src "}\n\n")
