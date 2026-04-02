@@ -5,6 +5,7 @@
 
 namespace Fusion
 {
+	class FWidget;
 
     struct FApplicationInstanceDesc
     {
@@ -33,6 +34,8 @@ namespace Fusion
 		void OnWindowDestroyed(FWindowHandle window) override;
 
 		FInstanceHandle m_InstanceHandle = FInstanceHandle::NullValue;
+
+		Ptr<FWidget> m_RootWidget;
 
     private:
 

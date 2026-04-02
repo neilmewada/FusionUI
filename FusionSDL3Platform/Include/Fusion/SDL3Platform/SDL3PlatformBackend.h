@@ -19,13 +19,13 @@ namespace Fusion
         FVec2 wheelDelta{};
         u64 curTime = 0;
 
-        HashMap<FKeyCode, bool> keyStates{};
+        FHashMap<FKeyCode, bool> keyStates{};
         //HashMap<FKeyCode, Internal::FKeyStateDelayed> keyStatesDelayed{};
-        HashMap<FMouseButton, int> mouseButtonStates{};
+        FHashMap<FMouseButton, int> mouseButtonStates{};
 
         // Per-Tick changes
-        HashMap<FKeyCode, bool> stateChangesThisTick{};
-        HashMap<FMouseButton, int> mouseButtonStateChanges{};
+        FHashMap<FKeyCode, bool> stateChangesThisTick{};
+        FHashMap<FMouseButton, int> mouseButtonStateChanges{};
 
         FKeyModifier modifierStates{};
     };
@@ -77,11 +77,11 @@ namespace Fusion
 
         void ProcessWindowResizeEvent(FWindowHandle windowHandle);
 
-        HashMap<FInstanceHandle, FSDL3InstanceData> m_Instances;
+        FHashMap<FInstanceHandle, FSDL3InstanceData> m_Instances;
 
-		HashMap<FWindowHandle, FSDL3PlatformWindow*> m_WindowsByHandle;
+		FHashMap<FWindowHandle, FSDL3PlatformWindow*> m_WindowsByHandle;
 
-		HashMap<FUuid, bool> m_Displays;
+		FHashMap<FUuid, bool> m_Displays;
 
 		bool m_IsInitialized = false;
         bool m_InitFailed = false;
@@ -110,13 +110,13 @@ namespace Fusion
         FArray<u64> m_FocusGainedWindows{};
         FArray<u64> m_FocusLostWindows{};
 
-        HashMap<FKeyCode, bool> m_KeyStates{};
+        FHashMap<FKeyCode, bool> m_KeyStates{};
         //HashMap<FKeyCode, Internal::KeyStateDelayed> keyStatesDelayed{};
-        HashMap<FMouseButton, int> m_MouseButtonStates{};
+        FHashMap<FMouseButton, int> m_MouseButtonStates{};
 
         // Per-Tick changes
-        HashMap<FKeyCode, bool> m_StateChangesThisTick{};
-        HashMap<FMouseButton, int> m_MouseButtonStateChanges{};
+        FHashMap<FKeyCode, bool> m_StateChangesThisTick{};
+        FHashMap<FMouseButton, int> m_MouseButtonStateChanges{};
 
         FKeyModifier m_ModifierStates{};
 

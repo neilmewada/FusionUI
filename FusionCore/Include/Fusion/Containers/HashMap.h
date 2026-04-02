@@ -6,16 +6,16 @@ namespace Fusion
 {
 
     template<typename KeyType, typename ValueType>
-    class Pair
+    class FPair
     {
     public:
 
-        constexpr Pair() : first({}), second({})
+        constexpr FPair() : first({}), second({})
         {
 
         }
 
-        constexpr Pair(KeyType key, ValueType value) : first(key), second(value)
+        constexpr FPair(KeyType key, ValueType value) : first(key), second(value)
         {
 
         }
@@ -30,32 +30,32 @@ namespace Fusion
             return hash;
         }
 
-        bool operator==(const Pair& rhs) const
+        bool operator==(const FPair& rhs) const
         {
             return GetHash() == rhs.GetHash();
         }
 
-        bool operator!=(const Pair& rhs) const
+        bool operator!=(const FPair& rhs) const
         {
             return !operator==(rhs);
         }
     };
 
     template<typename KeyType, typename ValueType>
-    class HashMap
+    class FHashMap
     {
     public:
-        HashMap() : Impl({})
+        FHashMap() : Impl({})
         {
 
         }
 
-        HashMap(std::initializer_list<std::pair<KeyType, ValueType>> list) : Impl(list)
+        FHashMap(std::initializer_list<std::pair<KeyType, ValueType>> list) : Impl(list)
         {
 
         }
 
-        ~HashMap()
+        ~FHashMap()
         {
 
         }
@@ -130,12 +130,12 @@ namespace Fusion
             Impl.insert({ key, value });
         }
 
-        inline void Add(const Pair<KeyType, ValueType>& pair)
+        inline void Add(const FPair<KeyType, ValueType>& pair)
         {
             Impl.insert({ pair.first, pair.second });
         }
 
-        inline void AddRange(const HashMap<KeyType, ValueType>& from)
+        inline void AddRange(const FHashMap<KeyType, ValueType>& from)
         {
             for (const auto& [key, value] : from)
             {

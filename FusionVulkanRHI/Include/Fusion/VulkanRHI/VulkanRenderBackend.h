@@ -213,7 +213,7 @@ namespace Fusion::Vulkan
 
     private:
 
-        HashMap<FInstanceHandle, IntrusivePtr<FRenderInstance>> instances;
+        FHashMap<FInstanceHandle, IntrusivePtr<FRenderInstance>> instances;
 
         // - Vulkan Data -
 		
@@ -256,7 +256,7 @@ namespace Fusion::Vulkan
 
         // - SwapChain -
 
-        HashMap<FWindowHandle, IntrusivePtr<FSwapChain>> m_SwapChainsByWindowHandle;
+        FHashMap<FWindowHandle, IntrusivePtr<FSwapChain>> m_SwapChainsByWindowHandle;
 
         // - Render Pass -
 

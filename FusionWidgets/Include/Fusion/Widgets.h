@@ -17,3 +17,16 @@
 #include "Application/Service.h"
 #include "Application/Application.h"
 
+// Layer
+#include "Layer/Layer.h"
+#include "Layer/LayerTree.h"
+
+// Rendering
+#include "Rendering/Painter.h"
+
+// Surface
+#include "Surface/Surface.h"
+#include "Surface/NativeSurface.h"
+
+// Widgets
+#include "Widget/Widget.h"
