@@ -5,24 +5,24 @@ namespace Fusion
 
 	void FLayerTree::MarkSyncNeeded()
 	{
-		needsSync = true;
+		m_NeedsSync = true;
 	}
 
 	void FLayerTree::DoSyncIfNeeded(FWidget* rootWidget)
 	{
-		if (!needsSync)
+		if (!m_NeedsSync)
 			return;
 
 		ZoneScoped;
 
-		HashSet<Uuid> visited;
+		FHashSet<FUuid> visited;
 		SyncWidget(rootWidget, nullptr, visited);
 
-		HashSet<Uuid> widgetsToRemove;
+		FHashSet<FUuid> widgetsToRemove;
 
-		for (const auto& [widgetUuid, layer] : widgetUuidToLayerMap)
+		for (const auto& [widgetUuid, layer] : m_WidgetUuidToLayerMap)
 		{
-			if (!visited.Exists(widgetUuid))
+			if (!visited.Contains(widgetUuid))
 			{
 				widgetsToRemove.Add(widgetUuid);
 			}
@@ -30,32 +30,32 @@ namespace Fusion
 
 		for (auto widgetUuid : widgetsToRemove)
 		{
-			widgetUuidToLayerMap.Remove(widgetUuid);
+			m_WidgetUuidToLayerMap.Remove(widgetUuid);
 		}
 
-		needsSync = false;
+		m_NeedsSync = false;
 	}
 
 	void FLayerTree::DoPaintIfNeeded()
 	{
-		if (!rootLayer)
+		if (!m_RootLayer)
 			return;
 
-		rootLayer->cachedTransformInParentLayerSpace = FAffineTransform::Identity();
-		rootLayer->DoPaintIfNeeded();
+		m_RootLayer->cachedTransformInParentLayerSpace = FAffineTransform::Identity();
+		m_RootLayer->DoPaintIfNeeded();
 	}
 
 	Ptr<FLayer> FLayerTree::FindLayerForWidget(FUuid widgetUuid)
 	{
-		auto it = widgetUuidToLayerMap.Find(widgetUuid);
-		if (it != widgetUuidToLayerMap.End())
+		auto it = m_WidgetUuidToLayerMap.Find(widgetUuid);
+		if (it != m_WidgetUuidToLayerMap.End())
 		{
 			return it->second;
 		}
 		return nullptr;
 	}
 
-	void FLayerTree::SyncWidget(FWidget* widget, Ptr<FLayer> parentLayer, HashSet<FUuid>& visited)
+	void FLayerTree::SyncWidget(Ptr<FWidget> widget, Ptr<FLayer> parentLayer, FHashSet<FUuid>& visited)
 	{
 		if (!widget)
 			return;
@@ -70,9 +70,9 @@ namespace Fusion
 
 			Ptr<FLayer> layer;
 
-			auto it = widgetUuidToLayerMap.Find(uuid);
+			auto it = m_WidgetUuidToLayerMap.Find(uuid);
 
-			if (it != widgetUuidToLayerMap.End())
+			if (it != m_WidgetUuidToLayerMap.End())
 			{
 				layer = it->second;
 			}
@@ -80,9 +80,9 @@ namespace Fusion
 			{
 				layer = new FLayer("Layer", this);
 
-				layer->owningWidget = widget;
-				layer->ownerTree = this;
-				widgetUuidToLayerMap.Add(uuid, layer);
+				layer->m_OwningWidget = widget;
+				layer->m_OwnerTree = Ptr(this);
+				m_WidgetUuidToLayerMap.Add(uuid, layer);
 			}
 
 			layer->parent = parentLayer;
@@ -91,7 +91,7 @@ namespace Fusion
 			if (parentLayer != nullptr)
 				parentLayer->children.Add(layer);
 			else
-				rootLayer = layer;
+				m_RootLayer = layer;
 
 			visited.Add(uuid);
 			currentLayer = layer.Get();

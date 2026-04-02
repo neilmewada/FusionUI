@@ -178,7 +178,7 @@ namespace Fusion
 		}
 	}
 
-	void FSDL3PlatformBackend::SetEventSink(FInstanceHandle instance, IFPlatformEventSink* eventSink)
+	void FSDL3PlatformBackend::SetInstanceEventSink(FInstanceHandle instance, IFPlatformEventSink* eventSink)
 	{
 		if (!m_Instances.KeyExists(instance))
 		{
@@ -186,6 +186,16 @@ namespace Fusion
 		}
 
 		m_Instances[instance].eventSink = eventSink;
+	}
+
+	void FSDL3PlatformBackend::RegisterEventSink(IFPlatformEventSink* eventSink)
+	{
+		m_RegisteredSinks.Add(eventSink);
+	}
+
+	void FSDL3PlatformBackend::DeregisterEventSink(IFPlatformEventSink* eventSink)
+	{
+		m_RegisteredSinks.Remove(eventSink);
 	}
 
 
@@ -204,8 +214,11 @@ namespace Fusion
 					instanceData.eventSink->OnWindowCreated(newWindow->GetWindowHandle());
 				}
 			}
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowCreated(newWindow->GetWindowHandle());
+
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowCreated(newWindow->GetWindowHandle());
+			}
 
 			return newWindow->GetWindowHandle();
 		}
@@ -230,8 +243,10 @@ namespace Fusion
 			}
 		}
 
-		if (m_RenderBackendEventSink)
-			m_RenderBackendEventSink->OnWindowDestroyed(window);
+		for (auto sink : m_RegisteredSinks)
+		{
+			sink->OnWindowDestroyed(window);
+		}
 
 		FSDL3PlatformWindow* platformWindow = m_WindowsByHandle[window];
 		delete platformWindow;
@@ -270,8 +285,11 @@ namespace Fusion
 					instanceData.eventSink->OnWindowMoved(event.window.windowID, event.window.data1, event.window.data2);
 				}
 			}
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowMoved(event.window.windowID, event.window.data1, event.window.data2);
+
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowMoved(event.window.windowID, event.window.data1, event.window.data2);
+			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) // Close a specific window
 		{
@@ -292,8 +310,10 @@ namespace Fusion
 						}
 					}
 
-					if (m_RenderBackendEventSink)
-						m_RenderBackendEventSink->OnWindowClosed(event.window.windowID);
+					for (auto sink : m_RegisteredSinks)
+					{
+						sink->OnWindowClosed(event.window.windowID);
+					}
 				}
 			}
 		}
@@ -306,8 +326,11 @@ namespace Fusion
 					instanceData.eventSink->OnWindowMinimized(event.window.windowID);
 				}
 			}
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowMinimized(event.window.windowID);
+
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowMinimized(event.window.windowID);
+			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_SHOWN)
 		{
@@ -319,8 +342,10 @@ namespace Fusion
 				}
 			}
 
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowShown(event.window.windowID);
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowShown(event.window.windowID);
+			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_RESTORED)
 		{
@@ -332,8 +357,10 @@ namespace Fusion
 				}
 			}
 
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowRestored(event.window.windowID);
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowRestored(event.window.windowID);
+			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MAXIMIZED)
 		{
@@ -345,8 +372,10 @@ namespace Fusion
 				}
 			}
 
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowMaximized(event.window.windowID);
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowMaximized(event.window.windowID);
+			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_DISPLAY_CHANGED)
 		{
@@ -360,8 +389,10 @@ namespace Fusion
 				}
 			}
 
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowDisplayChanged(event.window.windowID, displayId);
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowDisplayChanged(event.window.windowID, displayId);
+			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_FOCUS_GAINED)
 		{
@@ -373,8 +404,10 @@ namespace Fusion
 				}
 			}
 
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowKeyboardFocusChanged(event.window.windowID, true);
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowKeyboardFocusChanged(event.window.windowID, true);
+			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_FOCUS_LOST)
 		{
@@ -386,8 +419,10 @@ namespace Fusion
 				}
 			}
 
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowKeyboardFocusChanged(event.window.windowID, false);
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowKeyboardFocusChanged(event.window.windowID, false);
+			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MOUSE_ENTER)
 		{
@@ -399,8 +434,10 @@ namespace Fusion
 				}
 			}
 
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowMouseFocusChanged(event.window.windowID, true);
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowMouseFocusChanged(event.window.windowID, true);
+			}
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MOUSE_LEAVE)
 		{
@@ -412,8 +449,10 @@ namespace Fusion
 				}
 			}
 
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowMouseFocusChanged(event.window.windowID, false);
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowMouseFocusChanged(event.window.windowID, false);
+			}
 		}
 	}
 
@@ -516,8 +555,10 @@ namespace Fusion
 				}
 			}
 
-			if (m_RenderBackendEventSink)
-				m_RenderBackendEventSink->OnWindowResized(window->GetWindowHandle(), w, h);
+			for (auto sink : m_RegisteredSinks)
+			{
+				sink->OnWindowResized(window->GetWindowHandle(), w, h);
+			}
 		}
 	}
 

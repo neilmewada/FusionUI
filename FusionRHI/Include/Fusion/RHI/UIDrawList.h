@@ -1,0 +1,66 @@
+#pragma once
+
+namespace Fusion
+{
+    using FUIVertexArray        = FStableDynamicArray<FUIVertex,        1024>;
+    using FUIIndexArray         = FStableDynamicArray<FUIIndex,         1024>;
+    using FUIDrawItemArray      = FStableDynamicArray<FUIDrawItem,      512>;
+    using FUIClipRectArray      = FStableDynamicArray<FUIClipRect,      64>;
+    using FUIGradientStopArray  = FStableDynamicArray<FUIGradientStop,  64>;
+    using FUIDrawCmdArray       = FStableDynamicArray<FUIDrawCmd,       64>;
+
+	class FUSIONRHI_API FUIDrawList final : public IntrusiveBase
+	{
+	public:
+
+        // -  Public API -
+
+        void Clear();
+        void Finalize();
+
+        SizeT GetCurrentDrawCmdCount() const { return drawCmdArray.GetCount(); }
+
+        // Current vertex count — used to compute relative index offsets
+        u32 GetCurrentVertexCount() const { return vertexArray.GetCount(); }
+
+        FUIDrawCmd& NewDrawCmd();
+
+        FUIDrawCmd& AcquireDrawCmd();
+
+        u32 AddDrawItem(const FUIDrawItem& item);
+
+        void AddPolyLine(const FVec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex = 0, const f32* uvXValues = nullptr);
+
+        void AddConvexPolyFilled(const FVec2* points, int numPoints, u32 color, bool antiAliased, FRect* minMaxPos, u32 drawItemIndex = 0);
+
+        void PrimReserve(int vertexCount, int indexCount);
+
+        // - Types & Constants -
+
+        using FTempPointsArray = FStableDynamicArray<FVec2, 128>;
+        static constexpr u32 ColorAlphaMask = 0xff000000;
+
+        // - Data -
+
+        FUIVertexArray vertexArray;
+        FUIIndexArray indexArray;
+        FUIDrawItemArray drawItemArray;
+        FUIClipRectArray clipRectArray;
+        FUIGradientStopArray gradientStopArray;
+        FUIDrawCmdArray drawCmdArray;
+
+        FTempPointsArray temporaryPoints;
+        FUIVertex* vertexWritePtr = nullptr;
+        FUIIndex* indexWritePtr = nullptr;
+
+        // Start offset of current vertex
+        FUIIndex vertexCurrentIdx = 0;
+
+        float fringeScale = 1.0f;
+
+        EUIBlendMode blendMode = EUIBlendMode::Normal;
+
+
+	};
+
+}

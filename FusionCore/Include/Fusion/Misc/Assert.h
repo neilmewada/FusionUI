@@ -16,7 +16,7 @@ namespace Fusion::Internal
     // Never call directly — use FUSION_ASSERT.
     [[noreturn]] FUSIONCORE_API void AssertFailed(const char* condition, const char* message, const char* file, int line);
 
-    template<typename TException> requires TFIsBaseClassOf<FException, TException>::Value
+    template<typename TException> requires TFIsDerivedClass<FException, TException>::Value
     [[noreturn]] void AssertFailedThrow(const char* message, const char* file, int line);
 
 } // namespace Fusion::Internal

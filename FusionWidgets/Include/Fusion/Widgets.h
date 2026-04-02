@@ -13,6 +13,8 @@
 #include <Fusion/VulkanRHI.h>
 #endif
 
+#include "Macros.h"
+
 #include "Application/ApplicationInstance.h"
 #include "Application/Service.h"
 #include "Application/Application.h"
@@ -21,8 +23,13 @@
 #include "Layer/Layer.h"
 #include "Layer/LayerTree.h"
 
-// Rendering
-#include "Rendering/Painter.h"
+// Style
+#include "Style/Gradient.h"
+#include "Style/Pen.h"
+#include "Style/Brush.h"
+
+// Painting
+#include "Painting/Painter.h"
 
 // Surface
 #include "Surface/Surface.h"

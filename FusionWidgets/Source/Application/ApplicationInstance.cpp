@@ -48,7 +48,7 @@ namespace Fusion
 			return false;
 		}
 
-		m_PlatformBackend->SetEventSink(m_InstanceHandle, this);
+		m_PlatformBackend->SetInstanceEventSink(m_InstanceHandle, this);
 
 		m_RenderBackend->InitializeInstance(m_InstanceHandle);
 

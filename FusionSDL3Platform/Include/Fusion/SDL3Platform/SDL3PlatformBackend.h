@@ -54,12 +54,11 @@ namespace Fusion
 
         void PumpEvents() override;
 
-        void SetEventSink(FInstanceHandle instance, IFPlatformEventSink* eventSink) override;
+        void SetInstanceEventSink(FInstanceHandle instance, IFPlatformEventSink* eventSink) override;
 
-        void SetRenderBackendEventSink(IFPlatformEventSink* genericEventSink) override
-        {
-            m_RenderBackendEventSink = genericEventSink;
-        }
+        void RegisterEventSink(IFPlatformEventSink* eventSink) override;
+
+        void DeregisterEventSink(IFPlatformEventSink* eventSink) override;
 
         // - Windowing -
 
@@ -89,7 +88,7 @@ namespace Fusion
 
         FInstanceHandle m_InstanceCounter = FInstanceHandle::NullValue;
 
-        IFPlatformEventSink* m_RenderBackendEventSink = nullptr;
+        FHashSet<IFPlatformEventSink*> m_RegisteredSinks{};
 
         FDelegate<void()> m_ContinuousResizeTick{};
 

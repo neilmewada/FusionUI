@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <type_traits>
+#include <concepts>
 
 namespace Fusion
 {
@@ -25,7 +26,7 @@ namespace Fusion
     struct TFIsSameType<T, T> : TFTrueType {};
 
     template<class TBase, class TDerived>
-    using TFIsBaseClassOf = TFBoolConst<__is_base_of(TBase, TDerived)>;
+    using TFIsDerivedClass = TFBoolConst<__is_base_of(TBase, TDerived)>;
 
     template<typename T>
     struct TFIsTemplate : TFFalseType {};
@@ -109,5 +110,19 @@ namespace Fusion
     struct TFIsIntegralType<i32> : TFTrueType {};
     template<>
     struct TFIsIntegralType<i64> : TFTrueType {};
+
+    class FObject;
+
+    template<class TObject>
+    concept FObjectType = TFIsDerivedClass<FObject, TObject>::Value;
+
+    template <typename T>
+    struct TFEquitable : TFBoolConst<std::equality_comparable<T>>
+    {
+        static bool AreEqual(const T& lhs, const T& rhs)
+        {
+            return lhs == rhs;
+        }
+    };
     
 } // namespace Fusion

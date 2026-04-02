@@ -170,14 +170,14 @@ namespace Fusion
     };
 
     template<typename T>
-    class HashSet
+    class FHashSet
     {
     public:
-        HashSet() : impl({})
+        FHashSet() : impl({})
         {
         }
 
-        HashSet(std::initializer_list<T> elements) : impl(elements)
+        FHashSet(std::initializer_list<T> elements) : impl(elements)
         {
         }
 
@@ -191,12 +191,12 @@ namespace Fusion
             impl.erase(item);
         }
 
-        inline bool IsEmpty() const
+        inline bool Empty() const
         {
             return impl.empty();
         }
 
-        inline bool Exists(const T& item) const
+        inline bool Contains(const T& item) const
         {
             return impl.contains(item);
         }

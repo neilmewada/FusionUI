@@ -12,7 +12,7 @@ namespace Fusion
 
         FLayer(FName name, FObject* outer = nullptr);
 
-        Ptr<FWidget> GetOwningWidget() { return owningWidget.Lock(); }
+        Ptr<FWidget> GetOwningWidget() { return m_OwningWidget.Lock(); }
 
         Ptr<FLayer> GetParentLayer() { return parent.Lock(); }
 
@@ -44,11 +44,11 @@ namespace Fusion
 
         void DoPaint(FWidget* widget, FPainter& painter);
 
-        WeakPtr<FLayerTree> ownerTree;
+        WeakPtr<FLayerTree> m_OwnerTree;
 
         WeakPtr<FLayer> parent;
 
-        WeakPtr<FWidget> owningWidget;
+        WeakPtr<FWidget> m_OwningWidget;
 
         FArray<Ptr<FLayer>> children;
 

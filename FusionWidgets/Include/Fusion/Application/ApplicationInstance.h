@@ -6,6 +6,7 @@
 namespace Fusion
 {
 	class FWidget;
+	class FSurface;
 
     struct FApplicationInstanceDesc
     {
@@ -35,7 +36,7 @@ namespace Fusion
 
 		FInstanceHandle m_InstanceHandle = FInstanceHandle::NullValue;
 
-		Ptr<FWidget> m_RootWidget;
+		FArray<Ptr<FSurface>> m_Surfaces;
 
     private:
 

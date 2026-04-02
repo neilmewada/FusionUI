@@ -110,6 +110,12 @@ namespace Fusion
 		Fusion::Log(level, category, FString::FormatV(message, std::make_format_args(args...)));
     }
 
+    template <SizeT Bits>
+    FString FBitSet<Bits>::ToString() const
+    {
+        return impl.to_string();
+    }
+
 } // namespace Fusion
 
 // Allow FString to be used directly as a std::format argument.

@@ -7,7 +7,7 @@ namespace Fusion
 {
 	FObject::FObject(FName name, Ptr<FObject> outer) : m_Outer(outer), m_Name(MoveTemp(name)), m_Uuid(FUuid::Random())
     {
-	    
+		m_Flags |= EObjectFlags::PendingConstruction;
     }
 
 	void FObject::AttachSubobject(Ptr<FObject> subobject)

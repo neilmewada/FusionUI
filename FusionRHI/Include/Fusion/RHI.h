@@ -4,5 +4,6 @@
 #include <Fusion/Platform.h>
 
 #include "RHI/UIDrawData.h"
+#include "RHI/UIDrawList.h"
 #include "RHI/IRenderBackend.h"
 

@@ -115,7 +115,7 @@ namespace Fusion::Vulkan
 		VkDescriptorPoolCreateInfo poolCI{};
 		poolCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		poolCI.maxSets = 128;
-		poolCI.poolSizeCount = poolSizes.Size();
+		poolCI.poolSizeCount = (uint32_t)poolSizes.Size();
 		poolCI.pPoolSizes = poolSizes.Data();
 		poolCI.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
@@ -436,7 +436,7 @@ namespace Fusion::Vulkan
 
 	void FVulkanRenderBackend::InitializeVulkan()
 	{
-		m_PlatformBackend->SetRenderBackendEventSink(this);
+		m_PlatformBackend->RegisterEventSink(this);
 
 		// - Instance -
 
@@ -666,7 +666,7 @@ namespace Fusion::Vulkan
 
 		VkCommandBufferAllocateInfo commandBufferInfo{};
 		commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		commandBufferInfo.commandBufferCount = m_CommandBuffers.Size();
+		commandBufferInfo.commandBufferCount = (uint32_t)m_CommandBuffers.Size();
 		commandBufferInfo.commandPool = m_CommandPool;
 		commandBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		
@@ -801,7 +801,7 @@ namespace Fusion::Vulkan
 			VkVertexInputBindingDescription vertexInputBinding{};
 			vertexInputBinding.binding = 0;
 			vertexInputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			vertexInputBinding.stride = sizeof(FUIVertex);
+			vertexInputBinding.stride = sizeof(EUIVertex);
 
 			vertexInputState.vertexBindingDescriptionCount = 1;
 			vertexInputState.pVertexBindingDescriptions = &vertexInputBinding;
@@ -810,22 +810,22 @@ namespace Fusion::Vulkan
 			vertexAttributes[0].format = VK_FORMAT_R32G32_SFLOAT;
 			vertexAttributes[0].binding = 0;
 			vertexAttributes[0].location = 0;
-			vertexAttributes[0].offset = offsetof(FUIVertex, pos);
+			vertexAttributes[0].offset = offsetof(EUIVertex, pos);
 
 			vertexAttributes[1].format = VK_FORMAT_R32G32_SFLOAT;
 			vertexAttributes[1].binding = 0;
 			vertexAttributes[1].location = 1;
-			vertexAttributes[1].offset = offsetof(FUIVertex, uv);
+			vertexAttributes[1].offset = offsetof(EUIVertex, uv);
 
 			vertexAttributes[2].format = VK_FORMAT_R8G8B8A8_UNORM;
 			vertexAttributes[2].binding = 0;
 			vertexAttributes[2].location = 2;
-			vertexAttributes[2].offset = offsetof(FUIVertex, color);
+			vertexAttributes[2].offset = offsetof(EUIVertex, color);
 
 			vertexAttributes[3].format = VK_FORMAT_R32_UINT;
 			vertexAttributes[3].binding = 0;
 			vertexAttributes[3].location = 3;
-			vertexAttributes[3].offset = offsetof(FUIVertex, drawItemIndex);
+			vertexAttributes[3].offset = offsetof(EUIVertex, drawItemIndex);
 
 			vertexInputState.vertexAttributeDescriptionCount = 4;
 			vertexInputState.pVertexAttributeDescriptions = vertexAttributes.data();
@@ -852,7 +852,7 @@ namespace Fusion::Vulkan
 
 			VkPipelineDynamicStateCreateInfo dynamicState{};
 			dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-			dynamicState.dynamicStateCount = dynamicStates.size();
+			dynamicState.dynamicStateCount = (uint32_t)dynamicStates.size();
 			dynamicState.pDynamicStates = dynamicStates.data();
 
 			graphicsPipelineCI.pDynamicState = &dynamicState;
@@ -963,7 +963,7 @@ namespace Fusion::Vulkan
 				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
 			}
 
-			pipelineLayoutCI.setLayoutCount = m_MainGraphicsPipeline->m_SetLayouts.Size();
+			pipelineLayoutCI.setLayoutCount = (uint32_t)m_MainGraphicsPipeline->m_SetLayouts.Size();
 			pipelineLayoutCI.pSetLayouts = m_MainGraphicsPipeline->m_SetLayouts.Data();
 
 			result = vkCreatePipelineLayout(m_Device, &pipelineLayoutCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_PipelineLayout);
@@ -1038,7 +1038,7 @@ namespace Fusion::Vulkan
 
 		m_SwapChainsByWindowHandle.Clear();
 
-		m_PlatformBackend->SetRenderBackendEventSink(nullptr);
+		m_PlatformBackend->DeregisterEventSink(this);
 
 		if (m_RenderPass)
 		{
@@ -1204,7 +1204,7 @@ namespace Fusion::Vulkan
 		FArray<VkImage> swapChainImages(swapChainImageCount);
 		vkGetSwapchainImagesKHR(m_Device, swapChain->m_SwapChain, &swapChainImageCount, swapChainImages.Data());
 
-		for (int i = 0; i < swapChainImageCount; i++)
+		for (uint32_t i = 0; i < swapChainImageCount; i++)
 		{
 			IntrusivePtr<FTexture> texture = new FTexture(this, m_Device);
 
@@ -1315,7 +1315,7 @@ namespace Fusion::Vulkan
 		DestroySwapChain(window);
 	}
 
-	void FVulkanRenderBackend::OnWindowResized(FWindowHandle window, u32 newWidth, u32 newHeight)
+	void FVulkanRenderBackend::OnWindowResized(FWindowHandle window, [[maybe_unused]] u32 newWidth, [[maybe_unused]] u32 newHeight)
 	{
 		CreateOrUpdateSwapChain(window);
 	}

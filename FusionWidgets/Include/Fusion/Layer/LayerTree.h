@@ -8,7 +8,10 @@ namespace Fusion
         FUSION_CLASS(FLayerTree, FObject)
     public:
 
-        bool IsSyncNeeded() const { return needsSync; }
+        FLayerTree() : Super("LayerTree")
+		{}
+
+        bool IsSyncNeeded() const { return m_NeedsSync; }
 
         void MarkSyncNeeded();
 
@@ -18,19 +21,19 @@ namespace Fusion
 
         Ptr<FLayer> FindLayerForWidget(FUuid widgetUuid);
 
-        Ptr<FLayer> GetRootLayer() { return rootLayer; }
+        Ptr<FLayer> GetRootLayer() { return m_RootLayer; }
 
     protected:
 
-        void SyncWidget(FWidget* widget, Ptr<FLayer> parentLayer, HashSet<FUuid>& visited);
+        void SyncWidget(Ptr<FWidget> widget, Ptr<FLayer> parentLayer, FHashSet<FUuid>& visited);
 
-        Ptr<FLayer> rootLayer;
+        Ptr<FLayer> m_RootLayer;
 
-        FAffineTransform rootLayerTransform;
+        FAffineTransform m_RootLayerTransform;
 
-        FHashMap<FUuid, Ptr<FLayer>> widgetUuidToLayerMap;
+        FHashMap<FUuid, Ptr<FLayer>> m_WidgetUuidToLayerMap;
 
-        bool needsSync = true;
+        bool m_NeedsSync = true;
     };
     
 } // namespace CE

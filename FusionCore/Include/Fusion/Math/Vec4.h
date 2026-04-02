@@ -63,8 +63,14 @@ namespace Fusion
         constexpr FVec4& operator*=(float scalar)     { *this = *this * scalar; return *this; }
         constexpr FVec4& operator/=(float scalar)     { *this = *this / scalar; return *this; }
 
-        constexpr bool operator==(const FVec4& rhs) const { return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w; }
-        constexpr bool operator!=(const FVec4& rhs) const { return !(*this == rhs); }
+        bool operator==(const FVec4& rhs) const { 
+        	return FMath::ApproxEquals(x, rhs.x) && 
+	            FMath::ApproxEquals(y, rhs.y) && 
+	            FMath::ApproxEquals(z, rhs.z) && 
+	            FMath::ApproxEquals(w, rhs.w); 
+        }
+
+        bool operator!=(const FVec4& rhs) const { return !(*this == rhs); }
 
         // ----------------------------------------------------------------
         // Vector math
@@ -190,5 +196,7 @@ namespace Fusion
     };
 
     inline constexpr FVec4i operator*(int32_t scalar, FVec4i v) { return v * scalar; }
+
+    using FMargin = FVec4;
 
 } // namespace Fusion

@@ -73,3 +73,14 @@ namespace Fusion
 	}
 
 } // namespace Fusion
+
+// Allow FString to be used directly as a std::format argument.
+// Example: FString::Format("Value: {}", someString)
+template<>
+struct std::formatter<Fusion::FName> : std::formatter<std::string_view>
+{
+	auto format(const Fusion::FName& name, std::format_context& ctx) const
+	{
+		return std::formatter<std::string_view>::format(name.ToString().ToStdString(), ctx);
+	}
+};

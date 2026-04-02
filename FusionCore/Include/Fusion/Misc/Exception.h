@@ -98,7 +98,7 @@ namespace Fusion
 
     namespace Internal
     {
-        template<typename TException> requires TFIsBaseClassOf<FException, TException>::Value
+        template<typename TException> requires TFIsDerivedClass<FException, TException>::Value
         [[noreturn]] void AssertFailedThrow(const char* message, const char* file, int line)
         {
             FString fullMessage = FString(file) + ":" + std::to_string(line) + " - " + message;

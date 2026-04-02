@@ -10,13 +10,13 @@
 #include "Fusion/Misc/CoreMacros.h"
 #include "Fusion/Misc/CoreTypes.h"
 #include "Fusion/Templates/TypeTraits.h"
+#include "Fusion/Templates/Templates.h"
 #include "Fusion/Misc/Assert.h"
 
 #include "Fusion/Algorithm/Hash.h"
 
 #include "Fusion/Log/Log.h"
 
-#include "Fusion/Math/Math.h"
 #include "Fusion/Math/Math.h"
 #include "Fusion/Math/Vec2.h"
 #include "Fusion/Math/Vec4.h"

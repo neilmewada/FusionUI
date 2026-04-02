@@ -124,8 +124,8 @@ namespace Fusion
         // Operators
         // ----------------------------------------------------------------
 
-        constexpr bool operator==(const FRect& rhs) const { return min == rhs.min && max == rhs.max; }
-        constexpr bool operator!=(const FRect& rhs) const { return !(*this == rhs); }
+        bool operator==(const FRect& rhs) const { return min == rhs.min && max == rhs.max; }
+        bool operator!=(const FRect& rhs) const { return !(*this == rhs); }
 
         constexpr FRect operator+(const FRect& rhs) const
         {

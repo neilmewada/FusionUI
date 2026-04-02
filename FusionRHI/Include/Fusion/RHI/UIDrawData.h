@@ -4,7 +4,7 @@ namespace Fusion
 {
 	using FUIIndex = u32;
 
-	enum class FUIShaderType : u32
+	enum class EUIShaderType : u32
 	{
 		SolidColor = 0,
 		Texture,
@@ -14,9 +14,9 @@ namespace Fusion
 		SDFText,
 		Custom
 	};
-	FUSION_ENUM_CLASS(FUIShaderType);
+	FUSION_ENUM_CLASS(EUIShaderType);
 
-	enum class FUIDrawItemFlags : u32
+	enum class EUIDrawItemFlags : u32
 	{
 		None = 0,
 		TextureTileX = 1 << 0,
@@ -24,15 +24,15 @@ namespace Fusion
 		ImageFitCover = 1 << 2,
 		ImageFitContain = 1 << 3,
 	};
-	FUSION_ENUM_CLASS_FLAGS(FUIDrawItemFlags);
+	FUSION_ENUM_CLASS_FLAGS(EUIDrawItemFlags);
 
-	enum class FUIBlendMode : u32
+	enum class EUIBlendMode : u32
 	{
 		Normal = 0, // Standard alpha-over
 		Additive,
 		Multiply
 	};
-	FUSION_ENUM_CLASS(FUIBlendMode);
+	FUSION_ENUM_CLASS(EUIBlendMode);
 
 	struct FUIVertex
 	{
@@ -58,10 +58,10 @@ namespace Fusion
 
 	struct alignas(4) FUIDrawItem
 	{
-		FUIShaderType shaderType = FUIShaderType::SolidColor;
+		EUIShaderType shaderType = EUIShaderType::SolidColor;
 		u32 textureIndex = 0;
 		u32 samplerIndex = 0;
-		FUIDrawItemFlags drawItemFlags = FUIDrawItemFlags::None;
+		EUIDrawItemFlags drawItemFlags = EUIDrawItemFlags::None;
 
 		int clipRectIndex = -1;
 		int gradientStartIndex = 0;
@@ -78,6 +78,8 @@ namespace Fusion
 		u32 indexOffset = 0;
 		u32 indexCount = 0;
 		u32 vertexOffset = 0;
+
+		EUIBlendMode blendMode = EUIBlendMode::Normal;
 	};
 
 	struct FSplitRange

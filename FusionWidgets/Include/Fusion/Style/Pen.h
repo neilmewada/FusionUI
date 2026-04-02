@@ -2,7 +2,5 @@
 
 namespace Fusion
 {
-
-
     
 } // namespace Fusion

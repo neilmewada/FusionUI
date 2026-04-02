@@ -57,9 +57,10 @@ namespace Fusion
 
         virtual void PumpEvents() = 0;
 
-		virtual void SetEventSink(FInstanceHandle instance, IFPlatformEventSink* eventSink) = 0;
+		virtual void SetInstanceEventSink(FInstanceHandle instance, IFPlatformEventSink* eventSink) = 0;
 
-        virtual void SetRenderBackendEventSink(IFPlatformEventSink* genericEventSink) = 0;
+        virtual void RegisterEventSink(IFPlatformEventSink* eventSink) = 0;
+        virtual void DeregisterEventSink(IFPlatformEventSink* eventSink) = 0;
 
 		// - Window Management -
 
