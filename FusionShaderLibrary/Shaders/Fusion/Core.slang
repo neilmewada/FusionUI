@@ -91,6 +91,7 @@ StructuredBuffer<FUIDrawItem> _DrawItems;
 // ---------------------------------------------------------
 // - Utility Functions -
 
+
 float SDFRoundedRect(float2 p, float2 halfSize, float4 radii)
 {
     float r = p.x > 0.0

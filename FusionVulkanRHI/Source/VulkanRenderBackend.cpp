@@ -235,7 +235,10 @@ namespace Fusion::Vulkan
 	{
 		for (int i = 0; i < m_SetLayouts.Size(); i++)
 		{
-			vkDestroyDescriptorSetLayout(m_Device, m_SetLayouts[i], VULKAN_CPU_ALLOCATOR);
+			if (m_SetLayouts[i])
+			{
+				vkDestroyDescriptorSetLayout(m_Device, m_SetLayouts[i], VULKAN_CPU_ALLOCATOR);
+			}
 		}
 		m_SetLayouts.Clear();
 
@@ -856,8 +859,71 @@ namespace Fusion::Vulkan
 
 			VkPipelineLayoutCreateInfo pipelineLayoutCI{};
 			pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-			pipelineLayoutCI.setLayoutCount = 0;
 			pipelineLayoutCI.pushConstantRangeCount = 0;
+
+			// Set 0
+			{
+				VkDescriptorSetLayoutCreateInfo setLayoutCI{};
+				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+				setLayoutCI.bindingCount = 0;
+
+				VkDescriptorSetLayout setLayout = nullptr;
+				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
+				VULKAN_ASSERT(result, "Failed to create Set Layout.");
+				
+				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
+			}
+			
+			// Set 1
+			{
+				VkDescriptorSetLayoutCreateInfo setLayoutCI{};
+				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+				
+				FArray<VkDescriptorSetLayoutBinding> bindings{};
+				bindings.Add({
+					.binding = 0,
+					.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+					.descriptorCount = 1,
+					.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+					.pImmutableSamplers = nullptr
+				});
+
+				setLayoutCI.bindingCount = (uint32_t)bindings.Size();
+				setLayoutCI.pBindings = bindings.Data();
+				
+				VkDescriptorSetLayout setLayout = nullptr;
+				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
+				VULKAN_ASSERT(result, "Failed to create Set Layout.");
+
+				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
+			}
+
+			// Set 2
+			{
+				VkDescriptorSetLayoutCreateInfo setLayoutCI{};
+				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+
+				FArray<VkDescriptorSetLayoutBinding> bindings{};
+				bindings.Add({
+					.binding = 0,
+					.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+					.descriptorCount = 1,
+					.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+					.pImmutableSamplers = nullptr
+				});
+
+				setLayoutCI.bindingCount = (uint32_t)bindings.Size();
+				setLayoutCI.pBindings = bindings.Data();
+
+				VkDescriptorSetLayout setLayout = nullptr;
+				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
+				VULKAN_ASSERT(result, "Failed to create Set Layout.");
+
+				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
+			}
+
+			pipelineLayoutCI.setLayoutCount = m_MainGraphicsPipeline->m_SetLayouts.Size();
+			pipelineLayoutCI.pSetLayouts = m_MainGraphicsPipeline->m_SetLayouts.Data();
 
 			result = vkCreatePipelineLayout(m_Device, &pipelineLayoutCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_PipelineLayout);
 			VULKAN_ASSERT(result, "Failed to create Main Pipeline Layout.");
