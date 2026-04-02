@@ -55,10 +55,10 @@ namespace Fusion
 
 		virtual void ShutdownInstance(FInstanceHandle instance) = 0;
 
-		// Render loop
-		virtual void RenderTick() = 0;
-
 		// - Rendering -
+
+		// Render loop, only called when using FApplication.Run()
+		virtual void RenderTick() = 0;
 
 		// TODO: Need to come up with a better API
 		virtual void SubmitFrame(FInstanceHandle instance) {}

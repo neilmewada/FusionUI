@@ -34,7 +34,6 @@ namespace Fusion::Vulkan
 		return VK_FALSE;
 	}
 
-
 	static VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 	{
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
@@ -64,6 +63,85 @@ namespace Fusion::Vulkan
 		createInfo.pfnUserCallback = VulkanValidationCallback;
 	}
 
+	// -----------------------------------------------------------------
+	// Descriptor Set
+	// -----------------------------------------------------------------
+
+	FDescriptorSet::~FDescriptorSet()
+	{
+		if (!m_RenderBackend->IsDescriptorPoolAlive())
+			return;
+
+		VkDevice device = m_Device;
+		VkDescriptorPool pool = m_OwningPool;
+		VkDescriptorSet set = m_Set;
+
+		m_RenderBackend->DeferDestruction([device, pool, set]
+		{
+			vkFreeDescriptorSets(device, pool, 1, &set);
+		});
+	}
+
+	// -----------------------------------------------------------------
+	// Descriptor Pool
+	// -----------------------------------------------------------------
+
+	FDescriptorPool::~FDescriptorPool()
+	{
+		VkDevice device = m_Device;
+
+		for (int i = 0; i < m_Pools.Size(); i++)
+		{
+			VkDescriptorPool pool = m_Pools[i];
+			vkDestroyDescriptorPool(device, pool, VULKAN_CPU_ALLOCATOR);
+		}
+
+		m_Pools.Clear();
+	}
+
+	void FDescriptorPool::Grow()
+	{
+		FArray<VkDescriptorPoolSize, 10> poolSizes = {
+			{.type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = 32 },
+			{.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = 16 },
+			{.type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 4 },
+			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 32 },
+			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, .descriptorCount = 2 },
+			{.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = 2 },
+			{.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 32 },
+			{.type = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, .descriptorCount = 2 },
+		};
+
+		VkDescriptorPoolCreateInfo poolCI{};
+		poolCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolCI.maxSets = 128;
+		poolCI.poolSizeCount = poolSizes.Size();
+		poolCI.pPoolSizes = poolSizes.Data();
+		poolCI.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+
+		VkDescriptorPool pool = VK_NULL_HANDLE;
+
+		auto result = vkCreateDescriptorPool(m_Device, &poolCI, VULKAN_CPU_ALLOCATOR, &pool);
+		VULKAN_ASSERT(result, "Failed to create VkDescriptorPool");
+
+		m_Pools.Add(pool);
+	}
+
+	FDescriptorSet* FDescriptorPool::Allocate(VkDescriptorSetLayout setLayout)
+	{
+		VkDescriptorSetAllocateInfo allocateInfo{};
+		allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocateInfo.descriptorPool = m_Pools.Last();
+		allocateInfo.descriptorSetCount = 1;
+		allocateInfo.pSetLayouts = &setLayout;
+
+		VkDescriptorSet set = VK_NULL_HANDLE;
+
+		auto result = vkAllocateDescriptorSets(m_Device, &allocateInfo, &set);
+		VULKAN_ASSERT(result, "Failed to allocate VkDescriptorSet");
+
+		return new FDescriptorSet(m_RenderBackend, m_Device, allocateInfo.descriptorPool);
+	}
 
 	// -----------------------------------------------------------------
 	// Texture
@@ -155,6 +233,12 @@ namespace Fusion::Vulkan
 
 	FGraphicsPipeline::~FGraphicsPipeline()
 	{
+		for (int i = 0; i < m_SetLayouts.Size(); i++)
+		{
+			vkDestroyDescriptorSetLayout(m_Device, m_SetLayouts[i], VULKAN_CPU_ALLOCATOR);
+		}
+		m_SetLayouts.Clear();
+
 		vkDestroyPipeline(m_Device, m_Pipeline, VULKAN_CPU_ALLOCATOR);
 		vkDestroyPipelineLayout(m_Device, m_PipelineLayout, VULKAN_CPU_ALLOCATOR);
 
@@ -827,11 +911,23 @@ namespace Fusion::Vulkan
 			result = vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &graphicsPipelineCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_Pipeline);
 			VULKAN_ASSERT(result, "Failed to create Main Graphics Pipeline.");
 		}
+
+		// - Descriptors -
+
+		m_Pool = new FDescriptorPool(this, m_Device);
 	}
 
 	void FVulkanRenderBackend::ShutdownVulkan()
 	{
 		vkDeviceWaitIdle(m_Device);
+
+		for (int i = 0; i < m_DeferredDestruction.Size(); i++)
+		{
+			m_DeferredDestruction[i].m_Destruction.ExecuteIfBound();
+		}
+		m_DeferredDestruction.Clear();
+
+		delete m_Pool; m_Pool = nullptr;
 
 		m_SwapChainsByWindowHandle.Clear();
 

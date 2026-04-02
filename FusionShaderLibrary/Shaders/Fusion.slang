@@ -1,11 +1,4 @@
-
-struct VSInput
-{
-    float2 position : POSITION;
-    float2 uv : TEXCOORD0;
-    float4 color : COLOR0;
-    uint   drawItemIndex : TEXCOORD1;
-};
+import Fusion.Core;
 
 struct VSOutput
 {

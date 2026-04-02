@@ -7,6 +7,45 @@ namespace Fusion::Vulkan
 {
     class FVulkanRenderBackend;
 
+    // - Descriptor Set -
+
+    struct FUSIONVULKANRHI_API FDescriptorSet
+    {
+        FDescriptorSet(FVulkanRenderBackend* renderBackend, VkDevice device, VkDescriptorPool pool)
+	        : m_RenderBackend(renderBackend), m_Device(device), m_OwningPool(pool)
+		{}
+
+        ~FDescriptorSet();
+
+        FVulkanRenderBackend* m_RenderBackend = nullptr;
+        VkDevice m_Device = VK_NULL_HANDLE;
+
+        VkDescriptorPool m_OwningPool = VK_NULL_HANDLE;
+        VkDescriptorSet m_Set = VK_NULL_HANDLE;
+    };
+
+    // - Descriptor Pool -
+
+    struct FUSIONVULKANRHI_API FDescriptorPool
+    {
+        FDescriptorPool(FVulkanRenderBackend* renderBackend, VkDevice device) 
+    		: m_RenderBackend(renderBackend), m_Device(device)
+        {
+            Grow();
+        }
+
+        ~FDescriptorPool();
+
+        void Grow();
+
+        FDescriptorSet* Allocate(VkDescriptorSetLayout setLayout);
+
+        FVulkanRenderBackend* m_RenderBackend = nullptr;
+        VkDevice m_Device = VK_NULL_HANDLE;
+        
+        FArray<VkDescriptorPool> m_Pools{};
+    };
+
     // - Image -
 
     struct FUSIONVULKANRHI_API FTexture : IntrusiveBase
@@ -45,6 +84,7 @@ namespace Fusion::Vulkan
         VkShaderModule m_VertexModule = VK_NULL_HANDLE;
         VkShaderModule m_FragmentModule = VK_NULL_HANDLE;
 
+        FArray<VkDescriptorSetLayout> m_SetLayouts{};
         VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
         
         VkPipeline m_Pipeline = VK_NULL_HANDLE;
@@ -109,6 +149,11 @@ namespace Fusion::Vulkan
             return m_VulkanInstance;
         }
 
+        bool IsDescriptorPoolAlive() const
+        {
+            return m_Pool != nullptr;
+        }
+
         FGraphicsBackendType GetGraphicsBackendType() override
         {
             return FGraphicsBackendType::Vulkan;
@@ -171,7 +216,7 @@ namespace Fusion::Vulkan
         HashMap<FInstanceHandle, IntrusivePtr<FRenderInstance>> instances;
 
         // - Vulkan Data -
-
+		
 		VkInstance m_VulkanInstance = VK_NULL_HANDLE;
         VkDebugUtilsMessengerEXT m_VkMessenger = VK_NULL_HANDLE;
 
@@ -220,6 +265,10 @@ namespace Fusion::Vulkan
         // - Pipeline -
 
         IntrusivePtr<FGraphicsPipeline> m_MainGraphicsPipeline;
+
+        // - Descriptors -
+
+        FDescriptorPool* m_Pool = nullptr;
 
         // - Frame Loop -
 
