@@ -12,7 +12,7 @@ enum class FUIShaderType : uint
     Custom
 };
 
-enum FUIDrawItemFlags : uint
+enum class FUIDrawItemFlags : uint
 {
     None = 0,
     TextureTileX = 1 << 0,
@@ -87,6 +87,11 @@ cbuffer _LayerData
 [[vk::binding(0, 3)]]
 StructuredBuffer<FUIDrawItem> _DrawItems;
 
+[[vk::binding(1, 3)]]
+StructuredBuffer<FUIClipRect> _ClipRects;
+
+[[vk::binding(2, 3)]]
+StructuredBuffer<FUIGradientStop> _GradientStops;
 
 // ---------------------------------------------------------
 // - Utility Functions -
