@@ -131,6 +131,38 @@ namespace Fusion
                 Grow(newCapacity);
         }
 
+        void ShrinkToFit()
+        {
+            if (m_Size == m_Capacity || IsInline())
+                return;
+
+            if (m_Size <= InlineCapacity)
+            {
+                // Move back into inline buffer
+                T* heap = m_Data;
+                m_Data = InlineData();
+                for (size_t i = 0; i < m_Size; ++i)
+                {
+                    new (m_Data + i) T(std::move(heap[i]));
+                    heap[i].~T();
+                }
+                Deallocate(heap);
+                m_Capacity = InlineCapacity;
+            }
+            else
+            {
+                T* newData = Allocate(m_Size);
+                for (size_t i = 0; i < m_Size; ++i)
+                {
+                    new (newData + i) T(std::move(m_Data[i]));
+                    m_Data[i].~T();
+                }
+                Deallocate(m_Data);
+                m_Data = newData;
+                m_Capacity = m_Size;
+            }
+        }
+
         void Resize(size_t newSize)
         {
             if (newSize > m_Size)

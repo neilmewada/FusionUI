@@ -3,9 +3,10 @@
 // Copyright (c) 2026 Neil Mewada
 // SPDX-License-Identifier: MIT
 
-#include "PAL/VulkanPlatform.h"
+#define VMA_IMPLEMENTATION
+#include <vma/vk_mem_alloc.h>
 
-#define VULKAN_CHECK(vkResult, message) FUSION_ASSERT(vkResult == VK_SUCCESS, message)
+#include "PAL/VulkanPlatform.h"
 
 namespace Fusion::Vulkan
 {
@@ -64,10 +65,6 @@ namespace Fusion::Vulkan
 	}
 
 	// -----------------------------------------------------------------
-	// Descriptor Set
-	// -----------------------------------------------------------------
-
-	// -----------------------------------------------------------------
 	// Descriptor Pool
 	// -----------------------------------------------------------------
 
@@ -88,7 +85,7 @@ namespace Fusion::Vulkan
 	{
 		FArray<VkDescriptorPoolSize, 10> poolSizes = {
 			{.type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = 32 },
-			{.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = 16 },
+			{.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = 32 },
 			{.type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 4 },
 			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 32 },
 			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, .descriptorCount = 2 },
@@ -274,6 +271,7 @@ namespace Fusion::Vulkan
 	FRenderCapabilities FVulkanRenderBackend::GetRenderCapabilities()
 	{
 		return {
+			.MinConstantBufferOffsetAlignment = m_PhysicalDeviceProperties.limits.minUniformBufferOffsetAlignment,
 			.MinStructuredBufferOffsetAlignment = m_PhysicalDeviceProperties.limits.minStorageBufferOffsetAlignment
 		};
 	}
@@ -292,7 +290,7 @@ namespace Fusion::Vulkan
 
 		IntrusivePtr<FRenderInstance> renderInstance = new FRenderInstance();
 		
-
+		
 
 		instances.Add(instance, renderInstance);
 
@@ -378,6 +376,8 @@ namespace Fusion::Vulkan
 		if (m_SwapChainsByWindowHandle.IsEmpty())
 			return;
 
+		ZoneScoped;
+
 		VkResult result = VK_SUCCESS;
 
 		constexpr uint64_t kSwapChainTimeOut = UINT64_MAX;
@@ -389,12 +389,25 @@ namespace Fusion::Vulkan
 		FArray<VkSwapchainKHR> presentSwapChains{};
 		FArray<uint32_t> presentImageIndices{};
 
+		// - Wait for GPU
+
 		result = vkWaitForFences(m_Device, 1, &m_RenderFinishedFences[m_FrameSlot], VK_TRUE, kFenceTimeOut);
 		VULKAN_CHECK(result, "Failed to wait on Render Finished Fence.");
 
 		m_PoolsPerFrame[m_FrameSlot]->Reset();
 
 		vkResetFences(m_Device, 1, &m_RenderFinishedFences[m_FrameSlot]);
+
+		m_OffsetData.Clear();
+
+		for (auto [handle, renderTargetData] : m_RenderTargetsByHandle)
+		{
+			if (!renderTargetData->m_Snapshot)
+				continue;
+
+			// TODO: Handle splits within a snapshot
+
+		}
 
 		for (auto [windowHandle, swapChain] : m_SwapChainsByWindowHandle)
 		{
@@ -435,7 +448,7 @@ namespace Fusion::Vulkan
 			for (auto [windowHandle, swapChain] : m_SwapChainsByWindowHandle)
 			{
 				VkClearValue colorClear;
-				colorClear.color = { { 0.0f, 0.0f, 0.0f, 0.0f } }; // Opaque black
+				colorClear.color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
 
 				VkRenderPassBeginInfo renderPassInfo{};
 				renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -489,7 +502,7 @@ namespace Fusion::Vulkan
 		FUSION_ASSERT(result == VK_SUCCESS || result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR,
 			"Failed to Present SwapChains.");
 
-		m_FrameSlot = (m_FrameSlot + 1) % ImageCount;
+		m_FrameSlot = (m_FrameSlot + 1) % kImageCount;
 	}
 
 	// ------------------------------------------------------------------------------------------------------------
@@ -710,6 +723,17 @@ namespace Fusion::Vulkan
 			m_PresentQueue = m_GraphicsQueue;
 		}
 
+		
+		// - VMA Allocator -
+
+		VmaAllocatorCreateInfo vmaAllocatorCI{};
+		vmaAllocatorCI.instance = m_VulkanInstance;
+		vmaAllocatorCI.device = m_Device;
+		vmaAllocatorCI.physicalDevice = m_PhysicalDevice;
+		vmaAllocatorCI.vulkanApiVersion = appInfo.apiVersion;
+
+		result = vmaCreateAllocator(&vmaAllocatorCI, &m_Allocator);
+		VULKAN_CHECK(result, "Failed to create VmaAllocator");
 
 		// - Command Pool -
 
@@ -724,7 +748,7 @@ namespace Fusion::Vulkan
 
 		// - Command Buffer -
 
-		m_CommandBuffers.Resize(ImageCount);
+		m_CommandBuffers.Resize(kImageCount);
 
 		VkCommandBufferAllocateInfo commandBufferInfo{};
 		commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -741,9 +765,9 @@ namespace Fusion::Vulkan
 		VkSemaphoreCreateInfo semaphoreCI{};
 		semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 		
-		m_RenderFinishedSemaphores.Resize(ImageCount);
+		m_RenderFinishedSemaphores.Resize(kImageCount);
 
-		for (int i = 0; i < ImageCount; i++)
+		for (int i = 0; i < kImageCount; i++)
 		{
 			VkSemaphore semaphore = VK_NULL_HANDLE;
 
@@ -760,9 +784,9 @@ namespace Fusion::Vulkan
 		fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		m_RenderFinishedFences.Resize(ImageCount);
+		m_RenderFinishedFences.Resize(kImageCount);
 
-		for (int i = 0; i < ImageCount; i++)
+		for (int i = 0; i < kImageCount; i++)
 		{
 			VkFence fence = VK_NULL_HANDLE;
 
@@ -942,7 +966,7 @@ namespace Fusion::Vulkan
 				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 				
 				FArray<VkDescriptorSetLayoutBinding> bindings{};
-				bindings.Add({
+				bindings.Add({ // _ViewData
 					.binding = 0,
 					.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 					.descriptorCount = 1,
@@ -966,7 +990,7 @@ namespace Fusion::Vulkan
 				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
 				FArray<VkDescriptorSetLayoutBinding> bindings{};
-				bindings.Add({
+				bindings.Add({ // _LayerTransform
 					.binding = 0,
 					.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 					.descriptorCount = 1,
@@ -991,7 +1015,7 @@ namespace Fusion::Vulkan
 
 				FArray<VkDescriptorSetLayoutBinding> bindings{};
 
-				bindings.Add({ // Binding 0
+				bindings.Add({ // _DrawItems
 					.binding = 0,
 					.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 					.descriptorCount = 1,
@@ -999,7 +1023,7 @@ namespace Fusion::Vulkan
 					.pImmutableSamplers = nullptr
 				});
 
-				bindings.Add({ // Binding 1
+				bindings.Add({ // _ClipRects
 					.binding = 1,
 					.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 					.descriptorCount = 1,
@@ -1007,7 +1031,7 @@ namespace Fusion::Vulkan
 					.pImmutableSamplers = nullptr
 				});
 
-				bindings.Add({ // Binding 2
+				bindings.Add({ // _GradientStops
 					.binding = 2,
 					.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 					.descriptorCount = 1,
@@ -1083,9 +1107,18 @@ namespace Fusion::Vulkan
 
 		// - Descriptors -
 
-		for (int i = 0; i < ImageCount; i++)
+		for (int i = 0; i < kImageCount; i++)
 		{
 			m_PoolsPerFrame.Add(new FDescriptorPool(this, m_Device));
+		}
+
+		// - UI Render Buffer -
+
+		m_UIRenderBuffers.Resize(kImageCount);
+
+		for (int i = 0; i < kImageCount; i++)
+		{
+			m_UIRenderBuffers[i] = new FUIDrawBuffer(this, kBufferInitialSize, kBufferGrowSize);
 		}
 	}
 
@@ -1093,13 +1126,19 @@ namespace Fusion::Vulkan
 	{
 		vkDeviceWaitIdle(m_Device);
 
-		for (int i = 0; i < m_DeferredDestruction.Size(); i++)
+		for (SizeT i = 0; i < m_UIRenderBuffers.Size(); i++)
+		{
+			m_UIRenderBuffers[i]->DeferredDestroy();
+		}
+		m_UIRenderBuffers.Clear();
+
+		for (SizeT i = 0; i < m_DeferredDestruction.Size(); i++)
 		{
 			m_DeferredDestruction[i].m_Destruction.ExecuteIfBound();
 		}
 		m_DeferredDestruction.Clear();
 
-		for (int i = 0; i < ImageCount; i++)
+		for (SizeT i = 0; i < kImageCount; i++)
 		{
 			delete m_PoolsPerFrame[i];
 		}
@@ -1135,6 +1174,12 @@ namespace Fusion::Vulkan
 		{
 			vkDestroyCommandPool(m_Device, m_CommandPool, VULKAN_CPU_ALLOCATOR);
 			m_CommandPool = VK_NULL_HANDLE;
+		}
+
+		if (m_Allocator)
+		{
+			vmaDestroyAllocator(m_Allocator);
+			m_Allocator = VK_NULL_HANDLE;
 		}
 
 		for (int i = 0; i < m_DeferredDestruction.Size(); i++)
@@ -1179,9 +1224,9 @@ namespace Fusion::Vulkan
 
 			swapChain->m_Surface = FVulkanPlatform::CreateSurface(this, window);
 
-			swapChain->m_ImageAcquiredSemaphores.Resize(ImageCount);
+			swapChain->m_ImageAcquiredSemaphores.Resize(kImageCount);
 
-			for (int i = 0; i < ImageCount; i++)
+			for (int i = 0; i < kImageCount; i++)
 			{
 				VkSemaphoreCreateInfo semaphoreCI{
 					.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,

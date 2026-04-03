@@ -24,7 +24,8 @@ namespace Fusion
 
 	struct FRenderCapabilities
 	{
-		SizeT MinStructuredBufferOffsetAlignment = 16;
+		SizeT MinConstantBufferOffsetAlignment = 0x40;
+		SizeT MinStructuredBufferOffsetAlignment = 0x10;
 	};
     
     class FUSIONRHI_API IFRenderBackend : public IFPlatformEventSink

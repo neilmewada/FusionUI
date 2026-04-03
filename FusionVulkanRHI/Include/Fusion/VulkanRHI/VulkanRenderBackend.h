@@ -132,7 +132,12 @@ namespace Fusion::Vulkan
     {
     public:
 
-        static constexpr u32 ImageCount = 2;
+        static constexpr u32 kImageCount = 2;
+        static constexpr VkDeviceSize kVertexBufferOffsetAlignment = 4;
+        static constexpr VkDeviceSize kIndexBufferOffsetAlignment = 4;
+
+        static constexpr VkDeviceSize kBufferInitialSize = 16_MB;
+        static constexpr VkDeviceSize kBufferGrowSize = 16_MB;
 
         FVulkanRenderBackend(IFPlatformBackend* platformBackend) : IFRenderBackend(platformBackend)
         {
@@ -142,6 +147,26 @@ namespace Fusion::Vulkan
         VkInstance GetVkInstance()
         {
             return m_VulkanInstance;
+        }
+
+        VkDevice GetVkDevice()
+        {
+            return m_Device;
+        }
+
+        VmaAllocator GetVmaAllocator()
+        {
+            return m_Allocator;
+        }
+
+        bool IsUnifiedMemory() const
+        {
+            return m_IsUnifiedMemory;
+        }
+
+        bool IsResizableBAR() const
+        {
+            return m_IsResizableBAR;
         }
 
         EGraphicsBackendType GetGraphicsBackendType() override
@@ -168,7 +193,7 @@ namespace Fusion::Vulkan
         void DeferDestruction(TFunc&& functor)
         {
             m_DeferredDestruction.Add({
-                .m_FrameCounter = ImageCount,
+                .m_FrameCounter = kImageCount,
                 .m_Destruction = functor
             });
         }
@@ -248,6 +273,10 @@ namespace Fusion::Vulkan
         VkQueue m_GraphicsQueue = VK_NULL_HANDLE;
         VkQueue m_PresentQueue = VK_NULL_HANDLE;
 
+        // - VMA Allocator -
+
+        VmaAllocator m_Allocator = VK_NULL_HANDLE;
+
         // - Command Pools & Buffers -
 
         VkCommandPool m_CommandPool = VK_NULL_HANDLE;
@@ -273,13 +302,31 @@ namespace Fusion::Vulkan
 
         u32 m_FrameSlot = 0;
         
-        FArray<FDescriptorPool*, ImageCount> m_PoolsPerFrame;
+        FArray<FDescriptorPool*, kImageCount> m_PoolsPerFrame;
+        FArray<IntrusivePtr<FUIDrawBuffer>, kImageCount> m_UIRenderBuffers;
 
-        FArray<VkCommandBuffer, ImageCount> m_CommandBuffers;
-        FArray<VkSemaphore, ImageCount> m_RenderFinishedSemaphores;
-        FArray<VkFence, ImageCount> m_RenderFinishedFences;
+        FArray<VkCommandBuffer, kImageCount> m_CommandBuffers;
+        FArray<VkSemaphore, kImageCount> m_RenderFinishedSemaphores;
+        FArray<VkFence, kImageCount> m_RenderFinishedFences;
 
         FArray<FDeferredDestruction> m_DeferredDestruction;
+
+        // - Transient Resources -
+
+        struct FDrawDataBufferViews
+        {
+            FRenderTargetHandle RenderTarget;
+            
+            FBufferView VertexBuffer;
+            FBufferView IndexBuffer;
+            FBufferView ViewData;
+            FBufferView LayerData;
+            FBufferView DrawItems;
+            FBufferView ClipRects;
+            FBufferView GradientStops;
+        };
+
+        FArray<FDrawDataBufferViews> m_OffsetData;
     };
 
 } // namespace Fusion

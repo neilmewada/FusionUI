@@ -1049,3 +1049,273 @@ TEST(FColorTest, PredefinedColors)
 }
 
 #pragma endregion FColor
+
+#pragma region FStableDynamicArray
+
+TEST(FStableDynamicArrayTest, DefaultConstructor)
+{
+    FStableDynamicArray<int> arr;
+    EXPECT_TRUE(arr.IsEmpty());
+    EXPECT_EQ(arr.GetCount(), 0);
+    EXPECT_EQ(arr.GetCapacity(), 0);
+    EXPECT_EQ(arr.GetData(), nullptr);
+}
+
+TEST(FStableDynamicArrayTest, InsertAndCount)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(1);
+    arr.Insert(2);
+    arr.Insert(3);
+    EXPECT_EQ(arr.GetCount(), 3);
+    EXPECT_FALSE(arr.IsEmpty());
+    EXPECT_EQ(arr[0], 1);
+    EXPECT_EQ(arr[1], 2);
+    EXPECT_EQ(arr[2], 3);
+}
+
+TEST(FStableDynamicArrayTest, GrowthIncrement)
+{
+    FStableDynamicArray<int, 4> arr;
+    arr.Insert(1);
+    arr.Insert(2);
+    arr.Insert(3);
+    arr.Insert(4);
+    EXPECT_EQ(arr.GetCapacity(), 4);
+    // Inserting beyond capacity triggers Grow()
+    arr.Insert(5);
+    EXPECT_GE(arr.GetCapacity(), 5);
+    EXPECT_EQ(arr.GetCount(), 5);
+    EXPECT_EQ(arr[4], 5);
+}
+
+TEST(FStableDynamicArrayTest, Reserve)
+{
+    FStableDynamicArray<int> arr;
+    arr.Reserve(64);
+    EXPECT_GE(arr.GetCapacity(), 64);
+    EXPECT_EQ(arr.GetCount(), 0);
+
+    // Reserve smaller than current capacity is a no-op
+    arr.Reserve(10);
+    EXPECT_GE(arr.GetCapacity(), 64);
+}
+
+TEST(FStableDynamicArrayTest, ReservePreservesData)
+{
+    FStableDynamicArray<int, 4> arr;
+    arr.Insert(10);
+    arr.Insert(20);
+    arr.Reserve(64);
+    EXPECT_EQ(arr.GetCount(), 2);
+    EXPECT_EQ(arr[0], 10);
+    EXPECT_EQ(arr[1], 20);
+}
+
+TEST(FStableDynamicArrayTest, FirstAndLast)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(10);
+    arr.Insert(20);
+    arr.Insert(30);
+    EXPECT_EQ(arr.First(), 10);
+    EXPECT_EQ(arr.Last(), 30);
+}
+
+TEST(FStableDynamicArrayTest, RemoveAll)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(1);
+    arr.Insert(2);
+    arr.RemoveAll();
+    EXPECT_EQ(arr.GetCount(), 0);
+    EXPECT_TRUE(arr.IsEmpty());
+    // Capacity is retained
+    EXPECT_GT(arr.GetCapacity(), 0);
+}
+
+TEST(FStableDynamicArrayTest, RemoveAt)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(1);
+    arr.Insert(2);
+    arr.Insert(3);
+    arr.RemoveAt(1);
+    EXPECT_EQ(arr.GetCount(), 2);
+    EXPECT_EQ(arr[0], 1);
+    EXPECT_EQ(arr[1], 3);
+}
+
+TEST(FStableDynamicArrayTest, RemoveAtFirst)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(10);
+    arr.Insert(20);
+    arr.Insert(30);
+    arr.RemoveAt(0);
+    EXPECT_EQ(arr.GetCount(), 2);
+    EXPECT_EQ(arr[0], 20);
+    EXPECT_EQ(arr[1], 30);
+}
+
+TEST(FStableDynamicArrayTest, RemoveAtOutOfBounds)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(1);
+    arr.RemoveAt(5); // should not crash, no-op
+    EXPECT_EQ(arr.GetCount(), 1);
+}
+
+TEST(FStableDynamicArrayTest, RemoveLast)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(1);
+    arr.Insert(2);
+    arr.Insert(3);
+    arr.RemoveLast();
+    EXPECT_EQ(arr.GetCount(), 2);
+    EXPECT_EQ(arr.Last(), 2);
+}
+
+TEST(FStableDynamicArrayTest, InsertRange)
+{
+    FStableDynamicArray<int> arr;
+    arr.InsertRange(3, 42);
+    EXPECT_EQ(arr.GetCount(), 3);
+    EXPECT_EQ(arr[0], 42);
+    EXPECT_EQ(arr[1], 42);
+    EXPECT_EQ(arr[2], 42);
+}
+
+TEST(FStableDynamicArrayTest, InsertMultipleValues)
+{
+    FStableDynamicArray<int> arr;
+    int values[] = { 5, 10, 15 };
+    arr.Insert(values, 3);
+    EXPECT_EQ(arr.GetCount(), 3);
+    EXPECT_EQ(arr[0], 5);
+    EXPECT_EQ(arr[1], 10);
+    EXPECT_EQ(arr[2], 15);
+}
+
+TEST(FStableDynamicArrayTest, GetByteSize)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(1);
+    arr.Insert(2);
+    EXPECT_EQ(arr.GetByteSize(), 2 * sizeof(int));
+}
+
+TEST(FStableDynamicArrayTest, CopyConstructor)
+{
+    FStableDynamicArray<int> a;
+    a.Insert(1);
+    a.Insert(2);
+    a.Insert(3);
+
+    FStableDynamicArray<int> b(a);
+    EXPECT_EQ(b.GetCount(), 3);
+    EXPECT_EQ(b[0], 1);
+    EXPECT_EQ(b[1], 2);
+    EXPECT_EQ(b[2], 3);
+
+    // Ensure deep copy — modifying b doesn't affect a
+    b.RemoveAt(0);
+    EXPECT_EQ(a.GetCount(), 3);
+}
+
+TEST(FStableDynamicArrayTest, CopyAssignment)
+{
+    FStableDynamicArray<int> a;
+    a.Insert(10);
+    a.Insert(20);
+
+    FStableDynamicArray<int> b;
+    b.Insert(99);
+    b = a;
+
+    EXPECT_EQ(b.GetCount(), 2);
+    EXPECT_EQ(b[0], 10);
+    EXPECT_EQ(b[1], 20);
+    EXPECT_EQ(a.GetCount(), 2); // a unchanged
+}
+
+TEST(FStableDynamicArrayTest, MoveConstructor)
+{
+    FStableDynamicArray<int> a;
+    a.Insert(1);
+    a.Insert(2);
+
+    FStableDynamicArray<int> b(std::move(a));
+    EXPECT_EQ(b.GetCount(), 2);
+    EXPECT_EQ(b[0], 1);
+    EXPECT_TRUE(a.IsEmpty());
+    EXPECT_EQ(a.GetData(), nullptr);
+}
+
+TEST(FStableDynamicArrayTest, MoveAssignment)
+{
+    FStableDynamicArray<int> a;
+    a.Insert(1);
+    a.Insert(2);
+
+    FStableDynamicArray<int> b;
+    b = std::move(a);
+    EXPECT_EQ(b.GetCount(), 2);
+    EXPECT_TRUE(a.IsEmpty());
+    EXPECT_EQ(a.GetData(), nullptr);
+}
+
+TEST(FStableDynamicArrayTest, SelfCopyAssignment)
+{
+    FStableDynamicArray<int> a;
+    a.Insert(1);
+    a = a;
+    EXPECT_EQ(a.GetCount(), 1);
+    EXPECT_EQ(a[0], 1);
+}
+
+TEST(FStableDynamicArrayTest, SelfMoveAssignment)
+{
+    FStableDynamicArray<int> a;
+    a.Insert(1);
+    a = std::move(a);
+    EXPECT_EQ(a.GetCount(), 1);
+}
+
+TEST(FStableDynamicArrayTest, RangeBasedFor)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(10);
+    arr.Insert(20);
+    arr.Insert(30);
+
+    int sum = 0;
+    for (int v : arr)
+        sum += v;
+    EXPECT_EQ(sum, 60);
+}
+
+TEST(FStableDynamicArrayTest, Free)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(1);
+    arr.Insert(2);
+    arr.Free();
+    EXPECT_TRUE(arr.IsEmpty());
+    EXPECT_EQ(arr.GetCount(), 0);
+    EXPECT_EQ(arr.GetCapacity(), 0);
+    EXPECT_EQ(arr.GetData(), nullptr);
+}
+
+TEST(FStableDynamicArrayTest, InsertAfterFree)
+{
+    FStableDynamicArray<int> arr;
+    arr.Insert(1);
+    arr.Free();
+    arr.Insert(2);
+    EXPECT_EQ(arr.GetCount(), 1);
+    EXPECT_EQ(arr[0], 2);
+}
+
+#pragma endregion FStableDynamicArray
