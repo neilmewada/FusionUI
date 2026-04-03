@@ -11,9 +11,9 @@ namespace Fusion
 	{
 		FRenderTargetHandle Handle;
 
-		SizeT layerIndex = 0;
-		SizeT drawCmdStartIndex = 0;
-		SizeT drawCmdCount = 0;
+		SizeT LayerIndex = 0;
+		SizeT DrawCmdStartIndex = 0;
+		SizeT DrawCmdCount = 0;
 	};
 
     class FUSIONRHI_API FRenderSnapshot : public FIntrusiveBase
@@ -24,7 +24,6 @@ namespace Fusion
 
 		using FSplitRangeArray = FStableDynamicArray<FSplitRange, 64>;
 		using FRenderPassArray = FStableDynamicArray<FRenderPass, 32>;
-		using FMatrixArray	   = FStableDynamicArray<FMat4, 64>;
 
 		FUIVertexArray vertexArray;
 		FSplitRangeArray vertexSplits;
@@ -44,9 +43,12 @@ namespace Fusion
 		FUIGradientStopArray gradientStopArray;
 		FSplitRangeArray gradientStopSplits;
 
+		//! @brief This array defines the actual order of draw commands.
 		FRenderPassArray renderPassArray;
 
-		FMatrixArray matricesPerLayer;
+		FUIViewData viewData;
+
+		FUIMatrixArray transformMatricesPerLayer;
 
     };
     

@@ -66,6 +66,7 @@
 	inline constexpr u32  operator| (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); }
 
 #define FUSION_BIT(x) (1 << (x))
+#define FUSION_COUNT(arr) ::Fusion::FCountOf(&arr)
 
 namespace Fusion
 {
@@ -81,4 +82,11 @@ namespace Fusion
 	{
 		return ((((__underlying_type(Enum))Flags) & (__underlying_type(Enum))Contains) != 0) || ((__underlying_type(Enum))Contains == 0);
 	}
+
+	template<typename T, size_t TSize>
+	constexpr size_t FCountOf([[maybe_unused]] T (*arr)[TSize])
+	{
+		return TSize;
+	}
+
 }

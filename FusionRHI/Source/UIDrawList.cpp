@@ -37,7 +37,7 @@ namespace Fusion
             .gradientStartIndex = 0,
             .gradientStopCount = 0,
             .userFlags = 0
-            });
+        });
     }
 
     void FUIDrawList::Finalize()
@@ -55,13 +55,13 @@ namespace Fusion
 
     FUIDrawCmd& FUIDrawList::NewDrawCmd()
     {
-        if (!drawCmdArray.IsEmpty() && drawCmdArray.Last().indexCount == 0)
+        if (!drawCmdArray.IsEmpty() && drawCmdArray.Last().IndexCount == 0)
             return drawCmdArray.Last(); // already a clean boundary, reuse it
 
         FUIDrawCmd cmd{};
-        cmd.indexOffset = (u32)indexArray.GetCount();
-        cmd.vertexOffset = 0;
-        cmd.blendMode = drawCmdArray.IsEmpty() ? EUIBlendMode::Normal : drawCmdArray.Last().blendMode;
+        cmd.IndexOffset = (u32)indexArray.GetCount();
+        cmd.VertexOffset = 0;
+        cmd.BlendMode = drawCmdArray.IsEmpty() ? EUIBlendMode::Normal : drawCmdArray.Last().BlendMode;
         drawCmdArray.Insert(cmd);
 
         return drawCmdArray.Last();
@@ -72,23 +72,23 @@ namespace Fusion
         if (!drawCmdArray.IsEmpty())
         {
             auto& last = drawCmdArray.Last();
-            if (last.blendMode == blendMode)
+            if (last.BlendMode == blendMode)
             {
                 return last;
             }
 
-            if (last.indexCount == 0)
+            if (last.IndexCount == 0)
             {
                 // Last command had nothing written — reuse the slot with the new state
-                last.blendMode = blendMode;
+                last.BlendMode = blendMode;
                 return last;
             }
         }
 
         FUIDrawCmd cmd{};
-        cmd.indexOffset = (u32)indexArray.GetCount();
-        cmd.vertexOffset = 0;
-        cmd.blendMode = blendMode;
+        cmd.IndexOffset = (u32)indexArray.GetCount();
+        cmd.VertexOffset = 0;
+        cmd.BlendMode = blendMode;
         drawCmdArray.Insert(cmd);
 
         return drawCmdArray.Last();
@@ -295,7 +295,7 @@ namespace Fusion
             }
 
             vertexCurrentIdx += vertexCount;
-            drawCmd.indexCount += indexCount;
+            drawCmd.IndexCount += indexCount;
         }
         else
         {
@@ -330,7 +330,7 @@ namespace Fusion
                 vertexCurrentIdx += 4;
             }
 
-            drawCmd.indexCount += indexCount;
+            drawCmd.IndexCount += indexCount;
         }
     }
 
@@ -422,7 +422,7 @@ namespace Fusion
             }
 
             vertexCurrentIdx += vertexCount;
-            drawCmd.indexCount += indexCount;
+            drawCmd.IndexCount += indexCount;
         }
         else
         {
@@ -451,7 +451,7 @@ namespace Fusion
             }
 
             vertexCurrentIdx += vertexCount;
-            drawCmd.indexCount += indexCount;
+            drawCmd.IndexCount += indexCount;
         }
     }
 }

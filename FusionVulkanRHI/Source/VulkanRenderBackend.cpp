@@ -389,25 +389,272 @@ namespace Fusion::Vulkan
 		FArray<VkSwapchainKHR> presentSwapChains{};
 		FArray<uint32_t> presentImageIndices{};
 
-		// - Wait for GPU
+		// - Wait for GPU -
 
 		result = vkWaitForFences(m_Device, 1, &m_RenderFinishedFences[m_FrameSlot], VK_TRUE, kFenceTimeOut);
 		VULKAN_CHECK(result, "Failed to wait on Render Finished Fence.");
 
-		m_PoolsPerFrame[m_FrameSlot]->Reset();
-
 		vkResetFences(m_Device, 1, &m_RenderFinishedFences[m_FrameSlot]);
 
-		m_OffsetData.Clear();
+		// - Reset Pool -
 
-		for (auto [handle, renderTargetData] : m_RenderTargetsByHandle)
+		m_PoolsPerFrame[m_FrameSlot]->Reset();
+		FDescriptorPool* pool = m_PoolsPerFrame[m_FrameSlot];
+
+		// - Prepare Buffer Offsets -
+
+		m_OffsetDataPerSnapshot.Clear();
+		VkDeviceSize currentOffset = 0;
+		VkDeviceSize alignment = FMath::Max(m_PhysicalDeviceProperties.limits.minUniformBufferOffsetAlignment, m_PhysicalDeviceProperties.limits.minStorageBufferOffsetAlignment);
+
+		for (auto [renderTargetHandle, renderTarget] : m_RenderTargetsByHandle)
 		{
-			if (!renderTargetData->m_Snapshot)
+			if (!renderTarget->m_Snapshot)
 				continue;
 
-			// TODO: Handle splits within a snapshot
+			auto snapshot = renderTarget->m_Snapshot;
 
+			if (currentOffset > 0)
+				currentOffset = FUIDrawBuffer::AlignUp(currentOffset, alignment);
+
+			// TODO: Handle splits within a snapshot
+			
+			FSnapshotDrawDataBufferViews views{};
+
+			views.RenderTarget = renderTargetHandle;
+
+			views.VertexBuffer.StartOffset = currentOffset;
+			views.VertexBuffer.ByteSize = snapshot->vertexArray.GetByteSize();
+			currentOffset += views.VertexBuffer.ByteSize;
+
+			views.IndexBuffer.StartOffset = currentOffset;
+			views.IndexBuffer.ByteSize = snapshot->indexArray.GetByteSize();
+			currentOffset += views.IndexBuffer.ByteSize;
+
+			currentOffset = FUIDrawBuffer::AlignUp(currentOffset, m_PhysicalDeviceProperties.limits.minStorageBufferOffsetAlignment);
+			views.DrawItems.StartOffset = currentOffset;
+			views.DrawItems.ByteSize = snapshot->drawItemArray.GetByteSize();
+			currentOffset += views.DrawItems.ByteSize;
+
+			views.ClipRects.StartOffset = currentOffset;
+			views.ClipRects.ByteSize = snapshot->clipRectArray.GetByteSize();
+			currentOffset += views.DrawItems.ByteSize;
+
+			views.GradientStops.StartOffset = currentOffset;
+			views.GradientStops.ByteSize = snapshot->gradientStopArray.GetByteSize();
+			currentOffset += views.GradientStops.ByteSize;
+
+			currentOffset = FUIDrawBuffer::AlignUp(currentOffset, alignment);
+			views.ViewData.StartOffset = currentOffset;
+			views.ViewData.ByteSize = sizeof(snapshot->viewData);
+			currentOffset += views.ViewData.ByteSize;
+
+			for (int i = 0; i < snapshot->transformMatricesPerLayer.GetCount(); i++)
+			{
+				currentOffset = FUIDrawBuffer::AlignUp(currentOffset, alignment);
+
+				views.LayerTransformBuffers.Add({
+					.StartOffset = currentOffset,
+					.ByteSize = sizeof(FMat4)
+				});
+
+				currentOffset += sizeof(FMat4);
+			}
+
+			m_OffsetDataPerSnapshot.Add(views);
 		}
+
+		FUIDrawBuffer* drawBuffer = m_UIDrawDataBuffers[m_FrameSlot];
+
+		drawBuffer->EnsureCapacity(currentOffset);
+		u8* dataPtr = drawBuffer->m_MappedData;
+
+		// - Upload Buffer Data -
+
+		for (SizeT i = 0; i < m_OffsetDataPerSnapshot.Size(); i++)
+		{
+			FSnapshotDrawDataBufferViews& views = m_OffsetDataPerSnapshot[i];
+			IPtr<FRenderTarget> renderTarget = m_RenderTargetsByHandle[views.RenderTarget];
+			IPtr<FRenderSnapshot> snapshot = renderTarget->m_Snapshot;
+
+			VkDescriptorSetLayout viewDataSetLayout = m_MainGraphicsPipeline->m_SetLayouts[1];
+			VkDescriptorSetLayout layerTransformsSetLayout = m_MainGraphicsPipeline->m_SetLayouts[2];
+			VkDescriptorSetLayout drawDataSetLayout = m_MainGraphicsPipeline->m_SetLayouts[3];
+
+			views.ViewDataSet = pool->Allocate(viewDataSetLayout);
+			views.DrawDataSet = pool->Allocate(drawDataSetLayout);
+
+			// Vertex & Index Data
+
+			if (views.VertexBuffer.ByteSize > 0)
+			{
+				memcpy(dataPtr + views.VertexBuffer.StartOffset, snapshot->vertexArray.GetData(), views.VertexBuffer.ByteSize);
+			}
+
+			if (views.IndexBuffer.ByteSize > 0)
+			{
+				memcpy(dataPtr + views.IndexBuffer.StartOffset, snapshot->indexArray.GetData(), views.IndexBuffer.ByteSize);
+			}
+
+			// Draw Data
+			{
+				VkWriteDescriptorSet drawDataWrites[3] = {
+					VkWriteDescriptorSet{
+						.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+						.pNext = nullptr,
+						.dstSet = views.DrawDataSet,
+						.dstBinding = 0,
+						.dstArrayElement = 0,
+						.descriptorCount = 1,
+						.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+						.pImageInfo = nullptr,
+						.pBufferInfo = &m_NullBufferInfo,
+						.pTexelBufferView = nullptr
+					},
+					VkWriteDescriptorSet{
+						.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+						.pNext = nullptr,
+						.dstSet = views.DrawDataSet,
+						.dstBinding = 1,
+						.dstArrayElement = 0,
+						.descriptorCount = 1,
+						.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+						.pImageInfo = nullptr,
+						.pBufferInfo = &m_NullBufferInfo,
+						.pTexelBufferView = nullptr
+					},
+					VkWriteDescriptorSet{
+						.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+						.pNext = nullptr,
+						.dstSet = views.DrawDataSet,
+						.dstBinding = 2,
+						.dstArrayElement = 0,
+						.descriptorCount = 1,
+						.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+						.pImageInfo = nullptr,
+						.pBufferInfo = &m_NullBufferInfo,
+						.pTexelBufferView = nullptr
+					}
+				};
+				VkDescriptorBufferInfo drawDataBufferInfos[3] = {};
+
+				if (views.DrawItems.ByteSize > 0)
+				{
+					memcpy(dataPtr + views.DrawItems.StartOffset, snapshot->drawItemArray.GetData(), views.DrawItems.ByteSize);
+
+					drawDataBufferInfos[0] = {
+						.buffer = drawBuffer->m_Buffer,
+						.offset = views.DrawItems.StartOffset,
+						.range = views.DrawItems.ByteSize
+					};
+
+					drawDataWrites[0].pBufferInfo = &drawDataBufferInfos[0];
+				}
+
+				if (views.ClipRects.ByteSize > 0)
+				{
+					memcpy(dataPtr + views.ClipRects.StartOffset, (void*)snapshot->clipRectArray.GetData(), views.ClipRects.ByteSize);
+
+					drawDataBufferInfos[1] = {
+						.buffer = drawBuffer->m_Buffer,
+						.offset = views.ClipRects.StartOffset,
+						.range = views.ClipRects.ByteSize
+					};
+
+					drawDataWrites[1].pBufferInfo = &drawDataBufferInfos[1];
+				}
+
+				if (views.GradientStops.ByteSize > 0)
+				{
+					memcpy(dataPtr + views.GradientStops.StartOffset, (void*)snapshot->gradientStopArray.GetData(), views.GradientStops.ByteSize);
+
+					drawDataBufferInfos[2] = {
+						.buffer = drawBuffer->m_Buffer,
+						.offset = views.GradientStops.StartOffset,
+						.range = views.GradientStops.ByteSize
+					};
+
+					drawDataWrites[2].pBufferInfo = &drawDataBufferInfos[2];
+				}
+
+				vkUpdateDescriptorSets(m_Device, FUSION_COUNT(drawDataWrites), drawDataWrites, 0, nullptr);
+			}
+
+			// View Data
+			{
+				VkDescriptorBufferInfo viewDataBufferInfo{
+					.buffer = drawBuffer->m_Buffer,
+					.offset = views.ViewData.StartOffset,
+					.range = views.ViewData.ByteSize
+				};
+
+				VkWriteDescriptorSet viewDataBufferWrite{
+					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+					.pNext = nullptr,
+					.dstSet = views.ViewDataSet,
+					.dstBinding = 0,
+					.dstArrayElement = 0,
+					.descriptorCount = 1,
+					.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+					.pImageInfo = nullptr,
+					.pBufferInfo = &m_NullBufferInfo,
+					.pTexelBufferView = nullptr
+				};
+
+				if (views.ViewData.ByteSize > 0)
+				{
+					memcpy(dataPtr + views.ViewData.StartOffset, (void*)&snapshot->viewData, views.ViewData.ByteSize);
+
+					viewDataBufferWrite.pBufferInfo = &viewDataBufferInfo;
+				}
+
+				vkUpdateDescriptorSets(m_Device, 1, &viewDataBufferWrite, 0, nullptr);
+			}
+
+			// Layer Transforms
+
+			{
+				views.LayerTransformSets.Resize(views.LayerTransformBuffers.Size());
+
+				FArray<VkDescriptorBufferInfo> layerTransformBufferInfos(views.LayerTransformBuffers.Size());
+				FArray<VkWriteDescriptorSet> layerTransformSetWrites(views.LayerTransformBuffers.Size());
+
+				for (SizeT j = 0; j < views.LayerTransformBuffers.Size(); j++)
+				{
+					views.LayerTransformSets[j] = pool->Allocate(layerTransformsSetLayout);
+
+					layerTransformBufferInfos[j] = {
+						.buffer = drawBuffer->m_Buffer,
+						.offset = views.LayerTransformBuffers[j].StartOffset,
+						.range = views.LayerTransformBuffers[j].ByteSize
+					};
+
+					layerTransformSetWrites[j] = {
+						.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+						.pNext = nullptr,
+						.dstSet = views.LayerTransformSets[j],
+						.dstBinding = 0,
+						.dstArrayElement = 0,
+						.descriptorCount = 1,
+						.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+						.pImageInfo = nullptr,
+						.pBufferInfo = &m_NullBufferInfo,
+						.pTexelBufferView = nullptr
+					};
+
+					if (views.LayerTransformBuffers[j].ByteSize > 0)
+					{
+						memcpy(dataPtr + views.LayerTransformBuffers[j].StartOffset, (void*)&snapshot->transformMatricesPerLayer[j], views.LayerTransformBuffers[j].ByteSize);
+
+						layerTransformSetWrites[j].pBufferInfo = &layerTransformBufferInfos[j];
+					}
+				}
+
+				vkUpdateDescriptorSets(m_Device, (uint32_t)layerTransformSetWrites.Count(), layerTransformSetWrites.Data(), 0, nullptr);
+			}
+		}
+
+		// - Acquire SwapChain -
 
 		for (auto [windowHandle, swapChain] : m_SwapChainsByWindowHandle)
 		{
@@ -443,12 +690,22 @@ namespace Fusion::Vulkan
 
 		int numRenderPasses = 0;
 
+		// - Command Buffer Recording -
+
 		vkBeginCommandBuffer(cmdBuffer, &beginInfo);
 		{
-			for (auto [windowHandle, swapChain] : m_SwapChainsByWindowHandle)
+			for (SizeT i = 0; i < m_OffsetDataPerSnapshot.Size(); i++)
 			{
 				VkClearValue colorClear;
 				colorClear.color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+
+				IPtr<FRenderTarget> renderTarget = m_RenderTargetsByHandle[m_OffsetDataPerSnapshot[i].RenderTarget];
+				if (renderTarget->m_Type != ERenderTargetType::Window)
+					continue;
+
+				IPtr<FSwapChain> swapChain = m_SwapChainsByWindowHandle[renderTarget->m_Window];
+				if (!swapChain)
+					continue;
 
 				VkRenderPassBeginInfo renderPassInfo{};
 				renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -472,6 +729,8 @@ namespace Fusion::Vulkan
 		}
 		vkEndCommandBuffer(cmdBuffer);
 
+		// - Submit -
+
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
@@ -484,6 +743,8 @@ namespace Fusion::Vulkan
 
 		result = vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_RenderFinishedFences[m_FrameSlot]);
 		VULKAN_CHECK(result, "Failed to submit Command Buffer.");
+
+		// - Present -
 
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -1114,23 +1375,33 @@ namespace Fusion::Vulkan
 
 		// - UI Render Buffer -
 
-		m_UIRenderBuffers.Resize(kImageCount);
+		m_UIDrawDataBuffers.Resize(kImageCount);
 
 		for (int i = 0; i < kImageCount; i++)
 		{
-			m_UIRenderBuffers[i] = new FUIDrawBuffer(this, kBufferInitialSize, kBufferGrowSize);
+			m_UIDrawDataBuffers[i] = new FUIDrawBuffer(this, kBufferInitialSize, kBufferGrowSize);
 		}
+
+		m_NullBuffer = new FBuffer(this, 256);
+
+		m_NullBufferInfo = {
+			.buffer = m_NullBuffer->m_Buffer,
+			.offset = 0,
+			.range = m_NullBuffer->m_BufferSize
+		};
 	}
 
 	void FVulkanRenderBackend::ShutdownVulkan()
 	{
 		vkDeviceWaitIdle(m_Device);
 
-		for (SizeT i = 0; i < m_UIRenderBuffers.Size(); i++)
+		delete m_NullBuffer;
+
+		for (SizeT i = 0; i < m_UIDrawDataBuffers.Size(); i++)
 		{
-			m_UIRenderBuffers[i]->DeferredDestroy();
+			m_UIDrawDataBuffers[i]->DeferredDestroy();
 		}
-		m_UIRenderBuffers.Clear();
+		m_UIDrawDataBuffers.Clear();
 
 		for (SizeT i = 0; i < m_DeferredDestruction.Size(); i++)
 		{

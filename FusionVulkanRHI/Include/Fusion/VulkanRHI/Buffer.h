@@ -9,6 +9,24 @@ namespace Fusion::Vulkan
         SizeT StartOffset = 0;
         SizeT ByteSize = 0;
     };
+
+    struct FSnapshotDrawDataBufferViews
+    {
+        FRenderTargetHandle RenderTarget;
+
+        FBufferView VertexBuffer;
+        FBufferView IndexBuffer;
+        FBufferView DrawItems;
+        FBufferView ClipRects;
+        FBufferView GradientStops;
+        FBufferView ViewData;
+
+        FArray<FBufferView> LayerTransformBuffers;
+
+        VkDescriptorSet ViewDataSet = VK_NULL_HANDLE;
+        FArray<VkDescriptorSet> LayerTransformSets;
+        VkDescriptorSet DrawDataSet = VK_NULL_HANDLE;
+    };
     
     class FUSIONVULKANRHI_API FUIDrawBuffer : public FIntrusiveBase
     {
@@ -23,8 +41,11 @@ namespace Fusion::Vulkan
 
         ~FUIDrawBuffer();
 
+        void EnsureCapacity(VkDeviceSize capacity);
+
         void DeferredDestroy();
 
+        VkBufferCreateInfo m_BufferCI{};
         VmaAllocationCreateInfo m_AllocCI{};
 
         FVulkanRenderBackend* m_Backend = nullptr;
@@ -37,6 +58,21 @@ namespace Fusion::Vulkan
         VkDeviceSize m_GrowSize = 0;
 
         u8* m_MappedData = nullptr;
+
+    };
+
+    class FUSIONVULKANRHI_API FBuffer
+    {
+    public:
+
+        FBuffer(FVulkanRenderBackend* backend, VkDeviceSize bufferSize);
+
+        ~FBuffer();
+
+        FVulkanRenderBackend* m_Backend = nullptr;
+        VkBuffer m_Buffer = VK_NULL_HANDLE;
+        VkDeviceSize m_BufferSize = 0;
+        VmaAllocation m_Allocation = VK_NULL_HANDLE;
     };
 
 } // namespace Fusion::Vulkan

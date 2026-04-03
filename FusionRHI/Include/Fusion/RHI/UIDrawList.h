@@ -11,6 +11,7 @@ namespace Fusion
     using FUIClipRectArray      = FStableDynamicArray<FUIClipRect,      64>;
     using FUIGradientStopArray  = FStableDynamicArray<FUIGradientStop,  64>;
     using FUIDrawCmdArray       = FStableDynamicArray<FUIDrawCmd,       64>;
+    using FUIMatrixArray	    = FStableDynamicArray<FMat4,            64>;
 
 	class FUSIONRHI_API FUIDrawList final
 	{

@@ -92,7 +92,7 @@ namespace Fusion::Vulkan
         VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
         VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 
-        FArray<IntrusivePtr<FTexture>> m_Images{};
+        FArray<IPtr<FTexture>> m_Images{};
         FArray<VkFramebuffer> m_FrameBuffers{};
 
         u32 m_Width = 0, m_Height = 0;
@@ -108,7 +108,7 @@ namespace Fusion::Vulkan
 
         FWindowHandle m_Window{};
 
-        IntrusivePtr<FRenderSnapshot> m_Snapshot = nullptr;
+        IPtr<FRenderSnapshot> m_Snapshot = nullptr;
     };
 
     // - Render Instance -
@@ -288,7 +288,7 @@ namespace Fusion::Vulkan
         // - Render Targets -
 
         FRenderTargetHandle::IndexType m_RenderTargetIndexAllocator = 0;
-        FHashMap<FRenderTargetHandle, IntrusivePtr<FRenderTarget>> m_RenderTargetsByHandle;
+        FHashMap<FRenderTargetHandle, IPtr<FRenderTarget>> m_RenderTargetsByHandle;
 
         // - Render Pass -
 
@@ -303,7 +303,7 @@ namespace Fusion::Vulkan
         u32 m_FrameSlot = 0;
         
         FArray<FDescriptorPool*, kImageCount> m_PoolsPerFrame;
-        FArray<IntrusivePtr<FUIDrawBuffer>, kImageCount> m_UIRenderBuffers;
+        FArray<IntrusivePtr<FUIDrawBuffer>, kImageCount> m_UIDrawDataBuffers;
 
         FArray<VkCommandBuffer, kImageCount> m_CommandBuffers;
         FArray<VkSemaphore, kImageCount> m_RenderFinishedSemaphores;
@@ -313,20 +313,10 @@ namespace Fusion::Vulkan
 
         // - Transient Resources -
 
-        struct FDrawDataBufferViews
-        {
-            FRenderTargetHandle RenderTarget;
-            
-            FBufferView VertexBuffer;
-            FBufferView IndexBuffer;
-            FBufferView ViewData;
-            FBufferView LayerData;
-            FBufferView DrawItems;
-            FBufferView ClipRects;
-            FBufferView GradientStops;
-        };
+        FArray<FSnapshotDrawDataBufferViews> m_OffsetDataPerSnapshot;
 
-        FArray<FDrawDataBufferViews> m_OffsetData;
+        FBuffer* m_NullBuffer = nullptr;
+        VkDescriptorBufferInfo m_NullBufferInfo{};
     };
 
 } // namespace Fusion

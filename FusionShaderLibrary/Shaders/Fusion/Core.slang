@@ -69,7 +69,8 @@ cbuffer _ViewData
     float4x4 _ViewMatrix;
     float4x4 _ViewProjectionMatrix;
     float4x4 _ProjectionMatrix;
-    float2 _PixelResolution;
+    float4   _ViewPosition;
+    float2   _PixelResolution;
 };
 
 

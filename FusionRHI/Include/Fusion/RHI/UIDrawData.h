@@ -78,17 +78,29 @@ namespace Fusion
 
 	struct FUIDrawCmd
 	{
-		u32 indexOffset = 0;
-		u32 indexCount = 0;
-		u32 vertexOffset = 0;
+		u32 IndexOffset = 0;
+		u32 IndexCount = 0;
+		u32 VertexOffset = 0;
 
-		EUIBlendMode blendMode = EUIBlendMode::Normal;
+		EUIBlendMode BlendMode = EUIBlendMode::Normal;
 	};
 
 	struct FSplitRange
 	{
-		SizeT startOffset = 0;
-		SizeT byteSize = 0;
+		SizeT StartOffset = 0;
+		SizeT ByteSize = 0;
 	};
+
+	struct alignas(4) FUIViewData
+	{
+		FMat4 ViewMatrix;
+		FMat4 ViewProjectionMatrix;
+		FMat4 ProjectionMatrix;
+		FVec4 ViewPosition;
+		FVec2 PixelResolution;
+
+		u32   _pad[10];
+	};
+	static_assert(sizeof(FUIViewData) == 256);
     
 } // namespace Fusion

@@ -225,5 +225,8 @@ namespace Fusion
     };
 
     using FIntrusiveBase = IntrusiveBaseRefCnt<std::atomic<int>>;
+
+    template<typename T>
+    using IPtr = IntrusivePtr<T>;
     
 } // namespace Fusion

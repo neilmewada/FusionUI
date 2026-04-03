@@ -96,7 +96,18 @@ namespace Fusion
 		// - Composite
 
 		IntrusivePtr<FRenderSnapshot> snapshot = new FRenderSnapshot();
+
 		CompositeLayer(snapshot, m_LayerTree->GetRootLayer(), 0);
+
+		snapshot->viewData.PixelResolution = m_PixelSize;
+		snapshot->viewData.ProjectionMatrix = FMat4::OrthographicProjection(
+			0, m_AvailableSize.x,
+			0, m_AvailableSize.y,
+			-1.0f, 1.0f
+		);
+		snapshot->viewData.ViewMatrix = FMat4::Identity();
+		snapshot->viewData.ViewProjectionMatrix = snapshot->viewData.ProjectionMatrix * snapshot->viewData.ViewMatrix;
+
 		application->SubmitSnapshot(m_RenderTarget, snapshot);
 	}
 
@@ -159,47 +170,48 @@ namespace Fusion
 
 		layer->m_NeedsCompositing = false;
 
+		const SizeT constantBufferAlignment = m_RenderCapabilities.MinConstantBufferOffsetAlignment;
 		const SizeT structuredBufferAlignment = m_RenderCapabilities.MinStructuredBufferOffsetAlignment;
 
 		FUIDrawList* drawList = layer->GetDrawList();
 
-		snapshot->vertexSplits.Insert({ .startOffset = snapshot->vertexArray.GetByteSize(), .byteSize = drawList->vertexArray.GetByteSize() });
+		snapshot->vertexSplits.Insert({ .StartOffset = snapshot->vertexArray.GetByteSize(), .ByteSize = drawList->vertexArray.GetByteSize() });
 		snapshot->vertexArray.Insert(drawList->vertexArray.GetData(), (int)drawList->vertexArray.GetCount());
 
-		snapshot->indexSplits.Insert({ .startOffset = snapshot->indexArray.GetByteSize(), .byteSize = drawList->indexArray.GetByteSize() });
+		snapshot->indexSplits.Insert({ .StartOffset = snapshot->indexArray.GetByteSize(), .ByteSize = drawList->indexArray.GetByteSize() });
 		snapshot->indexArray.Insert(drawList->indexArray.GetData(), (int)drawList->indexArray.GetCount());
 
 		{
 			SizeT alignedOffset = FMemoryUtils::AlignUp(snapshot->drawItemArray.GetByteSize(), structuredBufferAlignment);
 			snapshot->drawItemArray.InsertRange((int)((alignedOffset - snapshot->drawItemArray.GetByteSize()) / sizeof(FUIDrawItem)));
-			snapshot->drawItemSplits.Insert({ .startOffset = alignedOffset, .byteSize = drawList->drawItemArray.GetByteSize() });
+			snapshot->drawItemSplits.Insert({ .StartOffset = alignedOffset, .ByteSize = drawList->drawItemArray.GetByteSize() });
 			snapshot->drawItemArray.Insert(drawList->drawItemArray.GetData(), (int)drawList->drawItemArray.GetCount());
 		}
 
-		snapshot->drawCmdSplits.Insert({ .startOffset = snapshot->drawCmdArray.GetByteSize(), .byteSize = drawList->drawCmdArray.GetByteSize() });
+		snapshot->drawCmdSplits.Insert({ .StartOffset = snapshot->drawCmdArray.GetByteSize(), .ByteSize = drawList->drawCmdArray.GetByteSize() });
 		snapshot->drawCmdArray.Insert(drawList->drawCmdArray.GetData(), (int)drawList->drawCmdArray.GetCount());
 
 		{
 			SizeT alignedOffset = FMemoryUtils::AlignUp(snapshot->clipRectArray.GetByteSize(), structuredBufferAlignment);
 			snapshot->clipRectArray.InsertRange((int)((alignedOffset - snapshot->clipRectArray.GetByteSize()) / sizeof(FUIClipRect)));
-			snapshot->clipRectSplits.Insert({ .startOffset = alignedOffset, .byteSize = drawList->clipRectArray.GetByteSize() });
+			snapshot->clipRectSplits.Insert({ .StartOffset = alignedOffset, .ByteSize = drawList->clipRectArray.GetByteSize() });
 			snapshot->clipRectArray.Insert(drawList->clipRectArray.GetData(), (int)drawList->clipRectArray.GetCount());
 		}
 
 		{
 			SizeT alignedOffset = FMemoryUtils::AlignUp(snapshot->gradientStopArray.GetByteSize(), structuredBufferAlignment);
 			snapshot->gradientStopArray.InsertRange((int)((alignedOffset - snapshot->gradientStopArray.GetByteSize()) / sizeof(FUIGradientStop)));
-			snapshot->gradientStopSplits.Insert({ .startOffset = alignedOffset, .byteSize = drawList->gradientStopArray.GetByteSize() });
+			snapshot->gradientStopSplits.Insert({ .StartOffset = alignedOffset, .ByteSize = drawList->gradientStopArray.GetByteSize() });
 			snapshot->gradientStopArray.Insert(drawList->gradientStopArray.GetData(), (int)drawList->gradientStopArray.GetCount());
 		}
 
 		u32 drawCmdSplitCount = layer->GetSplitPointCount();
 
-		SizeT cmdBase = snapshot->drawCmdSplits.Last().startOffset / sizeof(FUIDrawCmd);
+		SizeT cmdBase = snapshot->drawCmdSplits.Last().StartOffset / sizeof(FUIDrawCmd);
 		SizeT prevSplit = 0;
 
 		FMat4 layerGlobalMatrix = layer->GetGlobalTransform().ToMatrix4x4();
-		snapshot->matricesPerLayer.Insert(layerGlobalMatrix);
+		snapshot->transformMatricesPerLayer.Insert(layerGlobalMatrix);
 
 		for (u32 i = 0; i < drawCmdSplitCount; i++)
 		{
@@ -207,12 +219,12 @@ namespace Fusion
 
 			FRenderPass rp1 = {
 				//.renderTarget = nullptr,
-				.layerIndex = (SizeT)layerIndex,
-				.drawCmdStartIndex = cmdBase + prevSplit,
-				.drawCmdCount = sp - prevSplit   // excludes the placeholder at sp
+				.LayerIndex = (SizeT)layerIndex,
+				.DrawCmdStartIndex = cmdBase + prevSplit,
+				.DrawCmdCount = sp - prevSplit   // excludes the placeholder at sp
 			};
 
-			if (rp1.drawCmdCount > 0)
+			if (rp1.DrawCmdCount > 0)
 			{
 				// Emit render pass for this layer's cmds before the split point
 				snapshot->renderPassArray.Insert(rp1);
@@ -226,12 +238,12 @@ namespace Fusion
 
 		FRenderPass rp2 = {
 			//.renderTarget = nullptr,
-			.layerIndex = (SizeT)layerIndex,
-			.drawCmdStartIndex = cmdBase + prevSplit,
-			.drawCmdCount = snapshot->drawCmdSplits[layerIndex].byteSize / sizeof(FUIDrawCmd) - prevSplit
+			.LayerIndex = (SizeT)layerIndex,
+			.DrawCmdStartIndex = cmdBase + prevSplit,
+			.DrawCmdCount = snapshot->drawCmdSplits[layerIndex].ByteSize / sizeof(FUIDrawCmd) - prevSplit
 		};
 
-		if (rp2.drawCmdCount == 0)
+		if (rp2.DrawCmdCount == 0)
 			return;
 
 		// Final segment after the last split (or the whole thing if no splits)
