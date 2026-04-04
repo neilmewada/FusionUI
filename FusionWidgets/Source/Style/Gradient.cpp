@@ -2,32 +2,35 @@
 
 namespace Fusion
 {
-
-    FGradient FGradient::Linear(FVec2 start, FVec2 end)
+    FGradient FGradient::Linear(f32 angle, f32 startPoint, f32 endPoint)
     {
         FGradient g;
-        g.m_Type = EGradientType::Linear;
-        g.m_Params.Linear = { start, end };
+        g.m_Type       = EGradientType::Linear;
+        g.m_Angle      = angle;
+        g.m_StartPoint = startPoint;
+        g.m_EndPoint   = endPoint;
         return g;
     }
 
-    FGradient FGradient::Radial(FVec2 center, float radius)
+    FGradient FGradient::Radial(FVec2 center, f32 radius)
     {
         FGradient g;
-        g.m_Type = EGradientType::Radial;
-        g.m_Params.Radial = { center, radius };
+        g.m_Type   = EGradientType::Radial;
+        g.m_Center = center;
+        g.m_Radius = radius;
         return g;
     }
 
-    FGradient FGradient::Conical(FVec2 center, float angle)
+    FGradient FGradient::Conical(FVec2 center, f32 angle)
     {
         FGradient g;
-        g.m_Type = EGradientType::Conical;
-        g.m_Params.Conical = { center, angle };
+        g.m_Type   = EGradientType::Conical;
+        g.m_Center = center;
+        g.m_Angle  = angle;
         return g;
     }
 
-    FGradient& FGradient::AddStop(FColor color, float position)
+    FGradient& FGradient::AddStop(FColor color, f32 position)
     {
         m_Stops.Add({ color, position });
         return *this;
@@ -37,31 +40,6 @@ namespace Fusion
     {
         m_Extend = extend;
         return *this;
-    }
-
-    FVec2 FGradient::GetStartPoint() const
-    {
-        FUSION_ASSERT(m_Type == EGradientType::Linear, "FGradient: GetStartPoint called on non-linear gradient");
-        return m_Params.Linear.Start;
-    }
-
-    FVec2 FGradient::GetEndPoint() const
-    {
-        FUSION_ASSERT(m_Type == EGradientType::Linear, "FGradient: GetEndPoint called on non-linear gradient");
-        return m_Params.Linear.End;
-    }
-
-    FVec2 FGradient::GetCenter() const
-    {
-        FUSION_ASSERT(m_Type == EGradientType::Radial || m_Type == EGradientType::Conical,
-            "FGradient: GetCenter called on non-radial/conical gradient");
-        return m_Type == EGradientType::Radial ? m_Params.Radial.Center : m_Params.Conical.Center;
-    }
-
-    float FGradient::GetRadius() const
-    {
-        FUSION_ASSERT(m_Type == EGradientType::Radial, "FGradient: GetRadius called on non-radial gradient");
-        return m_Params.Radial.Radius;
     }
 
     bool FGradient::operator==(const FGradient& rhs) const
@@ -83,25 +61,20 @@ namespace Fusion
         switch (m_Type)
         {
         case EGradientType::Linear:
-            return m_Params.Linear.Start == rhs.m_Params.Linear.Start &&
-                   m_Params.Linear.End   == rhs.m_Params.Linear.End;
+            return FMath::ApproxEquals(m_Angle,      rhs.m_Angle)      &&
+                   FMath::ApproxEquals(m_StartPoint, rhs.m_StartPoint) &&
+                   FMath::ApproxEquals(m_EndPoint,   rhs.m_EndPoint);
 
         case EGradientType::Radial:
-            return m_Params.Radial.Center == rhs.m_Params.Radial.Center &&
-                   FMath::ApproxEquals(m_Params.Radial.Radius, rhs.m_Params.Radial.Radius);
+            return m_Center == rhs.m_Center &&
+                   FMath::ApproxEquals(m_Radius, rhs.m_Radius);
 
         case EGradientType::Conical:
-            return m_Params.Conical.Center == rhs.m_Params.Conical.Center &&
-                   FMath::ApproxEquals(m_Params.Conical.Angle, rhs.m_Params.Conical.Angle);
+            return m_Center == rhs.m_Center &&
+                   FMath::ApproxEquals(m_Angle, rhs.m_Angle);
         }
 
         return false;
-    }
-
-    float FGradient::GetAngle() const
-    {
-        FUSION_ASSERT(m_Type == EGradientType::Conical, "FGradient: GetAngle called on non-conical gradient");
-        return m_Params.Conical.Angle;
     }
 
 } // namespace Fusion

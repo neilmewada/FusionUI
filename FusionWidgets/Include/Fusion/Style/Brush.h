@@ -3,7 +3,7 @@
 namespace Fusion
 {
 	// Determines what content the brush renders.
-	
+
 	enum class EBrushStyle : u8
 	{
 		None = 0,
@@ -39,49 +39,48 @@ namespace Fusion
     {
     public:
 
-		FBrush();
+		FBrush() = default;
 
-		FBrush(const FColor& fillColor, EBrushStyle brushStyle = EBrushStyle::SolidFill);
+		FBrush(const FColor& color);
+		FBrush(const FName& imagePath, const FColor& tint = FColors::White);
+		FBrush(const FGradient& gradient, const FColor& tint = FColors::White);
 
-		// Image brush. tintColor is multiplied with the texture color (White = no tint).
-		FBrush(const FName& imagePath, const FColor& tintColor = FColors::White);
+		// Named factories
+		static FBrush Solid(const FColor& color);
+		static FBrush Image(const FName& imagePath, const FColor& tint = FColors::White);
+		static FBrush Gradient(const FGradient& gradient, const FColor& tint = FColors::White);
 
-		// Gradient brush. tintColor is multiplied with the gradient output (White = no tint).
-		FBrush(const FGradient& gradient, const FColor& tintColor = FColors::White);
-
-		bool IsValidBrush();
+		bool IsValid();
 
 		bool IsTiled() const { return m_Tiling != EBrushTiling::None; }
 
-		EBrushStyle GetBrushStyle() const { return m_BrushStyle; }
+		EBrushStyle  GetBrushStyle()  const { return m_BrushStyle; }
 		EBrushTiling GetBrushTiling() const { return m_Tiling; }
 		const FGradient& GetGradient() const { return m_Gradient; }
 
-		void SetBrushStyle(EBrushStyle brushStyle) { m_BrushStyle = brushStyle; }
-		void SetBrushTiling(EBrushTiling tiling) { m_Tiling = tiling; }
-
 		// For SolidFill: the fill color. For Image/Gradient: the tint color (multiplied with texture/gradient output).
-		const FColor& GetColor() const { return m_Color; }
-		void SetColor(const FColor& color) { m_Color = color; }
-
-		const FName& GetImagePath() const { return m_ImagePath; }
-
-		EImageFit GetImageFit() const { return m_ImageFit; }
-		void SetImageFit(EImageFit imageFit) { m_ImageFit = imageFit; }
+		const FColor& GetColor()     const { return m_Color; }
+		const FName&  GetImagePath() const { return m_ImagePath; }
+		EImageFit     GetImageFit()  const { return m_ImageFit; }
 
 		// Border sizes for NineSlice fitting (left, top, right, bottom in pixels).
 		// Only used when imageFit == FImageFit::NineSlice.
 		const FMargin& GetSliceMargins() const { return m_SliceMargins; }
-		void SetSliceMargins(const FMargin& margins) { m_SliceMargins = margins; }
 
 		// Explicit pixel size of the image within the widget rect. Vec2(-1,-1) = auto (driven by imageFit).
-		const FVec2& GetBrushSize() const { return m_BrushSize; }
-		void SetBrushSize(FVec2 brushSize) { m_BrushSize = brushSize; }
+		const FVec2& GetBrushSize()     const { return m_BrushSize; }
 
 		// Normalized anchor point for image placement within the widget rect.
 		// (0,0) = top-left, (0.5,0.5) = centered, (1,1) = bottom-right. Equivalent to CSS background-position.
 		const FVec2& GetBrushPosition() const { return m_BrushPos; }
-		void SetBrushPosition(FVec2 brushPos) { m_BrushPos = brushPos; }
+
+		// Fluent setters
+		FBrush& Color(const FColor& color)           { m_Color = color;          return *this; }
+		FBrush& Fit(EImageFit fit)                   { m_ImageFit = fit;         return *this; }
+		FBrush& Tiling(EBrushTiling tiling)          { m_Tiling = tiling;        return *this; }
+		FBrush& SliceMargins(const FMargin& margins) { m_SliceMargins = margins; return *this; }
+		FBrush& BrushSize(FVec2 size)                { m_BrushSize = size;       return *this; }
+		FBrush& BrushPosition(FVec2 pos)             { m_BrushPos = pos;         return *this; }
 
 		bool operator==(const FBrush& rhs) const;
 
@@ -92,33 +91,19 @@ namespace Fusion
 
     private:
 
-		
 		FGradient m_Gradient;
-		
-		FColor m_Color;
+		FColor    m_Color;
+		FName     m_ImagePath;
 
-		FName m_ImagePath;
-
-		// Explicit size of the image. Vec2(-1,-1) = auto.
-		
 		FVec2 m_BrushSize = FVec2(-1, -1);
+		FVec2 m_BrushPos  = FVec2(0.5f, 0.5f);
 
-		// Normalized anchor point (0=start, 1=end per axis). Default: centered (0.5, 0.5).
-		
-		FVec2 m_BrushPos = FVec2(0.5f, 0.5f);
+		EBrushTiling m_Tiling    = EBrushTiling::None;
+		EBrushStyle  m_BrushStyle = EBrushStyle::None;
+		EImageFit    m_ImageFit   = EImageFit::Fill;
 
-		
-		EBrushTiling m_Tiling = EBrushTiling::None;
-
-		
-		EBrushStyle m_BrushStyle = EBrushStyle::None;
-
-		
-		EImageFit m_ImageFit = EImageFit::Fill;
-
-		// NineSlice border sizes in pixels (left, top, right, bottom). Only used when imageFit == NineSlice.
 		FMargin m_SliceMargins;
 
     };
-    
+
 } // namespace Fusion

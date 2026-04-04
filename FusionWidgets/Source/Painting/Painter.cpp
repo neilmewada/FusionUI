@@ -770,34 +770,51 @@ namespace Fusion
 		case EBrushStyle::None:
 			return true;
 		case EBrushStyle::SolidFill:
-		{
-			FUIDrawItem drawItem{};
-			drawItem.clipRectIndex = GetCurrentClipIndex();
-			drawItem.shaderType = EUIShaderType::SolidColor;
+			{
+				FUIDrawItem drawItem{};
+				drawItem.clipRectIndex = GetCurrentClipIndex();
+				drawItem.shaderType = EUIShaderType::SolidColor;
 
-			drawItemIndex = m_DrawList->AddDrawItem(drawItem);
-		}
+				drawItemIndex = m_DrawList->AddDrawItem(drawItem);
+			}
 		break;
 		case EBrushStyle::Gradient:
-		{
-			FUIDrawItem drawItem{};
-			drawItem.clipRectIndex = GetCurrentClipIndex();
-			drawItem.shaderType = EUIShaderType::LinearGradient;
-			drawItem.gradientStartIndex = (int)m_DrawList->gradientStopArray.GetCount();
-			drawItem.gradientStopCount = (int)m_CurrentBrush.GetGradient().GetStops().Size();
-
-			if (drawItem.gradientStopCount < 2)
-				return true;
-
-			for (const auto& stop : m_CurrentBrush.GetGradient().GetStops())
 			{
-				m_DrawList->gradientStopArray.Insert({ .packedColor = stop.Color.ToU32(), .position = stop.Position });
+				FUIDrawItem drawItem{};
+				drawItem.clipRectIndex = GetCurrentClipIndex();
+				drawItem.gradientStartIndex = (int)m_DrawList->gradientStopArray.GetCount();
+				drawItem.gradientStopCount = (int)m_CurrentBrush.GetGradient().GetStops().Size();
+
+				switch (m_CurrentBrush.GetGradient().GetType())
+				{
+				case EGradientType::Linear:
+					drawItem.shaderType = EUIShaderType::LinearGradient;
+					break;
+				case EGradientType::Radial:
+					drawItem.shaderType = EUIShaderType::RadialGradient;
+					break;
+				case EGradientType::Conical:
+					drawItem.shaderType = EUIShaderType::ConicGradient;
+					break;
+				}
+
+				if (drawItem.gradientStopCount < 2)
+					return true;
+
+				for (const auto& stop : m_CurrentBrush.GetGradient().GetStops())
+				{
+					m_DrawList->gradientStopArray.Insert({ .packedColor = stop.Color.ToU32(), .position = stop.Position });
+				}
+
+				const FGradient& gradient = m_CurrentBrush.GetGradient();
+				drawItem.data[0] = gradient.GetAngle();
+				drawItem.data[1] = gradient.IsLinear() ? gradient.GetStartPoint() : gradient.GetCenter().x;
+				drawItem.data[2] = gradient.IsLinear() ? gradient.GetEndPoint()   : gradient.GetCenter().y;
+				if (gradient.IsRadial())
+					drawItem.data[3] = gradient.GetRadius();
+
+				drawItemIndex = m_DrawList->AddDrawItem(drawItem);
 			}
-
-			drawItem.data[0] = m_CurrentBrush.GetGradient().GetAngle();
-
-			drawItemIndex = m_DrawList->AddDrawItem(drawItem);
-		}
 		break;
 		default:
 			return true;

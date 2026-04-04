@@ -23,7 +23,12 @@ namespace Fusion
 	        
         }
 
-        static FShape RoundedRect(const FVec4& cornerRadius);
+        static FShape RoundedRect(const FVec4& cornerRadius)
+        {
+            FShape shape = EShapeType::RoundedRect;
+            shape.SetCornerRadius(cornerRadius);
+            return shape;
+        }
 
         EShapeType GetShapeType() const { return m_Type; }
 

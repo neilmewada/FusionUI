@@ -2,24 +2,51 @@
 
 namespace Fusion
 {
-	FBrush::FBrush()
+	FBrush::FBrush(const FColor& color)              : FBrush(Solid(color)) {}
+	FBrush::FBrush(const FName& imagePath, const FColor& tint) : FBrush(Image(imagePath, tint)) {}
+	FBrush::FBrush(const FGradient& gradient, const FColor& tint) : FBrush(Gradient(gradient, tint)) {}
+
+	FBrush FBrush::Solid(const FColor& color)
 	{
-		
+		FBrush b;
+		b.m_BrushStyle = EBrushStyle::SolidFill;
+		b.m_Color = color;
+		return b;
 	}
 
-	FBrush::FBrush(const FColor& fillColor, EBrushStyle brushStyle) : m_Color(fillColor), m_BrushStyle(brushStyle)
+	FBrush FBrush::Image(const FName& imagePath, const FColor& tint)
 	{
-		
+		FBrush b;
+		b.m_BrushStyle = EBrushStyle::Image;
+		b.m_ImagePath = imagePath;
+		b.m_Color = tint;
+		return b;
 	}
 
-	FBrush::FBrush(const FGradient& gradient, const FColor& tintColor) : m_Gradient(gradient), m_Color(tintColor)
+	FBrush FBrush::Gradient(const FGradient& gradient, const FColor& tint)
 	{
-		
+		FBrush b;
+		b.m_BrushStyle = EBrushStyle::Gradient;
+		b.m_Gradient = gradient;
+		b.m_Color = tint;
+		return b;
 	}
 
-	FBrush::FBrush(const FName& imagePath, const FColor& tintColor) : m_ImagePath(imagePath), m_Color(tintColor)
+	bool FBrush::IsValid()
 	{
-		
+		switch (m_BrushStyle)
+		{
+		case EBrushStyle::SolidFill:
+			return m_Color.a > 0;
+		case EBrushStyle::Image:
+			return m_ImagePath.IsValid();
+		case EBrushStyle::Gradient:
+			return m_Gradient.IsValid();
+		case EBrushStyle::None:
+			break;
+		}
+
+		return false;
 	}
 
 	bool FBrush::operator==(const FBrush& rhs) const

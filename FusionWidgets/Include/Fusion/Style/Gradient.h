@@ -29,58 +29,48 @@ namespace Fusion
     {
     public:
 
-        // - Factory Methods -
+        // - Factories -
 
-        static FGradient Linear(FVec2 start, FVec2 end);
-        static FGradient Radial(FVec2 center, float radius);
-        static FGradient Conical(FVec2 center, float angle);
+        static FGradient Linear(f32 angle = 0.0f, f32 startPoint = 0.0f, f32 endPoint = 1.0f);
+        static FGradient Radial(FVec2 center, f32 radius);
+        static FGradient Conical(FVec2 center, f32 angle);
 
         // - Builder -
 
-        FGradient& AddStop(FColor color, float position);
+        FGradient& AddStop(FColor color, f32 position);
         FGradient& SetExtend(EGradientExtend extend);
 
         // - Getters -
 
-        bool IsValid() const { return m_Stops.Size() >= 2; }
-        bool IsLinear() const { return m_Type == EGradientType::Linear; }
-        bool IsRadial() const { return m_Type == EGradientType::Radial; }
+        bool IsValid()   const { return m_Stops.Size() >= 2; }
+        bool IsLinear()  const { return m_Type == EGradientType::Linear; }
+        bool IsRadial()  const { return m_Type == EGradientType::Radial; }
         bool IsConical() const { return m_Type == EGradientType::Conical; }
+
+        EGradientType                GetType()   const { return m_Type; }
+        EGradientExtend              GetExtend() const { return m_Extend; }
+        const FArray<FGradientStop>& GetStops()  const { return m_Stops; }
+
+        f32   GetAngle()      const { return m_Angle; }       // Linear + Conical
+        f32   GetStartPoint() const { return m_StartPoint; }  // Linear
+        f32   GetEndPoint()   const { return m_EndPoint; }    // Linear
+        FVec2 GetCenter()     const { return m_Center; }      // Radial + Conical
+        f32   GetRadius()     const { return m_Radius; }      // Radial
 
         bool operator==(const FGradient& rhs) const;
         bool operator!=(const FGradient& rhs) const { return !(*this == rhs); }
 
-        EGradientType               GetType()   const { return m_Type; }
-        EGradientExtend             GetExtend() const { return m_Extend; }
-        const FArray<FGradientStop>& GetStops() const { return m_Stops; }
-
-        // Linear
-        FVec2 GetStartPoint() const;
-        FVec2 GetEndPoint()   const;
-
-        // Radial + Conical
-        FVec2 GetCenter() const;
-
-        // Radial
-        float GetRadius() const;
-
-        // Conical
-        float GetAngle()  const;
-
-        FGradient() = default;
-
     private:
 
-        EGradientType m_Type = EGradientType::Linear;
-        EGradientExtend m_Extend = EGradientExtend::Clamp;
+        EGradientType         m_Type   = EGradientType::Linear;
+        EGradientExtend       m_Extend = EGradientExtend::Clamp;
         FArray<FGradientStop> m_Stops;
 
-        union
-        {
-            struct { FVec2 Start, End; } Linear;
-            struct { FVec2 Center; float Radius; } Radial;
-            struct { FVec2 Center; float Angle; } Conical;
-        } m_Params = {};
+        f32   m_Angle      = 0.0f;
+        f32   m_StartPoint = 0.0f;
+        f32   m_EndPoint   = 1.0f;
+        FVec2 m_Center     = FVec2(0.5f, 0.5f);
+        f32   m_Radius     = 0.5f;
     };
 
 } // namespace Fusion
