@@ -62,6 +62,8 @@ namespace Fusion
 
 		m_PlatformBackend->SetContinuousResizeTick([this]
 		{
+			m_MainApplication->Tick();
+
 			m_RenderBackend->RenderTick();
 		});
 
