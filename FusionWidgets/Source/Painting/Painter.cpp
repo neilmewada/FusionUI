@@ -88,6 +88,14 @@ namespace Fusion
 		m_ArcFastRadiusCutoff = ((m_CircleSegmentMaxError) / (1 - cosf(FMath::PI / FMath::Max((float)(kArcFastTableSize), FMath::PI))));
 	}
 
+	void FPainter::ResetState()
+	{
+		m_CurrentBrush = {};
+		m_CurrentPen = {};
+		PathClear();
+		m_AntiAliased = true;
+	}
+
 	void FPainter::PushTransform(const FAffineTransform& transform)
 	{
 		m_TransformStack.Insert(GetCurrentTransform() * transform);

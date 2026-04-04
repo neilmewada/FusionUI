@@ -39,7 +39,8 @@ public:
 			.AddStop(FColor(0.50f, 0.00f, 1.00f), 0.875f) // violet
 			.AddStop(FColor(1.00f, 0.00f, 0.50f), 1.000f) // magenta
 		)
-		.Thickness(3.0f);
+		.Thickness(3.0f)
+		.GradientSpace(EGradientSpace::ArcLength);
 
 
 		Child(

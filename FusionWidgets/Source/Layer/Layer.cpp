@@ -124,8 +124,7 @@ namespace Fusion
 			FRect(FVec2(0, 0), widget->GetLayoutSize())
 		);
 
-		painter.SetBrush(FBrush());
-		painter.SetPen(FPen());
+		painter.ResetState();
 
 		widget->SetWidgetFlag(EWidgetFlags::PaintDirty, false);
 		widget->Paint(painter);

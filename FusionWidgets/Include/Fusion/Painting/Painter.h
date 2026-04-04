@@ -14,9 +14,13 @@ namespace Fusion
 
         // - Public API -
 
+        void ResetState();
+
         FLayer* GetLayer() const { return m_Layer; }
 
         f32 GetCurrentOpacity() const { return m_OpacityStack.IsEmpty() ? 1.0f : m_OpacityStack.Last(); }
+
+        void SetAntiAliasing(bool enabled) { m_AntiAliased = enabled; }
 
         void PushTransform(const FAffineTransform& transform);
         void PopTransform();
@@ -93,7 +97,6 @@ namespace Fusion
 
         FPen m_CurrentPen;
         FBrush m_CurrentBrush;
-        //FFont currentFont;
 
         FPathArray m_Path;
         FVec2 m_PathMin, m_PathMax;
