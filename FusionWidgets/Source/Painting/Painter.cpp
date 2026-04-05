@@ -638,8 +638,8 @@ namespace Fusion
 					continue;
 
 				const FVec2 dir = (p1 - p0) / segLen;
-				const f32  t0 = hasGradient ? m_TempPoints[i] : 0.0f;
-				const f32  t1 = hasGradient ? m_TempPoints[nextIdx] : 0.0f;
+				const f32  t0 = isGradientArcLength ? m_TempPoints[i] : 0.0f;
+				const f32  t1 = isGradientArcLength ? m_TempPoints[nextIdx] : 0.0f;
 
 				f32 segPos = 0.0f;
 				while (segPos < segLen - 0.001f)

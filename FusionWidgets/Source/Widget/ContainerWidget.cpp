@@ -34,6 +34,8 @@ namespace Fusion
 		childWidget->SetParentSurfaceRecursive(GetParentSurface());
 		childWidget->UpdateBoundaryFlags();
 
+		childWidget->OnAttachedToParent(this);
+
 		if (Ref<FSurface> surface = GetParentSurface())
 		{
 			surface->MarkLayerTreeDirty();
@@ -60,6 +62,8 @@ namespace Fusion
 			{
 				surface->MarkLayerTreeDirty();
 			}
+
+			child->OnDetachedFromParent(this);
 
 			m_Children.RemoveAt(index);
 			child->SetParentWidget(nullptr);

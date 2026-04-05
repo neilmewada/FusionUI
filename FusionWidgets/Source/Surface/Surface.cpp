@@ -699,4 +699,16 @@ namespace Fusion
 		// Final segment after the last split (or the whole thing if no splits)
 		snapshot->renderPassArray.Insert(rp2);
 	}
+
+	void FSurface::RefreshStyleRecursively(Ref<FWidget> widget)
+	{
+        if (widget == nullptr)
+            widget = m_RootWidget;
+
+        if (widget == nullptr)
+            return;
+
+        widget->RefreshStyleRecursively();
+	}
+
 } // namespace Fusion

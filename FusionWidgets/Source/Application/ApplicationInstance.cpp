@@ -185,6 +185,14 @@ namespace Fusion
 		m_RootStyleSheet = styleSheet;
 	}
 
+	void FApplicationInstance::RefreshStyleRecursively()
+	{
+		for (Ref<FSurface> surface : m_Surfaces)
+		{
+			surface->RefreshStyleRecursively();
+		}
+	}
+
 	void FApplicationInstance::OnWindowDestroyed(FWindowHandle window)
 	{
 		if (!m_NativeSurfacesByWindow.KeyExists(window))

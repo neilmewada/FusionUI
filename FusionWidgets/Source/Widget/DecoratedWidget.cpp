@@ -11,19 +11,19 @@ namespace Fusion
 	{
 		Super::Paint(painter);
 
-		painter.SetBrush(m_Background);
-		painter.SetPen(m_Border);
+		painter.SetBrush(Background());
+		painter.SetPen(Border());
 
 		FVec2 layoutSize = GetLayoutSize();
 
-		painter.FillAndStrokeShape(FRect(0, 0, layoutSize.width, layoutSize.height), m_Shape);
+		painter.FillAndStrokeShape(FRect(0, 0, layoutSize.width, layoutSize.height), Shape());
 	}
 
 	void FDecoratedWidget::ApplyStyle(FStyle& style)
 	{
 		Super::ApplyStyle(style);
 
-
+		FUSION_APPLY_STYLES(Background, Border, Shape);
 	}
 
 } // namespace Fusion

@@ -78,6 +78,8 @@ namespace Fusion
 
 		m_MainWindow = nullptr;
 
+		m_MainApplication->RefreshStyleRecursively();
+
 		while (!m_PlatformBackend->IsUserRequestingExit())
 		{
 			m_PlatformBackend->PumpEvents();

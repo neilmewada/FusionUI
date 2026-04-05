@@ -65,23 +65,37 @@ public:
 				(
 					FNew(FButton)
 					.FillRatio(1.0f)
-					.Height(30)
-					.Background(FBrush::Solid(FColors::Red))
+					.Height(32)
 					.Style("Button/Primary")
 					.OnClick([]
 					{
-						FUSION_LOG_INFO("Debug", "Button Clicked!");
+						FUSION_LOG_INFO("Debug", "Primary clicked!");
 					}),
 
-					FNew(FDecoratedWidget)
+					FNew(FButton)
 					.FillRatio(1.0f)
-					.Height(30)
-					.Background(FBrush::Solid(FColors::Green)),
+					.Height(32)
+					.Style("Button/Secondary")
+					.OnClick([]
+					{
+						FUSION_LOG_INFO("Debug", "Secondary clicked!");
+					}),
 
-					FNew(FDecoratedWidget)
+					FNew(FButton)
 					.FillRatio(1.0f)
-					.Height(30)
-					.Background(FBrush::Solid(FColors::Blue))
+					.Height(32)
+					.Style("Button/Destructive")
+					.OnClick([]
+					{
+						FUSION_LOG_INFO("Debug", "Destructive clicked!");
+					}),
+
+					FNew(FButton)
+					.FillRatio(1.0f)
+					.Height(32)
+					.Style("Button/Primary")
+					.Background(FColors::Gold)
+					.Border(FPen())
 				),
 
 				FNew(FDecoratedWidget)
@@ -172,13 +186,41 @@ int main(int argc, char* argv[])
 
 	Ref<FStyleSheet> styleSheet = app.CreateDefaultStyleSheet();
 
+	// -- Button/Primary (blue) --
 	styleSheet->Style("Button/Primary")
-		.Brush("Background", FColors::Red)
-		.Brush("Background", FColors::Red, EStyleState::Hovered)
-		.Brush("Background", FColors::Red, EStyleState::Pressed);
+		.Shape("Shape", FRoundedRectangle(5.0f))
+		.Brush("Background", FColor(0.23f, 0.51f, 0.96f))
+		.Brush("Background", FColor(0.38f, 0.65f, 0.98f), EStyleState::Hovered)
+		.Brush("Background", FColor(0.11f, 0.31f, 0.85f), EStyleState::Pressed | EStyleState::Hovered)
+		.Pen("Border",  FColor(0.16f, 0.40f, 0.82f))
+		.Pen("Border",  FColor(0.26f, 0.53f, 0.90f), EStyleState::Hovered)
+		.Pen("Border",  FColor(0.08f, 0.23f, 0.70f), EStyleState::Pressed | EStyleState::Hovered)
+	;
+
+	// -- Button/Secondary (neutral) --
+	styleSheet->Style("Button/Secondary")
+		.Shape("Shape", FRoundedRectangle(5.0f))
+		.Brush("Background", FColor(0.22f, 0.22f, 0.25f))
+		.Brush("Background", FColor(0.29f, 0.29f, 0.33f), EStyleState::Hovered)
+		.Brush("Background", FColor(0.16f, 0.16f, 0.19f), EStyleState::Pressed | EStyleState::Hovered)
+		.Pen("Border",  FColor(0.38f, 0.38f, 0.43f))
+		.Pen("Border",  FColor(0.50f, 0.50f, 0.56f), EStyleState::Hovered)
+		.Pen("Border",  FColor(0.30f, 0.30f, 0.35f), EStyleState::Pressed | EStyleState::Hovered)
+	;
+
+	// -- Button/Destructive (red) --
+	styleSheet->Style("Button/Destructive")
+		.Shape("Shape", FRoundedRectangle(5.0f))
+		.Brush("Background", FColor(0.75f, 0.15f, 0.15f))
+		.Brush("Background", FColor(0.88f, 0.22f, 0.22f), EStyleState::Hovered)
+		.Brush("Background", FColor(0.58f, 0.09f, 0.09f), EStyleState::Pressed | EStyleState::Hovered)
+		.Pen("Border",  FColor(0.60f, 0.10f, 0.10f))
+		.Pen("Border",  FColor(0.75f, 0.16f, 0.16f), EStyleState::Hovered)
+		.Pen("Border",  FColor(0.45f, 0.06f, 0.06f), EStyleState::Pressed | EStyleState::Hovered)
+	;
 
 	app.CreateMainWindow<SampleWindow>();
-	
+
 	return app.Run();
 }
 

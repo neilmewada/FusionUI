@@ -97,6 +97,16 @@ namespace Fusion
 		}
 	}
 
+	void FWidget::OnAttachedToParent(Ref<FWidget> parent)
+	{
+		RefreshStyle();
+	}
+
+	void FWidget::OnDetachedFromParent(Ref<FWidget> parent)
+	{
+		RefreshStyle();
+	}
+
 	Ref<FApplicationInstance> FWidget::GetApplication() const
 	{
 		if (Ref<FSurface> surface = GetParentSurface())
@@ -223,6 +233,19 @@ namespace Fusion
 		if (Ref<FStyle> style = ResolveStyle())
 		{
 			ApplyStyle(*style);
+		}
+	}
+
+	void FWidget::RefreshStyleRecursively()
+	{
+		RefreshStyle();
+
+		for (int i = 0; i < GetChildCount(); i++)
+		{
+			if (Ref<FWidget> widget = GetChildAt(i))
+			{
+				widget->RefreshStyleRecursively();
+			}
 		}
 	}
 

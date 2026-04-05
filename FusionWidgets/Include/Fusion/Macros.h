@@ -1,6 +1,8 @@
 // ReSharper disable CppInconsistentNaming
 #pragma once
 
+#include <optional>
+
 #define FNew(WidgetClass, ...) \
     (* NewObject<WidgetClass>(this))
 
@@ -47,29 +49,33 @@
 				 DirtyFunc;\
 			}\
 			return self;\
-		}
+		}\
+		__FUSION_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)
 
 #define __FUSION_STYLE_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
     protected:\
+		std::optional<PropertyType> m_Inline##PropertyName;\
 		PropertyType m_##PropertyName = {};\
     public:\
-		PropertyType PropertyName() const { return m_##PropertyName; }\
+		PropertyType PropertyName() const { return m_Inline##PropertyName.has_value() ? m_Inline##PropertyName.value() : m_##PropertyName; }\
 		template<typename TSelf>\
 		TSelf& PropertyName(this TSelf& self, PropertyType const& value) {\
 			ZoneScoped;\
 			if constexpr (TFEquitable<PropertyType>::Value)\
 			{\
-				if (TFEquitable<PropertyType>::AreEqual(self.m_##PropertyName, value))\
+				if (self.m_Inline##PropertyName.has_value() && TFEquitable<PropertyType>::AreEqual(self.m_Inline##PropertyName.value(), value))\
 					return self;\
 			}\
 			thread_local const Fusion::FName nameValue = #PropertyName;\
+			self.m_Inline##PropertyName = value;\
 			self.m_##PropertyName = value;\
 			if ((self.GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
 				 static_cast<Fusion::FWidget&>(self).OnPropertyModified(nameValue);\
 				 DirtyFunc;\
 			}\
 			return self;\
-		}
+		}\
+		__FUSION_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)
 
 
 #define FUSION_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
@@ -101,3 +107,15 @@
 			outHandle = self.m_##SignalName.Add(lambda);\
 			return self;\
 		}
+
+#define FUSION_APPLY_STYLE(PropertyName)\
+	if (!m_Inline##PropertyName.has_value())\
+	{\
+		decltype(m_##PropertyName) value;\
+		if (style.TryGet(#PropertyName, value, GetStyleState()))\
+		{\
+			__BypassSetter_##PropertyName(value);\
+		}\
+	}
+
+#define FUSION_APPLY_STYLES(...) FUSION_FOR_EACH(FUSION_APPLY_STYLE, __VA_ARGS__)

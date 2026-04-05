@@ -28,6 +28,9 @@ namespace Fusion
 
         FUSION_SIGNAL(FButtonSignal, OnClick);
 
+    private:
+
+        bool m_Pressed = false;
     };
     
 } // namespace Fusion

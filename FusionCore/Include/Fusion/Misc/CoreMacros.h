@@ -65,6 +65,27 @@
 	inline constexpr u32  operator& (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs & (__underlying_type(Enum))Rhs); }\
 	inline constexpr u32  operator| (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); }
 
+// Applies macro M to each argument (up to 16). Internal helpers use __ prefix.
+#define __FUSION_FOR_EACH_1( M, a)      M(a)
+#define __FUSION_FOR_EACH_2( M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_1( M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_3( M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_2( M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_4( M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_3( M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_5( M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_4( M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_6( M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_5( M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_7( M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_6( M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_8( M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_7( M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_9( M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_8( M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_10(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_9( M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_11(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_10(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_12(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_11(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_13(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_12(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_14(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_13(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_15(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_14(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_16(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_15(M, __VA_ARGS__))
+
+#define FUSION_FOR_EACH(M, ...) \
+    FUSION_MACRO_EXPAND(FUSION_CONCATENATE(__FUSION_FOR_EACH_, FUSION_ARG_COUNT(__VA_ARGS__))(M, __VA_ARGS__))
+
 #define FUSION_BIT(x) (1 << (x))
 #define FUSION_COUNT(arr) ::Fusion::FCountOf(&arr)
 

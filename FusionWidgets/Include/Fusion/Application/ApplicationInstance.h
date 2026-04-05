@@ -75,6 +75,8 @@ namespace Fusion
 
 		void SetRootStyleSheet(Ref<FStyleSheet> styleSheet);
 
+		void RefreshStyleRecursively();
+
 	protected:
 
 		void OnWindowDestroyed(FWindowHandle window) override;

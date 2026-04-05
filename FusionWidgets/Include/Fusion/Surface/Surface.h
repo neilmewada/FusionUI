@@ -85,6 +85,10 @@ namespace Fusion
 
         void CompositeLayer(IntrusivePtr<FRenderSnapshot> snapshot, Ref<FLayer> layer, int layerIndex);
 
+        // - Style -
+
+        void RefreshStyleRecursively(Ref<FWidget> widget = nullptr);
+
     protected:
 
         Ref<FLayerTree> m_LayerTree;

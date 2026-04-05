@@ -28,9 +28,11 @@ namespace Fusion
     class FUSIONWIDGETS_API FWidget : public FObject
     {
         FUSION_WIDGET(FWidget, FObject)
-    public:
+    protected:
 
         FWidget();
+
+    public:
 
         ~FWidget();
 
@@ -106,6 +108,8 @@ namespace Fusion
 
         void RefreshStyle();
 
+        void RefreshStyleRecursively();
+
         Ref<FStyle> ResolveStyle();
 
         virtual void ApplyStyle(FStyle& style);
@@ -117,6 +121,10 @@ namespace Fusion
         virtual void DetachChild(Ref<FWidget> child) {}
 
         void DetachFromParent();
+
+        virtual void OnAttachedToParent(Ref<FWidget> parent);
+
+        virtual void OnDetachedFromParent(Ref<FWidget> parent);
 
         // - Layer -
 

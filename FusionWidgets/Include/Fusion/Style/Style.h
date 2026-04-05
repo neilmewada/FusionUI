@@ -3,6 +3,7 @@
 namespace Fusion
 {
     class FStyleSheet;
+    class FWidget;
 
     template<typename T>
     struct FStyleValue
@@ -10,7 +11,7 @@ namespace Fusion
     private:
 	    
         T m_Default = T();
-        FArray<FPair<EStyleState, T>, 2> m_Overrides;
+        FArray<FPair<EStyleState, T>, 1> m_Overrides;
 
     public:
 
@@ -71,18 +72,20 @@ namespace Fusion
     public:
 
         FStyle& Brush(const FName& propertyName, const FBrush& value, EStyleState state = EStyleState::Default);
-
         FStyle& Pen(const FName& propertyName, const FPen& value, EStyleState state = EStyleState::Default);
-
         FStyle& Color(const FName& propertyName, const FColor& value, EStyleState state = EStyleState::Default);
-
         FStyle& Shape(const FName& propertyName, const FShape& value, EStyleState state = EStyleState::Default);
-
         FStyle& Float(const FName& propertyName, f32 value, EStyleState state = EStyleState::Default);
-
         FStyle& Vec2(const FName& propertyName, const FVec2& value, EStyleState state = EStyleState::Default);
-
         FStyle& Vec4(const FName& propertyName, const FVec4& value, EStyleState state = EStyleState::Default);
+
+        bool TryGet(const FName& propertyName, FBrush& outBrush, EStyleState state);
+        bool TryGet(const FName& propertyName, FPen& outPen, EStyleState state);
+        bool TryGet(const FName& propertyName, FColor& outColor, EStyleState state);
+        bool TryGet(const FName& propertyName, FShape& outShape, EStyleState state);
+        bool TryGet(const FName& propertyName, f32& outFloat, EStyleState state);
+        bool TryGet(const FName& propertyName, FVec2& outVec2, EStyleState state);
+        bool TryGet(const FName& propertyName, FVec4& outVec4, EStyleState state);
 
     private:
 

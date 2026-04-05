@@ -11,6 +11,8 @@
 #include "WeakRef.h"
 
 #define FUSION_CLASS_BODY(SelfClass) typedef SelfClass Self;\
+    template<FObjectType TObject, typename... TArgs>\
+	friend Ref<TObject> Fusion::NewObject(FObject* outer, TArgs&&... args);\
     public:\
 	    virtual FTypeID GetClassTypeID() const { thread_local const FTypeID typeId = ::Fusion::GetTypeID<Self>(); return typeId; }\
 	    virtual FName GetClassName() const { thread_local const Fusion::FName className = #SelfClass; return className; }
@@ -20,6 +22,8 @@
 
 namespace Fusion
 {
+    template<FObjectType TObject, typename... TArgs>
+    Ref<TObject> NewObject(FObject* outer, TArgs&&... args);
 
 	enum class EObjectFlags
     {
@@ -89,9 +93,6 @@ namespace Fusion
         template<typename T> friend class Ref;
         template<typename T> friend class WeakRef;
         friend struct Internal::RefCountBlock;
-
-        template<FObjectType TObject, typename... TArgs>
-        friend Ref<TObject> NewObject(FObject* outer, TArgs&&... args);
     };
 
     template<FObjectType TObject, typename... TArgs>

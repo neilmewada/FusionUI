@@ -23,17 +23,19 @@ namespace Fusion
 
 	FEventReply FButton::OnMouseButtonDown(FMouseEvent& event)
 	{
-		if (event.IsLeftButton())
+		if (event.IsLeftButton() || event.IsRightButton())
 		{
-			
+			SetStyleStateFlag(EStyleState::Pressed, true);
 		}
 		return FEventReply::Handled();
 	}
 
 	FEventReply FButton::OnMouseButtonUp(FMouseEvent& event)
 	{
-		if (event.IsLeftButton())
+		if (event.IsLeftButton() || event.IsRightButton())
 		{
+			SetStyleStateFlag(EStyleState::Pressed, false);
+
 			if (event.bIsInside)
 			{
 				m_OnClick.Broadcast(this);
