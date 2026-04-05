@@ -10,6 +10,12 @@ namespace Fusion
 		m_MainApplication = new FApplicationInstance("FusionApplication");
 	}
 
+	Ref<FStyleSheet> FApplication::CreateDefaultStyleSheet()
+	{
+		m_MainStyleSheet = NewObject<FStyleSheet>(nullptr);
+		return m_MainStyleSheet;
+	}
+
 	int FApplication::Run()
 	{
 		if (m_PlatformBackend == nullptr)
@@ -36,10 +42,13 @@ namespace Fusion
 
 		// TODO: This is all sample code for now
 
+		if (m_MainStyleSheet)
+			m_MainApplication->SetRootStyleSheet(m_MainStyleSheet);
+
 		m_MainApplication->Initialize({
 			m_PlatformBackend,
 			m_RenderBackend
-			});
+		});
 
 		FInstanceHandle instanceHandle = m_MainApplication->GetInstanceHandle();
 

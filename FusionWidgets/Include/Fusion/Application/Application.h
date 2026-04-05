@@ -6,6 +6,7 @@
 namespace Fusion
 {
     class FWidget;
+    class FStyleSheet;
 
     class FUSIONWIDGETS_API FApplication
     {
@@ -20,12 +21,14 @@ namespace Fusion
         Ref<FApplicationInstance> GetMainApplication() const { return m_MainApplication; }
 
         template<class TWidget, class... TArgs>
-        TWidget& CreateWindow(TArgs&&... args) requires TFIsDerivedClass<FWidget, TWidget>::Value
+        TWidget& CreateMainWindow(TArgs&&... args) requires TFIsDerivedClass<FWidget, TWidget>::Value
 		{
             Ref<TWidget> ptr = NewObject<TWidget>(nullptr, std::forward<TArgs>(args)...);
             m_MainWindow = ptr;
             return *ptr;
 		}
+
+        Ref<FStyleSheet> CreateDefaultStyleSheet();
 
         int Run();
 
@@ -35,6 +38,7 @@ namespace Fusion
         FVec2i m_InitialWindowSize = FVec2i(1200, 900);
 
 		Ref<FApplicationInstance> m_MainApplication;
+        Ref<FStyleSheet> m_MainStyleSheet;
 
 		IFRenderBackend* m_RenderBackend = nullptr;
 		IFPlatformBackend* m_PlatformBackend = nullptr;

@@ -64,6 +64,8 @@ namespace Fusion
 
         // - Getters -
 
+        Ref<FApplicationInstance> GetApplication() const;
+
         Ref<FWidget> GetParentWidget() const { return m_ParentWidget.Lock(); }
 
         Ref<FSurface> GetParentSurface() const { return m_ParentSurface.Lock(); }
@@ -77,6 +79,8 @@ namespace Fusion
         virtual u32 GetChildCount() { return 0; }
 
         virtual Ref<FWidget> GetChildAt(u32 index) { return nullptr; }
+
+        EStyleState GetStyleState() const { return m_StyleState; }
 
         // - Layout -
 
@@ -97,6 +101,14 @@ namespace Fusion
         virtual FVec2 MeasureContent(FVec2 availableSize);
 
         virtual void ArrangeContent(FVec2 finalSize);
+
+        // - Style -
+
+        void RefreshStyle();
+
+        Ref<FStyle> ResolveStyle();
+
+        virtual void ApplyStyle(FStyle& style);
 
         // Hierarchy
 
@@ -152,6 +164,8 @@ namespace Fusion
         // For internal use only!
         void SetWidgetFlag(EWidgetFlags flag, bool set);
 
+        void SetStyleStateFlag(EStyleState state, bool set);
+
     public: 
     	
     	// - Fusion Properties -
@@ -175,6 +189,8 @@ namespace Fusion
 
         FUSION_PROPERTY(FShape, ClipShape);
         FUSION_PROPERTY(bool, ClipContent);
+
+        FUSION_PROPERTY(FName, Style);
 
         FUSION_LAYOUT_PROPERTY(EHAlign, HAlign);
         FUSION_LAYOUT_PROPERTY(EVAlign, VAlign);
@@ -247,6 +263,7 @@ namespace Fusion
         FRect m_CachedLayerSpaceAABB;
 
         EWidgetFlags m_WidgetFlags = EWidgetFlags::None;
+        EStyleState m_StyleState = EStyleState::Default;
 
         friend class FLayer;
         friend class FSurface;

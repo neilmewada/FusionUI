@@ -10,7 +10,8 @@
       "Bash(find /c/Projects/CrystalEngine/Engine/Source/Engine/Public -type f -name *.h)",
       "Bash(xargs wc:*)",
       "Bash(find /c/Projects/CrystalEngine/Engine/Source -path *CoreRPI* -name *.h)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(find:*)"
     ]
   }
 }

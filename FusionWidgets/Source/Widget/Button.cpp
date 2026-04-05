@@ -11,12 +11,14 @@ namespace Fusion
 	{
 		Super::OnMouseEnter(event);
 
+		SetStyleStateFlag(EStyleState::Hovered, true);
 	}
 
 	void FButton::OnMouseLeave(FMouseEvent& event)
 	{
 		Super::OnMouseLeave(event);
 
+		SetStyleStateFlag(EStyleState::Hovered, false);
 	}
 
 	FEventReply FButton::OnMouseButtonDown(FMouseEvent& event)

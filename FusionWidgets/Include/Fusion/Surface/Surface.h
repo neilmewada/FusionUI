@@ -38,6 +38,8 @@ namespace Fusion
 
         virtual bool IsNativeSurface() const { return false; }
 
+        Ref<FStyleSheet> GetStyleSheet() const;
+
         FWidget* HitTestWidget(FVec2 pos, FWidget* widget = nullptr);
 
         // - Coordinate Transforms -
@@ -107,6 +109,10 @@ namespace Fusion
         FVec2 m_PixelSize;
 
         f32 m_DpiScale = 1.0f;
+
+        // - Style -
+
+        Ref<FStyleSheet> m_StyleSheet;
 
         // - Event -
 

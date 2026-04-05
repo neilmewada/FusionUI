@@ -19,4 +19,11 @@ namespace Fusion
 		painter.FillAndStrokeShape(FRect(0, 0, layoutSize.width, layoutSize.height), m_Shape);
 	}
 
+	void FDecoratedWidget::ApplyStyle(FStyle& style)
+	{
+		Super::ApplyStyle(style);
+
+
+	}
+
 } // namespace Fusion

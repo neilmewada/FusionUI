@@ -8,6 +8,7 @@ namespace Fusion
 	class FWidget;
 	class FSurface;
 	class FNativeSurface;
+	class FStyleSheet;
 
 	struct FApplicationInstanceDesc
 	{
@@ -68,6 +69,12 @@ namespace Fusion
 		void                ReleaseRenderTarget(FRenderTargetHandle renderTarget);
 		void                SubmitSnapshot(FRenderTargetHandle renderTarget, IntrusivePtr<FRenderSnapshot> snapshot);
 
+		// - Style -
+
+		Ref<FStyleSheet> GetStyleSheet() const { return m_RootStyleSheet; }
+
+		void SetRootStyleSheet(Ref<FStyleSheet> styleSheet);
+
 	protected:
 
 		void OnWindowDestroyed(FWindowHandle window) override;
@@ -88,6 +95,8 @@ namespace Fusion
 
 		WeakRef<FSurface> m_CurFocusSurface;
 		WeakRef<FSurface> m_FocusSurface;
+
+		Ref<FStyleSheet> m_RootStyleSheet;
 
 		FVec2 m_ScreenMousePos;
 		FVec2 m_PrevScreenMousePos;

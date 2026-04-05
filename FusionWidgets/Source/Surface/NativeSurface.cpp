@@ -19,7 +19,7 @@ namespace Fusion
 
 			FVec2i pixelSize = application->GetWindowSizeInPixels(m_WindowHandle);
 
-			m_AvailableSize = FVec2((int)pixelSize.x, (int)pixelSize.y) / m_DpiScale;
+			m_AvailableSize = FVec2((float)pixelSize.x, (float)pixelSize.y) / m_DpiScale;
 		}
 	}
 

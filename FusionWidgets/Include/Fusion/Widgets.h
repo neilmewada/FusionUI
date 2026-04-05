@@ -36,6 +36,8 @@
 #include "Style/Pen.h"
 #include "Style/Brush.h"
 #include "Style/StyleState.h"
+#include "Style/Style.h"
+#include "Style/StyleSheet.h"
 
 // Painting
 #include "Painting/Painter.h"

@@ -10,6 +10,24 @@ namespace Fusion
 		
 	}
 
+	Ref<FStyleSheet> FSurface::GetStyleSheet() const
+	{
+        if (m_StyleSheet)
+            return m_StyleSheet;
+
+        if (Ref<FSurface> parent = GetParentSurface())
+        {
+            return parent->GetStyleSheet();
+        }
+
+        if (Ref<FApplicationInstance> application = GetApplication())
+        {
+            return application->GetStyleSheet();
+        }
+
+        return nullptr;
+	}
+
 	FWidget* FSurface::HitTestWidget(FVec2 pos, FWidget* widget)
 	{
         if (widget == nullptr)

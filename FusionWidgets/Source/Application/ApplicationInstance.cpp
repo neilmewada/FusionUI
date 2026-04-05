@@ -180,6 +180,11 @@ namespace Fusion
 		m_RenderBackend->SubmitSnapshot(renderTarget, snapshot);
 	}
 
+	void FApplicationInstance::SetRootStyleSheet(Ref<FStyleSheet> styleSheet)
+	{
+		m_RootStyleSheet = styleSheet;
+	}
+
 	void FApplicationInstance::OnWindowDestroyed(FWindowHandle window)
 	{
 		if (!m_NativeSurfacesByWindow.KeyExists(window))

@@ -67,6 +67,7 @@ public:
 					.FillRatio(1.0f)
 					.Height(30)
 					.Background(FBrush::Solid(FColors::Red))
+					.Style("Button/Primary")
 					.OnClick([]
 					{
 						FUSION_LOG_INFO("Debug", "Button Clicked!");
@@ -169,7 +170,14 @@ int main(int argc, char* argv[])
 {
 	FApplication app(argc, argv);
 
-	app.CreateWindow<SampleWindow>();
+	Ref<FStyleSheet> styleSheet = app.CreateDefaultStyleSheet();
+
+	styleSheet->Style("Button/Primary")
+		.Brush("Background", FColors::Red)
+		.Brush("Background", FColors::Red, EStyleState::Hovered)
+		.Brush("Background", FColors::Red, EStyleState::Pressed);
+
+	app.CreateMainWindow<SampleWindow>();
 	
 	return app.Run();
 }

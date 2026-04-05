@@ -97,6 +97,15 @@ namespace Fusion
 		}
 	}
 
+	Ref<FApplicationInstance> FWidget::GetApplication() const
+	{
+		if (Ref<FSurface> surface = GetParentSurface())
+		{
+			return surface->GetApplication();
+		}
+		return nullptr;
+	}
+
 	void FWidget::OnPropertyModified(const FName& propertyName)
 	{
 		thread_local const FName styleProperty = "Style";
@@ -209,6 +218,33 @@ namespace Fusion
 		MarkPaintDirty();
 	}
 
+	void FWidget::RefreshStyle()
+	{
+		if (Ref<FStyle> style = ResolveStyle())
+		{
+			ApplyStyle(*style);
+		}
+	}
+
+	Ref<FStyle> FWidget::ResolveStyle()
+	{
+		FName styleName = m_Style.IsValid() ? m_Style : GetClassName();
+		if (Ref<FSurface> surface = GetParentSurface())
+		{
+			if (Ref<FStyleSheet> styleSheet = surface->GetStyleSheet())
+			{
+				return styleSheet->FindStyle(styleName);
+			}
+		}
+
+		return nullptr;
+	}
+
+	void FWidget::ApplyStyle(FStyle& style)
+	{
+
+	}
+
 	void FWidget::SetParentSurfaceRecursive(Ref<FSurface> surface)
 	{
 		ZoneScoped;
@@ -305,4 +341,19 @@ namespace Fusion
 			m_WidgetFlags &= ~flag;
 		}
 	}
+
+	void FWidget::SetStyleStateFlag(EStyleState state, bool set)
+	{
+		if (set)
+		{
+			m_StyleState |= state;
+		}
+		else
+		{
+			m_StyleState &= ~state;
+		}
+
+		RefreshStyle();
+	}
+
 } // namespace Fusion
