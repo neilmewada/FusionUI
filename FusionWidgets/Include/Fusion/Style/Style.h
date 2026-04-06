@@ -79,6 +79,19 @@ namespace Fusion
         FStyle& Vec2(const FName& propertyName, const FVec2& value, EStyleState state = EStyleState::Default);
         FStyle& Vec4(const FName& propertyName, const FVec4& value, EStyleState state = EStyleState::Default);
 
+        template<typename T>
+        FStyle& Set(const FName& propertyName, const T& value, EStyleState state = EStyleState::Default)
+        {
+            if constexpr (std::is_same_v<T, FBrush>)       return Brush(propertyName, value, state);
+            else if constexpr (std::is_same_v<T, FPen>)    return Pen(propertyName, value, state);
+            else if constexpr (std::is_same_v<T, FColor>)  return Color(propertyName, value, state);
+            else if constexpr (std::is_same_v<T, FShape>)  return Shape(propertyName, value, state);
+            else if constexpr (std::is_same_v<T, f32>)     return Float(propertyName, value, state);
+            else if constexpr (std::is_same_v<T, FVec2>)   return Vec2(propertyName, value, state);
+            else if constexpr (std::is_same_v<T, FVec4>)   return Vec4(propertyName, value, state);
+            else static_assert(sizeof(T) == 0, "FStyle::Set — unsupported property type");
+        }
+
         bool TryGet(const FName& propertyName, FBrush& outBrush, EStyleState state);
         bool TryGet(const FName& propertyName, FPen& outPen, EStyleState state);
         bool TryGet(const FName& propertyName, FColor& outColor, EStyleState state);

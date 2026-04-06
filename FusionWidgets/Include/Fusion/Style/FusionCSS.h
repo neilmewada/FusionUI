@@ -40,12 +40,15 @@ namespace Fusion::CSS
     };
 
     // -------------------------------------------------------------------------
-    // FStyleProp — write proxy for a single named style property.
+    // FStyleProp<T> — type-safe write proxy for a single named style property.
+    // T is deduced from the widget class getter via decltype in FUSION_STYLE.
     // Holds a pointer to the shared context so state changes made by
     // FUSION_ON are visible through existing prop bindings.
-    // operator= dispatches to the right FStyle setter by value type.
+    // operator= calls FStyle::Set<T>, which dispatches by type at compile time.
+    // Implicit conversions (e.g. FColor → FBrush) still work naturally.
     // -------------------------------------------------------------------------
 
+    template<typename T>
     struct FStyleProp
     {
         FStyleContext* m_Context;
@@ -54,45 +57,9 @@ namespace Fusion::CSS
         FStyleProp(FStyleContext* context, const FName& name)
             : m_Context(context), m_Name(name) {}
 
-        FStyleProp& operator=(const FBrush& value)
+        FStyleProp& operator=(const T& value)
         {
-            m_Context->Style.Brush(m_Name, value, m_Context->State);
-            return *this;
-        }
-
-        FStyleProp& operator=(const FPen& value)
-        {
-            m_Context->Style.Pen(m_Name, value, m_Context->State);
-            return *this;
-        }
-
-        FStyleProp& operator=(const FShape& value)
-        {
-            m_Context->Style.Shape(m_Name, value, m_Context->State);
-            return *this;
-        }
-
-        FStyleProp& operator=(const FColor& value)
-        {
-            m_Context->Style.Color(m_Name, value, m_Context->State);
-            return *this;
-        }
-
-        FStyleProp& operator=(f32 value)
-        {
-            m_Context->Style.Float(m_Name, value, m_Context->State);
-            return *this;
-        }
-
-        FStyleProp& operator=(const FVec2& value)
-        {
-            m_Context->Style.Vec2(m_Name, value, m_Context->State);
-            return *this;
-        }
-
-        FStyleProp& operator=(const FVec4& value)
-        {
-            m_Context->Style.Vec4(m_Name, value, m_Context->State);
+            m_Context->Style.Set<T>(m_Name, value, m_Context->State);
             return *this;
         }
     };
@@ -100,16 +67,20 @@ namespace Fusion::CSS
 } // namespace Fusion::CSS
 
 // -----------------------------------------------------------------------------
-// __FUSION_CSS_MAKE_PROP — internal helper, produces one FStyleProp per name.
-// Trailing comma is valid in a braced-init-list (C++11).
+// __FUSION_CSS_MAKE_PROP(WidgetClass, PropName)
+//   Produces one FStyleProp<T> where T is deduced from the widget getter.
+//   Uses std::remove_cvref_t so const& return types reduce to plain T.
+//   Trailing comma is valid in a braced-init-list (C++11).
 // -----------------------------------------------------------------------------
 
-#define __FUSION_CSS_MAKE_PROP(PropName) \
-    Fusion::CSS::FStyleProp{&_fusion_css_ctx, #PropName},
+#define __FUSION_CSS_MAKE_PROP(WidgetClass, PropName)                                  \
+    Fusion::CSS::FStyleProp<                                                           \
+        std::remove_cvref_t<decltype(std::declval<const WidgetClass&>().PropName())>  \
+    >{&_fusion_css_ctx, #PropName},
 
 // -----------------------------------------------------------------------------
 // FUSION_STYLE(WidgetClass, StyleName, ...Props)
-//   WidgetClass — documents intent, unused in expansion
+//   WidgetClass — used to deduce the type of each prop via its getter
 //   StyleName   — style registry key
 //   ...Props    — property names brought into block scope via structured bindings
 // -----------------------------------------------------------------------------
@@ -119,7 +90,7 @@ namespace Fusion::CSS
         true)                                                                          \
     if (auto [__VA_ARGS__] = std::tuple{                                               \
             FUSION_MACRO_EXPAND(                                                       \
-                FUSION_FOR_EACH(__FUSION_CSS_MAKE_PROP, __VA_ARGS__))                 \
+                FUSION_FOR_EACH_CTX(__FUSION_CSS_MAKE_PROP, WidgetClass, __VA_ARGS__)) \
         }; true)
 
 // -----------------------------------------------------------------------------
