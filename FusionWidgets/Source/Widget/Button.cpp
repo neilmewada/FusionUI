@@ -23,6 +23,9 @@ namespace Fusion
 
 	FEventReply FButton::OnMouseButtonDown(FMouseEvent& event)
 	{
+		if (Disabled())
+			return FEventReply::Unhandled();
+
 		if (event.IsLeftButton() || event.IsRightButton())
 		{
 			SetStyleStateFlag(EStyleState::Pressed, true);
@@ -32,6 +35,13 @@ namespace Fusion
 
 	FEventReply FButton::OnMouseButtonUp(FMouseEvent& event)
 	{
+		if (Disabled())
+		{
+			SetStyleStateFlag(EStyleState::Pressed | EStyleState::Hovered, false);
+
+			return FEventReply::Unhandled();
+		}
+
 		if (event.IsLeftButton() || event.IsRightButton())
 		{
 			SetStyleStateFlag(EStyleState::Pressed, false);

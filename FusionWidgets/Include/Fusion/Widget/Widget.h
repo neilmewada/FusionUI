@@ -114,6 +114,8 @@ namespace Fusion
 
         virtual void ApplyStyle(FStyle& style);
 
+        bool TestStyleState(EStyleState state) const { return FEnumHasAllFlags(m_StyleState, state); }
+
         // Hierarchy
 
         virtual void SetParentSurfaceRecursive(Ref<FSurface> surface);
@@ -225,6 +227,20 @@ namespace Fusion
         FUSION_PROPERTY_GET(bool, Visible)
         {
             return !IsHidden();
+        }
+
+        FUSION_PROPERTY_GET(bool, Disabled)
+        {
+            return TestStyleState(EStyleState::Disabled);
+        }
+
+        FUSION_PROPERTY_SET(bool, Disabled)
+        {
+            if (self.Disabled() != value)
+            {
+                static_cast<FWidget&>(self).SetStyleStateFlag(EStyleState::Disabled, value);
+            }
+            return self;
         }
 
         template<typename TWidget> requires TFIsDerivedClass<FWidget, TWidget>::Value

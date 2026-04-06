@@ -1,7 +1,6 @@
 
 #include <Fusion/Core.h>
 #include <Fusion/SDL3Platform.h>
-#include <Fusion/VulkanRHI.h>
 #include <Fusion/Widgets.h>
 
 using namespace Fusion;
@@ -13,6 +12,8 @@ public:
 
 	Ref<FVerticalStack> vstack;
 	Ref<FHorizontalStack> hstack;
+
+	Ref<FButton> btn0;
 
 	void Construct() override
 	{
@@ -63,7 +64,7 @@ public:
 				.ClipContent(true)
 				.Name("hstack")
 				(
-					FNew(FButton)
+					FAssignNew(FButton, btn0)
 					.FillRatio(1.0f)
 					.Height(32)
 					.Style("Button/Primary")
@@ -85,8 +86,9 @@ public:
 					.FillRatio(1.0f)
 					.Height(32)
 					.Style("Button/Destructive")
-					.OnClick([]
+					.OnClick([this]
 					{
+						btn0->Disabled(!btn0->Disabled());
 						FUSION_LOG_INFO("Debug", "Destructive clicked!");
 					}),
 
@@ -204,6 +206,11 @@ int main(int argc, char* argv[])
 				Background = FColor(0.11f, 0.31f, 0.85f);
 				Border     = FColor(0.08f, 0.23f, 0.70f);
 			}
+			FUSION_ON(Disabled)
+			{
+				Background = FColor(0.18f, 0.18f, 0.20f);
+				Border     = FColor(0.25f, 0.25f, 0.28f);
+			}
 		}
 
 		FUSION_STYLE(FButton, "Button/Secondary", Shape, Background, Border)
@@ -222,6 +229,11 @@ int main(int argc, char* argv[])
 				Background = FColor(0.16f, 0.16f, 0.19f);
 				Border     = FColor(0.30f, 0.30f, 0.35f);
 			}
+			FUSION_ON(Disabled)
+			{
+				Background = FColor(0.18f, 0.18f, 0.20f);
+				Border     = FColor(0.25f, 0.25f, 0.28f);
+			}
 		}
 
 		FUSION_STYLE(FButton, "Button/Destructive", Shape, Background, Border)
@@ -239,6 +251,11 @@ int main(int argc, char* argv[])
 			{
 				Background = FColor(0.58f, 0.09f, 0.09f);
 				Border     = FColor(0.45f, 0.06f, 0.06f);
+			}
+			FUSION_ON(Disabled)
+			{
+				Background = FColor(0.18f, 0.18f, 0.20f);
+				Border     = FColor(0.25f, 0.25f, 0.28f);
 			}
 		}
 	});

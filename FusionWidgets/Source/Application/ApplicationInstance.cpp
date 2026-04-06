@@ -182,7 +182,12 @@ namespace Fusion
 
 	void FApplicationInstance::SetRootTheme(Ref<FTheme> theme)
 	{
+		if (m_RootTheme == theme)
+			return;
+
 		m_RootTheme = theme;
+
+		RefreshStyleRecursively();
 	}
 
 	void FApplicationInstance::RefreshStyleRecursively()

@@ -367,16 +367,15 @@ namespace Fusion
 
 	void FWidget::SetStyleStateFlag(EStyleState state, bool set)
 	{
-		if (set)
-		{
-			m_StyleState |= state;
-		}
-		else
-		{
-			m_StyleState &= ~state;
-		}
+		EStyleState prev = m_StyleState;
 
-		RefreshStyle();
+		if (set)
+			m_StyleState |= state;
+		else
+			m_StyleState &= ~state;
+
+		if (m_StyleState != prev)
+			RefreshStyle();
 	}
 
 } // namespace Fusion
