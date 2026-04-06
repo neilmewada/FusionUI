@@ -190,9 +190,20 @@ int main(int argc, char* argv[])
 
 	theme->MergeStyleSheet(FUSION_STYLE_SHEET
 	{
+		FUSION_STYLE(FButton, "Button/Base", Shape, Background, Border)
+		{
+			Shape = FRoundedRectangle(5.0f);
+
+			FUSION_ON(Disabled)
+			{
+				Background = FColor(0.18f, 0.18f, 0.20f);
+				Border     = FColor(0.25f, 0.25f, 0.28f);
+			}
+		}
+
 		FUSION_STYLE(FButton, "Button/Primary", Shape, Background, Border)
 		{
-			Shape      = FRoundedRectangle(5.0f);
+			Extends("Button/Base");
 			Background = FColor(0.23f, 0.51f, 0.96f);
 			Border     = FColor(0.16f, 0.40f, 0.82f);
 
@@ -206,16 +217,11 @@ int main(int argc, char* argv[])
 				Background = FColor(0.11f, 0.31f, 0.85f);
 				Border     = FColor(0.08f, 0.23f, 0.70f);
 			}
-			FUSION_ON(Disabled)
-			{
-				Background = FColor(0.18f, 0.18f, 0.20f);
-				Border     = FColor(0.25f, 0.25f, 0.28f);
-			}
 		}
 
 		FUSION_STYLE(FButton, "Button/Secondary", Shape, Background, Border)
 		{
-			Shape      = FRoundedRectangle(5.0f);
+			Extends("Button/Base");
 			Background = FColor(0.22f, 0.22f, 0.25f);
 			Border     = FColor(0.38f, 0.38f, 0.43f);
 
@@ -229,16 +235,11 @@ int main(int argc, char* argv[])
 				Background = FColor(0.16f, 0.16f, 0.19f);
 				Border     = FColor(0.30f, 0.30f, 0.35f);
 			}
-			FUSION_ON(Disabled)
-			{
-				Background = FColor(0.18f, 0.18f, 0.20f);
-				Border     = FColor(0.25f, 0.25f, 0.28f);
-			}
 		}
 
 		FUSION_STYLE(FButton, "Button/Destructive", Shape, Background, Border)
 		{
-			Shape      = FRoundedRectangle(5.0f);
+			Extends("Button/Base");
 			Background = FColor(0.75f, 0.15f, 0.15f);
 			Border     = FColor(0.60f, 0.10f, 0.10f);
 
@@ -251,11 +252,6 @@ int main(int argc, char* argv[])
 			{
 				Background = FColor(0.58f, 0.09f, 0.09f);
 				Border     = FColor(0.45f, 0.06f, 0.06f);
-			}
-			FUSION_ON(Disabled)
-			{
-				Background = FColor(0.18f, 0.18f, 0.20f);
-				Border     = FColor(0.25f, 0.25f, 0.28f);
 			}
 		}
 	});
