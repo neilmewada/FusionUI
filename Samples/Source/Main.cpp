@@ -7,7 +7,7 @@ using namespace Fusion;
 
 class SampleWindow : public FDecoratedWidget
 {
-	FUSION_CLASS(SampleWindow, FDecoratedWidget)
+	FUSION_WIDGET(SampleWindow, FDecoratedWidget)
 public:
 
 	Ref<FVerticalStack> vstack;

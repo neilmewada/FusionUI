@@ -4,7 +4,7 @@
 #include <optional>
 
 #define FNew(WidgetClass, ...) \
-    (* NewObject<WidgetClass>(this))
+    (* ::Fusion::NewObject<WidgetClass>(this))
 
 #define FAssignNew(WidgetClass, VariableName) FNew(WidgetClass).Assign(VariableName)
 
