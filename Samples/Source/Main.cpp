@@ -60,6 +60,7 @@ public:
 				FAssignNew(FHorizontalStack, hstack)
 				.ContentHAlign(EHAlign::Center)
 				.ContentVAlign(EVAlign::Center)
+				//.ForcePaintBoundary(true)
 				.Spacing(10)
 				.ClipContent(true)
 				.Name("hstack")

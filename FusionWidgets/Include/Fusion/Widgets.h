@@ -40,6 +40,11 @@
 #include "Style/Theme.h"
 #include "Style/FusionCSS.h"
 
+// Animation
+#include "Animation/Animatable.h"
+#include "Animation/EasingCurve.h"
+#include "Animation/Animation.h"
+
 // Painting
 #include "Painting/Painter.h"
 

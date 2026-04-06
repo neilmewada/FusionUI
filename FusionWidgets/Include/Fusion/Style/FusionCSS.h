@@ -104,10 +104,13 @@ namespace Fusion::CSS
 
 
 
-#define __FUSION_FOLD_STATES_1(a)          EStyleState::a
-#define __FUSION_FOLD_STATES_2(a, b)       EStyleState::a | EStyleState::b
-#define __FUSION_FOLD_STATES_3(a, b, c)    EStyleState::a | EStyleState::b | EStyleState::c
-#define __FUSION_FOLD_STATES_4(a, b, c, d) EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d
+#define __FUSION_FOLD_STATES_1(a)                   EStyleState::a
+#define __FUSION_FOLD_STATES_2(a, b)                EStyleState::a | EStyleState::b
+#define __FUSION_FOLD_STATES_3(a, b, c)             EStyleState::a | EStyleState::b | EStyleState::c
+#define __FUSION_FOLD_STATES_4(a, b, c, d)          EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d
+#define __FUSION_FOLD_STATES_5(a, b, c, d, e)       EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e
+#define __FUSION_FOLD_STATES_6(a, b, c, d, e, f)    EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e | EStyleState::f
+#define __FUSION_FOLD_STATES_7(a, b, c, d, e, f, g) EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e | EStyleState::f | EStyleState::g
 
 /// @brief Folds one or more bare state names into a combined `EStyleState` bitmask.
 ///
