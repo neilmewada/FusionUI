@@ -81,9 +81,6 @@
 #define FUSION_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
 #define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkLayoutDirty())
 
-#define FUSION_STYLE_PROPERTY(PropertyType, PropertyName) __FUSION_STYLE_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
-#define FUSION_LAYOUT_STYLE_PROPERTY(PropertyType, PropertyName) __FUSION_STYLE_PROPERTY(PropertyType, PropertyName, self.MarkLayoutDirty())
-
 #define FUSION_PROPERTY_GET(PropertyType, PropertyName) \
 	PropertyType PropertyName()
 
@@ -121,20 +118,23 @@
 
 #define FUSION_APPLY_STYLES(...) FUSION_FOR_EACH(FUSION_APPLY_STYLE, __VA_ARGS__)
 
-// Per-pair helpers used by FUSION_STYLE_PROPERTIES.
-// Pair is always a parenthesised (Type, Name) token group.
-//
-// DECL: juxtapose the macro name with the already-parenthesised pair so the
-//       preprocessor sees a normal two-argument call — no unpacking needed.
-#define __FUSION_SP_DECL(Pair)        FUSION_STYLE_PROPERTY Pair
-//
-// APPLY: __FUSION_SP_NAME expands the pair to just its Name token, but
-//        FUSION_APPLY_STYLE uses # / ## which suppress argument expansion.
-//        The extra indirection (__FUSION_SP_APPLY2) forces full expansion of
-//        Name before it reaches those operators.
-#define __FUSION_SP_NAME(Type, Name)  Name
-#define __FUSION_SP_APPLY(Pair)       __FUSION_SP_APPLY2(__FUSION_SP_NAME Pair)
-#define __FUSION_SP_APPLY2(Name)      FUSION_APPLY_STYLE(Name)
+// Per-tuple helpers used by FUSION_STYLE_PROPERTIES.
+// Each tuple is a parenthesised (Type, Name, DirtyKind) token group
+// where DirtyKind is Paint or Layout.
+
+// Dirty-kind dispatch — maps the trailing tag to the right property macro.
+#define __FUSION_SP_PROP_Paint(Type, Name)   __FUSION_STYLE_PROPERTY(Type, Name, self.MarkPaintDirty())
+#define __FUSION_SP_PROP_Layout(Type, Name)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty())
+
+// DECL: unpack via juxtaposition, then dispatch on the trailing DirtyKind tag.
+#define __FUSION_SP_DECL(Tuple)                    __FUSION_SP_DECL_I Tuple
+#define __FUSION_SP_DECL_I(Type, Name, DirtyKind)  FUSION_CONCATENATE(__FUSION_SP_PROP_, DirtyKind)(Type, Name)
+
+// APPLY: extract Name (2nd element) with an extra indirection so it is fully
+//        expanded before reaching the # / ## operators inside FUSION_APPLY_STYLE.
+#define __FUSION_SP_NAME(Type, Name, DirtyKind)  Name
+#define __FUSION_SP_APPLY(Tuple)                 __FUSION_SP_APPLY2(__FUSION_SP_NAME Tuple)
+#define __FUSION_SP_APPLY2(Name)                 FUSION_APPLY_STYLE(Name)
 
 // Declares every (Type, Name) style property AND generates the ApplyStyle override.
 // Replaces individual FUSION_STYLE_PROPERTY calls + the hand-written ApplyStyle body.

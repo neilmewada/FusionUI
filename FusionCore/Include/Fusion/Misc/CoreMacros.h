@@ -65,7 +65,7 @@
 	inline constexpr u32  operator& (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs & (__underlying_type(Enum))Rhs); }\
 	inline constexpr u32  operator| (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); }
 
-// Applies macro M to each argument (up to 16). Internal helpers use __ prefix.
+// Applies macro M to each argument (up to 64). Internal helpers use __ prefix.
 #define __FUSION_FOR_EACH_1( M, a)      M(a)
 #define __FUSION_FOR_EACH_2( M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_1( M, __VA_ARGS__))
 #define __FUSION_FOR_EACH_3( M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_2( M, __VA_ARGS__))
@@ -98,6 +98,38 @@
 #define __FUSION_FOR_EACH_30(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_29(M, __VA_ARGS__))
 #define __FUSION_FOR_EACH_31(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_30(M, __VA_ARGS__))
 #define __FUSION_FOR_EACH_32(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_31(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_33(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_32(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_34(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_33(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_35(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_34(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_36(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_35(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_37(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_36(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_38(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_37(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_39(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_38(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_40(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_39(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_41(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_40(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_42(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_41(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_43(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_42(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_44(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_43(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_45(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_44(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_46(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_45(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_47(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_46(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_48(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_47(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_49(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_48(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_50(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_49(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_51(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_50(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_52(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_51(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_53(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_52(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_54(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_53(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_55(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_54(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_56(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_55(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_57(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_56(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_58(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_57(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_59(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_58(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_60(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_59(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_61(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_60(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_62(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_61(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_63(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_62(M, __VA_ARGS__))
+#define __FUSION_FOR_EACH_64(M, a, ...) M(a) FUSION_MACRO_EXPAND(__FUSION_FOR_EACH_63(M, __VA_ARGS__))
 
 #define FUSION_FOR_EACH(M, ...) \
     FUSION_MACRO_EXPAND(FUSION_CONCATENATE(__FUSION_FOR_EACH_, FUSION_ARG_COUNT(__VA_ARGS__))(M, __VA_ARGS__))

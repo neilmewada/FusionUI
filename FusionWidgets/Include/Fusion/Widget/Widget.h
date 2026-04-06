@@ -144,15 +144,15 @@ namespace Fusion
 
         // - Event -
 
-        virtual void OnMouseEnter(FMouseEvent& event) {}
-        virtual void OnMouseLeave(FMouseEvent& event) {}
-        virtual FEventReply OnMouseMove(FMouseEvent& event) { return FEventReply::Unhandled(); }
-        virtual FEventReply OnMouseButtonDown(FMouseEvent& event) { return FEventReply::Unhandled(); }
-        virtual FEventReply OnMouseButtonUp(FMouseEvent& event) { return FEventReply::Unhandled(); }
-        virtual FEventReply OnMouseWheel(FMouseEvent& event) { return FEventReply::Unhandled(); }
-        virtual FEventReply OnKeyDown(FKeyEvent& event) { return FEventReply::Unhandled(); }
-        virtual FEventReply OnKeyUp(FKeyEvent& event) { return FEventReply::Unhandled(); }
-        virtual void OnFocusChanged(FFocusEvent& event) {}
+        virtual void OnMouseEnter([[maybe_unused]] FMouseEvent& event) {}
+        virtual void OnMouseLeave([[maybe_unused]] FMouseEvent& event) {}
+        virtual FEventReply OnMouseMove([[maybe_unused]] FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnMouseButtonDown([[maybe_unused]] FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnMouseButtonUp([[maybe_unused]] FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnMouseWheel([[maybe_unused]] FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnKeyDown([[maybe_unused]] FKeyEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnKeyUp([[maybe_unused]] FKeyEvent& event) { return FEventReply::Unhandled(); }
+        virtual void OnFocusChanged([[maybe_unused]] FFocusEvent& event) {}
 
         bool SelfHitTest(FVec2 localMousePos);
 

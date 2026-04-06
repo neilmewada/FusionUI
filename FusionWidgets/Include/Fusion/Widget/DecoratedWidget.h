@@ -16,10 +16,12 @@ namespace Fusion
 
     public:
 
+        // - Fusion Properties -
+
         FUSION_STYLE_PROPERTIES(
-            (FBrush, Background),
-            (FPen,   Border),
-            (FShape, Shape)
+            (FBrush, Background, Paint),
+            (FPen,   Border,     Paint),
+            (FShape, Shape,      Paint)
         );
 
     };

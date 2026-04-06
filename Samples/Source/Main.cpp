@@ -219,6 +219,26 @@ int main(int argc, char* argv[])
 		.Pen("Border",  FColor(0.45f, 0.06f, 0.06f), EStyleState::Pressed | EStyleState::Hovered)
 	;
 
+	/*
+	STYLE(FButton, "Button/Primary", Shape, Background, Border)
+	{
+		Shape		 = FRoundedRectangle(5.0f);
+		Background   = FColor(0.23f, 0.51f, 0.96f);
+		Border		 = FColor(0.16f, 0.40f, 0.82f);
+
+		ON(Hovered)
+		{
+			background = FColor(0.38f, 0.65f, 0.98f);
+			border	   = FColor(0.26f, 0.53f, 0.90f);
+		}
+		ON(Pressed | Hovered)
+		{
+			background = FColor(0.11f, 0.31f, 0.85f);
+			border = FColor(0.08f, 0.23f, 0.70f);
+		}
+	}
+	*/
+
 	app.CreateMainWindow<SampleWindow>();
 
 	return app.Run();
