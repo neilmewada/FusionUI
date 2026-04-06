@@ -184,60 +184,64 @@ int main(int argc, char* argv[])
 {
 	FApplication app(argc, argv);
 
-	Ref<FStyleSheet> styleSheet = app.CreateDefaultStyleSheet();
+	Ref<FTheme> styleSheet = app.CreateDefaultStyleSheet();
 
-	// -- Button/Primary (blue) --
-	styleSheet->Style("Button/Primary")
-		.Shape("Shape", FRoundedRectangle(5.0f))
-		.Brush("Background", FColor(0.23f, 0.51f, 0.96f))
-		.Brush("Background", FColor(0.38f, 0.65f, 0.98f), EStyleState::Hovered)
-		.Brush("Background", FColor(0.11f, 0.31f, 0.85f), EStyleState::Pressed | EStyleState::Hovered)
-		.Pen("Border",  FColor(0.16f, 0.40f, 0.82f))
-		.Pen("Border",  FColor(0.26f, 0.53f, 0.90f), EStyleState::Hovered)
-		.Pen("Border",  FColor(0.08f, 0.23f, 0.70f), EStyleState::Pressed | EStyleState::Hovered)
-	;
+	styleSheet->Merge(FUSION_STYLE_SHEET {
 
-	// -- Button/Secondary (neutral) --
-	styleSheet->Style("Button/Secondary")
-		.Shape("Shape", FRoundedRectangle(5.0f))
-		.Brush("Background", FColor(0.22f, 0.22f, 0.25f))
-		.Brush("Background", FColor(0.29f, 0.29f, 0.33f), EStyleState::Hovered)
-		.Brush("Background", FColor(0.16f, 0.16f, 0.19f), EStyleState::Pressed | EStyleState::Hovered)
-		.Pen("Border",  FColor(0.38f, 0.38f, 0.43f))
-		.Pen("Border",  FColor(0.50f, 0.50f, 0.56f), EStyleState::Hovered)
-		.Pen("Border",  FColor(0.30f, 0.30f, 0.35f), EStyleState::Pressed | EStyleState::Hovered)
-	;
-
-	// -- Button/Destructive (red) --
-	styleSheet->Style("Button/Destructive")
-		.Shape("Shape", FRoundedRectangle(5.0f))
-		.Brush("Background", FColor(0.75f, 0.15f, 0.15f))
-		.Brush("Background", FColor(0.88f, 0.22f, 0.22f), EStyleState::Hovered)
-		.Brush("Background", FColor(0.58f, 0.09f, 0.09f), EStyleState::Pressed | EStyleState::Hovered)
-		.Pen("Border",  FColor(0.60f, 0.10f, 0.10f))
-		.Pen("Border",  FColor(0.75f, 0.16f, 0.16f), EStyleState::Hovered)
-		.Pen("Border",  FColor(0.45f, 0.06f, 0.06f), EStyleState::Pressed | EStyleState::Hovered)
-	;
-
-	/*
-	STYLE(FButton, "Button/Primary", Shape, Background, Border)
-	{
-		Shape		 = FRoundedRectangle(5.0f);
-		Background   = FColor(0.23f, 0.51f, 0.96f);
-		Border		 = FColor(0.16f, 0.40f, 0.82f);
-
-		ON(Hovered)
+		FUSION_STYLE(FButton, "Button/Primary", Shape, Background, Border)
 		{
-			background = FColor(0.38f, 0.65f, 0.98f);
-			border	   = FColor(0.26f, 0.53f, 0.90f);
+			Shape = FRoundedRectangle(5.0f);
+			Background = FBrush::Solid(FColor(0.23f, 0.51f, 0.96f));
+			Border = FPen::Solid(FColor(0.16f, 0.40f, 0.82f));
+
+			FUSION_ON(Hovered)
+			{
+				Background = FBrush::Solid(FColor(0.38f, 0.65f, 0.98f));
+				Border = FPen::Solid(FColor(0.26f, 0.53f, 0.90f));
+			}
+			FUSION_ON(Pressed, Hovered)
+			{
+				Background = FBrush::Solid(FColor(0.11f, 0.31f, 0.85f));
+				Border = FPen::Solid(FColor(0.08f, 0.23f, 0.70f));
+			}
 		}
-		ON(Pressed | Hovered)
+
+		FUSION_STYLE(FButton, "Button/Secondary", Shape, Background, Border)
 		{
-			background = FColor(0.11f, 0.31f, 0.85f);
-			border = FColor(0.08f, 0.23f, 0.70f);
+			Shape = FRoundedRectangle(5.0f);
+			Background = FBrush::Solid(FColor(0.22f, 0.22f, 0.25f));
+			Border = FPen::Solid(FColor(0.38f, 0.38f, 0.43f));
+
+			FUSION_ON(Hovered)
+			{
+				Background = FBrush::Solid(FColor(0.29f, 0.29f, 0.33f));
+				Border = FPen::Solid(FColor(0.50f, 0.50f, 0.56f));
+			}
+			FUSION_ON(Pressed, Hovered)
+			{
+				Background = FBrush::Solid(FColor(0.16f, 0.16f, 0.19f));
+				Border = FPen::Solid(FColor(0.30f, 0.30f, 0.35f));
+			}
 		}
-	}
-	*/
+
+		FUSION_STYLE(FButton, "Button/Destructive", Shape, Background, Border)
+		{
+			Shape = FRoundedRectangle(5.0f);
+			Background = FBrush::Solid(FColor(0.75f, 0.15f, 0.15f));
+			Border = FPen::Solid(FColor(0.60f, 0.10f, 0.10f));
+
+			FUSION_ON(Hovered)
+			{
+				Background = FBrush::Solid(FColor(0.88f, 0.22f, 0.22f));
+				Border = FColor(0.75f, 0.16f, 0.16f);
+			}
+			FUSION_ON(Pressed, Hovered)
+			{
+				Background = FBrush::Solid(FColor(0.58f, 0.09f, 0.09f));
+				Border = FColor(0.45f, 0.06f, 0.06f);
+			}
+		}
+	});
 
 	app.CreateMainWindow<SampleWindow>();
 

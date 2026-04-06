@@ -38,7 +38,7 @@ namespace Fusion
 
         virtual bool IsNativeSurface() const { return false; }
 
-        Ref<FStyleSheet> GetStyleSheet() const;
+        Ref<FTheme> GetStyleSheet() const;
 
         FWidget* HitTestWidget(FVec2 pos, FWidget* widget = nullptr);
 
@@ -116,7 +116,7 @@ namespace Fusion
 
         // - Style -
 
-        Ref<FStyleSheet> m_StyleSheet;
+        Ref<FTheme> m_StyleSheet;
 
         // - Event -
 

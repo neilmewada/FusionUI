@@ -37,7 +37,8 @@
 #include "Style/Brush.h"
 #include "Style/StyleState.h"
 #include "Style/Style.h"
-#include "Style/StyleSheet.h"
+#include "Style/Theme.h"
+#include "Style/FusionCSS.h"
 
 // Painting
 #include "Painting/Painter.h"

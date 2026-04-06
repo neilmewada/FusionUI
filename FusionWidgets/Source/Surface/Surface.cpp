@@ -10,7 +10,7 @@ namespace Fusion
 		
 	}
 
-	Ref<FStyleSheet> FSurface::GetStyleSheet() const
+	Ref<FTheme> FSurface::GetStyleSheet() const
 	{
         if (m_StyleSheet)
             return m_StyleSheet;

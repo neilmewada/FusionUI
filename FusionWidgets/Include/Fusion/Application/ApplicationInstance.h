@@ -8,7 +8,7 @@ namespace Fusion
 	class FWidget;
 	class FSurface;
 	class FNativeSurface;
-	class FStyleSheet;
+	class FTheme;
 
 	struct FApplicationInstanceDesc
 	{
@@ -71,9 +71,9 @@ namespace Fusion
 
 		// - Style -
 
-		Ref<FStyleSheet> GetStyleSheet() const { return m_RootStyleSheet; }
+		Ref<FTheme> GetStyleSheet() const { return m_RootStyleSheet; }
 
-		void SetRootStyleSheet(Ref<FStyleSheet> styleSheet);
+		void SetRootStyleSheet(Ref<FTheme> styleSheet);
 
 		void RefreshStyleRecursively();
 
@@ -98,7 +98,7 @@ namespace Fusion
 		WeakRef<FSurface> m_CurFocusSurface;
 		WeakRef<FSurface> m_FocusSurface;
 
-		Ref<FStyleSheet> m_RootStyleSheet;
+		Ref<FTheme> m_RootStyleSheet;
 
 		FVec2 m_ScreenMousePos;
 		FVec2 m_PrevScreenMousePos;

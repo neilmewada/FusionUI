@@ -10,9 +10,9 @@ namespace Fusion
 		m_MainApplication = new FApplicationInstance("FusionApplication");
 	}
 
-	Ref<FStyleSheet> FApplication::CreateDefaultStyleSheet()
+	Ref<FTheme> FApplication::CreateDefaultStyleSheet()
 	{
-		m_MainStyleSheet = NewObject<FStyleSheet>(nullptr);
+		m_MainStyleSheet = NewObject<FTheme>(nullptr);
 		return m_MainStyleSheet;
 	}
 

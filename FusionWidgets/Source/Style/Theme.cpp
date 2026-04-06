@@ -2,12 +2,12 @@
 
 namespace Fusion
 {
-	FStyleSheet::FStyleSheet(Ref<FStyleSheet> parent) : m_Parent(parent)
+	FTheme::FTheme(Ref<FTheme> parent) : m_Parent(parent)
 	{
-		
+
 	}
 
-	void FStyleSheet::SetParent(Ref<FStyleSheet> parent)
+	void FTheme::SetParent(Ref<FTheme> parent)
 	{
 		if (parent != this)
 		{
@@ -15,21 +15,21 @@ namespace Fusion
 		}
 	}
 
-	Ref<FStyle> FStyleSheet::FindStyle(const FName& name) const
+	Ref<FStyle> FTheme::FindStyle(const FName& name) const
 	{
 		auto it = m_Styles.Find(name);
 		if (it != m_Styles.End() && it->second)
 		{
 			return it->second;
 		}
-		if (Ref<FStyleSheet> parent = m_Parent.Lock())
+		if (Ref<FTheme> parent = m_Parent.Lock())
 		{
 			return parent->FindStyle(name);
 		}
 		return nullptr;
 	}
 
-	FStyle& FStyleSheet::Style(const FName& name)
+	FStyle& FTheme::Style(const FName& name)
 	{
 		Ref<FStyle> style;
 

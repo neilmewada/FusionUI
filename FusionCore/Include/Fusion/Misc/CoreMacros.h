@@ -134,6 +134,17 @@
 #define FUSION_FOR_EACH(M, ...) \
     FUSION_MACRO_EXPAND(FUSION_CONCATENATE(__FUSION_FOR_EACH_, FUSION_ARG_COUNT(__VA_ARGS__))(M, __VA_ARGS__))
 
+// Folds variadic arguments with | (up to 8).
+#define __FUSION_FOLD_OR_1(a)                a
+#define __FUSION_FOLD_OR_2(a, b)             a | b
+#define __FUSION_FOLD_OR_3(a, b, c)          a | b | c
+#define __FUSION_FOLD_OR_4(a, b, c, d)       a | b | c | d
+#define __FUSION_FOLD_OR_5(a, b, c, d, e)    a | b | c | d | e
+#define __FUSION_FOLD_OR_6(a, b, c, d, e, f) a | b | c | d | e | f
+
+#define FUSION_FOLD_OR(...) \
+    FUSION_MACRO_EXPAND(FUSION_CONCATENATE(__FUSION_FOLD_OR_, FUSION_ARG_COUNT(__VA_ARGS__))(__VA_ARGS__))
+
 #define FUSION_BIT(x) (1 << (x))
 #define FUSION_COUNT(arr) ::Fusion::FCountOf(&arr)
 

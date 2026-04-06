@@ -2,7 +2,7 @@
 
 namespace Fusion
 {
-    class FStyleSheet;
+    class FTheme;
     class FWidget;
 
     template<typename T>
@@ -89,7 +89,7 @@ namespace Fusion
 
     private:
 
-        WeakRef<FStyleSheet> m_StyleSheet;
+        WeakRef<FTheme> m_StyleSheet;
 
         FHashMap<FName, FStyleValue<FBrush>> m_BrushValues;
         FHashMap<FName, FStyleValue<FPen>>   m_PenValues;
@@ -99,7 +99,7 @@ namespace Fusion
         FHashMap<FName, FStyleValue<FVec2>>  m_Vec2Values;
         FHashMap<FName, FStyleValue<FVec4>>  m_Vec4Values;
 
-        friend class FStyleSheet;
+        friend class FTheme;
     };
     
 } // namespace Fusion

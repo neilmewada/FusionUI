@@ -6,7 +6,7 @@
 namespace Fusion
 {
     class FWidget;
-    class FStyleSheet;
+    class FTheme;
 
     class FUSIONWIDGETS_API FApplication
     {
@@ -28,7 +28,7 @@ namespace Fusion
             return *ptr;
 		}
 
-        Ref<FStyleSheet> CreateDefaultStyleSheet();
+        Ref<FTheme> CreateDefaultStyleSheet();
 
         int Run();
 
@@ -38,7 +38,7 @@ namespace Fusion
         FVec2i m_InitialWindowSize = FVec2i(1200, 900);
 
 		Ref<FApplicationInstance> m_MainApplication;
-        Ref<FStyleSheet> m_MainStyleSheet;
+        Ref<FTheme> m_MainStyleSheet;
 
 		IFRenderBackend* m_RenderBackend = nullptr;
 		IFPlatformBackend* m_PlatformBackend = nullptr;
