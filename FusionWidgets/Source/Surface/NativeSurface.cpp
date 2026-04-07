@@ -34,7 +34,7 @@ namespace Fusion
 		if (!application)
 			return position;
 		
-#if PLATFORM_MAC
+#if FUSION_PLATFORM_MAC
 		return (position - application->GetWindowPosition(m_WindowHandle).ToVec2());
 #else
 		return (position - application->GetWindowPosition(m_WindowHandle).ToVec2()) / GetDpiScale();

@@ -309,6 +309,12 @@ int main(int argc, char* argv[])
 
 	app.CreateMainWindow<SampleWindow>();
 
+#if FUSION_PLATFORM_MAC
+	app.SetInitialWindowSize(800, 600);
+#else
+	app.SetInitialWindowSize(1200, 900);
+#endif
+
 	return app.Run();
 }
 

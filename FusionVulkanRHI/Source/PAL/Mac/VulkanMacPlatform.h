@@ -2,6 +2,8 @@
 
 #include "vulkan/vulkan_metal.h"
 
+#include "../VulkanPlatform.h"
+
 namespace Fusion::Vulkan
 {
     struct FMacVulkanTempSurface : FVulkanTempSurfaceBase

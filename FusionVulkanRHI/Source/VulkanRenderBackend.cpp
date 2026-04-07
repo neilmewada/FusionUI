@@ -929,6 +929,9 @@ namespace Fusion::Vulkan
 			FUSION_LOG_ERROR("Vulkan", "Failed to find any Vulkan-compatible physical devices.");
 		}
 
+#if FUSION_PLATFORM_MAC
+		m_PhysicalDevice = physicalDevices[0];
+#else
 		if (physicalDeviceCount == 1)
 		{
 			m_PhysicalDevice = physicalDevices[0];
@@ -947,6 +950,7 @@ namespace Fusion::Vulkan
 				}
 			}
 		}
+#endif
 
 		FUSION_ASSERT(m_PhysicalDevice != VK_NULL_HANDLE, "Failed to find a suitable Vulkan physical device.");
 

@@ -30,6 +30,11 @@ namespace Fusion
 
         Ref<FTheme> CreateDefaultTheme();
 
+    	void SetInitialWindowSize(int width, int height)
+    	{
+    		m_InitialWindowSize = { width, height };
+    	}
+
         int Run();
 
     private:
