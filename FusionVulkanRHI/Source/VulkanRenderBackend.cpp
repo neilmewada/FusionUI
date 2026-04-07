@@ -884,7 +884,7 @@ namespace Fusion::Vulkan
 
 		VkInstanceCreateInfo instanceCI{};
 		instanceCI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-		instanceCI.flags = 0;
+		instanceCI.flags = FVulkanPlatform::GetRequiredInstanceFlags();
 		instanceCI.pNext = nullptr;
 
 		instanceCI.pApplicationInfo = &appInfo;

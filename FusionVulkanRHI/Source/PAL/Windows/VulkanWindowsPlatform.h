@@ -39,6 +39,8 @@ namespace Fusion::Vulkan
             };
         }
 
+        static VkInstanceCreateFlags GetRequiredInstanceFlags() { return 0; }
+
         static bool IsValidationEnabled()
         {
 #if FUSION_VULKAN_VALIDATION

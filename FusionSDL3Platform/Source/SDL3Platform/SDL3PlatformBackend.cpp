@@ -137,6 +137,8 @@ namespace Fusion
 
 #if FUSION_PLATFORM_WINDOWS
 		return SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+#elif FUSION_PLATFORM_MAC
+		return SDL_GetPointerProperty(props, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, NULL);
 #else
 		#error Platform Not Supported
 #endif

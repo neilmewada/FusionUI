@@ -32,7 +32,7 @@ namespace Fusion::Vulkan
 #include "PAL/Windows/VulkanWindowsPlatform.h"
 #undef max
 #elif FUSION_PLATFORM_MAC
-
+#include "PAL/Mac/VulkanMacPlatform.h"
 #elif FUSION_PLATFORM_LINUX
 
 #endif

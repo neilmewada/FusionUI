@@ -17,3 +17,16 @@ add_fusion_target(FusionVulkanRHI STATIC
             Vulkan::Vulkan
 )
 
+if(FUSION_PLATFORM_MAC)
+    # ObjC++ .mm files cannot share the C++ PCH
+    set_source_files_properties(
+        Source/PAL/Mac/VulkanMacPlatform.mm
+        PROPERTIES SKIP_PRECOMPILE_HEADERS ON
+    )
+
+    target_link_libraries(FusionVulkanRHI PRIVATE
+        "-framework Cocoa"
+        "-framework QuartzCore"
+    )
+endif()
+
