@@ -11,14 +11,14 @@
 #include "WeakRef.h"
 
 #define FUSION_CLASS_BODY(SelfClass) typedef SelfClass Self;\
-    template<FObjectType TObject, typename... TArgs>\
-	friend Ref<TObject> Fusion::NewObject(FObject* outer, TArgs&&... args);\
     public:\
 	    virtual FTypeID GetClassTypeID() const { thread_local const FTypeID typeId = ::Fusion::GetTypeID<Self>(); return typeId; }\
 	    virtual FName GetClassName() const { thread_local const Fusion::FName className = #SelfClass; return className; }
 
 #define FUSION_CLASS(SelfClass, SuperClass) typedef SuperClass Super; \
-    FUSION_CLASS_BODY(SelfClass)
+    FUSION_CLASS_BODY(SelfClass)\
+    template<FObjectType TObject, typename... TArgs>\
+	Ref<TObject> NewObject(FObject* outer, TArgs&&... args);
 
 namespace Fusion
 {

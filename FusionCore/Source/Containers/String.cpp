@@ -6,23 +6,10 @@
 namespace Fusion
 {
 
-    size_t FString::CountCodepoints(const char* str, size_t byteLength)
-    {
-        size_t count = 0;
-        for (size_t i = 0; i < byteLength; ++i)
-        {
-            // Count bytes that are NOT UTF-8 continuation bytes (10xxxxxx)
-            if ((static_cast<uint8_t>(str[i]) & 0xC0) != 0x80)
-                ++count;
-        }
-        return count;
-    }
-
     FString::FString()
     {
         m_SSO[0] = '\0';
         m_Size   = 0;
-        m_Length = 0;
     }
 
     FString::FString(const char* str)
@@ -33,7 +20,6 @@ namespace Fusion
         {
             m_SSO[0] = '\0';
             m_Size   = 0;
-            m_Length = 0;
         }
     }
 
@@ -59,8 +45,7 @@ namespace Fusion
 
     FString::FString(FString&& other) noexcept
     {
-        m_Size   = other.m_Size;
-        m_Length = other.m_Length;
+        m_Size = other.m_Size;
 
         if (other.IsHeap())
         {
@@ -73,7 +58,6 @@ namespace Fusion
         }
 
         other.m_Size   = 0;
-        other.m_Length = 0;
         other.m_SSO[0] = '\0';
     }
 
@@ -102,8 +86,7 @@ namespace Fusion
             if (IsHeap())
                 delete[] m_Heap.Ptr;
 
-            m_Size   = other.m_Size;
-            m_Length = other.m_Length;
+            m_Size = other.m_Size;
 
             if (other.IsHeap())
             {
@@ -116,7 +99,6 @@ namespace Fusion
             }
 
             other.m_Size   = 0;
-            other.m_Length = 0;
             other.m_SSO[0] = '\0';
         }
         return *this;
@@ -244,8 +226,7 @@ namespace Fusion
 
     void FString::Assign(const char* str, size_t length)
     {
-        m_Size   = length;
-        m_Length = CountCodepoints(str, length);
+        m_Size = length;
 
         if (length <= SSO_CAPACITY)
         {
@@ -304,8 +285,7 @@ namespace Fusion
             m_Heap.Capacity = newCap;
         }
 
-        m_Size   = newSize;
-        m_Length += CountCodepoints(str, length);
+        m_Size = newSize;
     }
 
 } // namespace Fusion

@@ -27,7 +27,7 @@ namespace Fusion
 
 	    FName(const FString& str)
 	    {
-		    if (!str.IsEmpty())
+		    if (!str.Empty())
 		    {
 	            m_Hash = str.GetHash();
 				m_String = str;

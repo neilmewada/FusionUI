@@ -40,6 +40,9 @@
 #include "Style/Theme.h"
 #include "Style/FusionCSS.h"
 
+// Text Rendering
+#include "Font/FontAtlas.h"
+
 // Animation
 #include "Animation/Animatable.h"
 #include "Animation/EasingCurve.h"

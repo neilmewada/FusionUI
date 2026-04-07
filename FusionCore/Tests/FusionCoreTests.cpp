@@ -13,8 +13,7 @@ TEST(FStringTest, DefaultConstructor)
 {
     FString str;
     EXPECT_EQ(str.ByteLength(), 0);
-    EXPECT_EQ(str.Length(), 0);
-    EXPECT_TRUE(str.IsEmpty());
+    EXPECT_TRUE(str.Empty());
     EXPECT_STREQ(str.CStr(), "");
 }
 
@@ -22,17 +21,15 @@ TEST(FStringTest, ConstructFromCStr)
 {
     FString str("Hello");
     EXPECT_EQ(str.ByteLength(), 5);
-    EXPECT_EQ(str.Length(), 5);
-    EXPECT_FALSE(str.IsEmpty());
+    EXPECT_FALSE(str.Empty());
     EXPECT_STREQ(str.CStr(), "Hello");
 }
 
 TEST(FStringTest, ConstructFromNullCStr)
 {
     FString str(nullptr);
-    EXPECT_TRUE(str.IsEmpty());
+    EXPECT_TRUE(str.Empty());
     EXPECT_EQ(str.ByteLength(), 0);
-    EXPECT_EQ(str.Length(), 0);
 }
 
 TEST(FStringTest, ConstructFromStringView)
@@ -40,7 +37,6 @@ TEST(FStringTest, ConstructFromStringView)
     std::string_view sv = "Hello";
     FString str(sv);
     EXPECT_EQ(str.ByteLength(), 5);
-    EXPECT_EQ(str.Length(), 5);
     EXPECT_STREQ(str.CStr(), "Hello");
 }
 
@@ -49,7 +45,6 @@ TEST(FStringTest, ConstructFromStdString)
     std::string s = "Hello";
     FString str(s);
     EXPECT_EQ(str.ByteLength(), 5);
-    EXPECT_EQ(str.Length(), 5);
     EXPECT_STREQ(str.CStr(), "Hello");
 }
 
@@ -58,7 +53,6 @@ TEST(FStringTest, CopyConstructor)
     FString a("Hello");
     FString b(a);
     EXPECT_EQ(b.ByteLength(), a.ByteLength());
-    EXPECT_EQ(b.Length(), a.Length());
     EXPECT_STREQ(b.CStr(), "Hello");
 }
 
@@ -67,7 +61,7 @@ TEST(FStringTest, MoveConstructor)
     FString a("Hello");
     FString b(std::move(a));
     EXPECT_STREQ(b.CStr(), "Hello");
-    EXPECT_TRUE(a.IsEmpty());
+    EXPECT_TRUE(a.Empty());
 }
 
 TEST(FStringTest, CopyAssignment)
@@ -85,7 +79,7 @@ TEST(FStringTest, MoveAssignment)
     FString b;
     b = std::move(a);
     EXPECT_STREQ(b.CStr(), "Hello");
-    EXPECT_TRUE(a.IsEmpty());
+    EXPECT_TRUE(a.Empty());
 }
 
 TEST(FStringTest, AssignFromCStr)
@@ -108,7 +102,6 @@ TEST(FStringTest, SSOBoundaryInline)
 {
     FString str("123456789012345"); // exactly 15 bytes
     EXPECT_EQ(str.ByteLength(), 15);
-    EXPECT_EQ(str.Length(), 15);
     EXPECT_STREQ(str.CStr(), "123456789012345");
 }
 
@@ -116,7 +109,6 @@ TEST(FStringTest, SSOBoundaryHeap)
 {
     FString str("1234567890123456"); // 16 bytes, goes to heap
     EXPECT_EQ(str.ByteLength(), 16);
-    EXPECT_EQ(str.Length(), 16);
     EXPECT_STREQ(str.CStr(), "1234567890123456");
 }
 
@@ -126,7 +118,6 @@ TEST(FStringTest, AppendOperatorPlusEquals)
     str += " World";
     EXPECT_STREQ(str.CStr(), "Hello World");
     EXPECT_EQ(str.ByteLength(), 11);
-    EXPECT_EQ(str.Length(), 11);
 }
 
 TEST(FStringTest, AppendOperatorPlus)
@@ -183,50 +174,52 @@ TEST(FStringTest, ToStdString)
 }
 
 // UTF-8: "café" — 4 codepoints, 5 bytes (é is 2 bytes in UTF-8)
-TEST(FStringTest, UTF8ByteLengthVsLength)
+TEST(FStringTest, UTF8ByteLengthVsCodepoints)
 {
     FString str("café");
-    EXPECT_EQ(str.Length(), 4);     // 4 codepoints
-    EXPECT_EQ(str.ByteLength(), 5); // 5 bytes
+    std::ranges::distance(str.Codepoints());
+
+    EXPECT_EQ(std::ranges::distance(str.Codepoints()), 4); // 4 codepoints
+    EXPECT_EQ(str.ByteLength(), 5);                        // 5 bytes
 }
 
 // UTF-8: "こんにちは" — 5 codepoints, 15 bytes (3 bytes each in UTF-8)
 TEST(FStringTest, UTF8JapaneseSSoBoundary)
 {
     FString str("こんにちは");
-    EXPECT_EQ(str.Length(), 5);      // 5 codepoints
-    EXPECT_EQ(str.ByteLength(), 15); // 15 bytes, exactly SSO limit
+    EXPECT_EQ(std::ranges::distance(str.Codepoints()), 5); // 5 codepoints
+    EXPECT_EQ(str.ByteLength(), 15);                       // 15 bytes, exactly SSO limit
 }
 
 // UTF-8: "こんにちは!" — 6 codepoints, 16 bytes (heap)
 TEST(FStringTest, UTF8JapaneseHeap)
 {
     FString str("こんにちは!");
-    EXPECT_EQ(str.Length(), 6);
+    EXPECT_EQ(std::ranges::distance(str.Codepoints()), 6);
     EXPECT_EQ(str.ByteLength(), 16);
 }
 
-TEST(FStringTest, UTF8AppendUpdatesCounts)
+TEST(FStringTest, UTF8CodepointsDecodeCorrectly)
 {
     FString str("café");
     str += " latte";
-    EXPECT_EQ(str.Length(), 10);     // 4 + 6 codepoints
-    EXPECT_EQ(str.ByteLength(), 11); // 5 + 6 bytes
+    EXPECT_EQ(std::ranges::distance(str.Codepoints()), 10); // 4 + 6 codepoints
+    EXPECT_EQ(str.ByteLength(), 11);                        // 5 + 6 bytes
 }
 
 #pragma endregion FString
 
 #pragma region Ptr
 
+class FTestObject : public FObject
+{
+    FUSION_CLASS(FTestObject, FObject)
+public:
+    std::atomic<int> m_Value = 0;
+};
+
 TEST(PtrTest, ThreadSafety)
 {
-    class FTestObject : public FObject
-    {
-        FUSION_CLASS(FTestObject, FObject)
-    public:
-        std::atomic<int> m_Value = 0;
-    };
-
     // Shared strong ref — all threads copy from this
     Ref<FTestObject> shared = new FTestObject();
 

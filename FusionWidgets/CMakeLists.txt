@@ -16,5 +16,6 @@ add_fusion_target(FusionWidgets STATIC
             Fusion::RHI
             $<$<BOOL:${FUSION_USE_SDL3}>:Fusion::SDL3Platform>
             $<$<BOOL:${FUSION_USE_VULKAN}>:Fusion::VulkanRHI>
+            Freetype::Freetype
 )
 
