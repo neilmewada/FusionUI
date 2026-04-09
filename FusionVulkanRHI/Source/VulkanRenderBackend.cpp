@@ -295,9 +295,19 @@ namespace Fusion::Vulkan
 
 	FAtlasHandle FVulkanRenderBackend::CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers)
 	{
-		//FTextureAtlas* atlas = new FTextureAtlas(this, resolution, maxLayers, grayscale ? VK_FORMAT_R8_UNORM : VK_FORMAT_R8G8B8A8_UNORM, kImageCount);
+		m_AtlasIndexAllocator += 1;
+		FAtlasHandle handle = FAtlasHandle(m_AtlasIndexAllocator);
 
-		return {};
+		IPtr<FTextureAtlas> atlas = new FTextureAtlas(this, resolution, maxLayers, grayscale ? VK_FORMAT_R8_UNORM : VK_FORMAT_R8G8B8A8_UNORM, kImageCount);
+
+		m_AtlasesByHandle[handle] = atlas;
+
+		return handle;
+	}
+
+	void FVulkanRenderBackend::DestroyAtlas(FAtlasHandle atlas)
+	{
+		m_AtlasesByHandle.Remove(atlas);
 	}
 
 	FRenderTargetHandle FVulkanRenderBackend::AcquireWindowRenderTarget(FWindowHandle window)
@@ -1479,6 +1489,12 @@ namespace Fusion::Vulkan
 	void FVulkanRenderBackend::ShutdownVulkan()
 	{
 		vkDeviceWaitIdle(m_Device);
+
+		m_AtlasIndexAllocator = 0;
+		m_AtlasesByHandle.Clear();
+
+		m_RenderTargetIndexAllocator = 0;
+		m_RenderTargetsByHandle.Clear();
 
 		delete m_NullBuffer;
 

@@ -191,6 +191,8 @@ namespace Fusion::Vulkan
 
         FAtlasHandle CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers) override;
 
+        void DestroyAtlas(FAtlasHandle atlas) override;
+
         // - Render Target -
 
         FRenderTargetHandle AcquireWindowRenderTarget(FWindowHandle window) override;
@@ -314,7 +316,8 @@ namespace Fusion::Vulkan
 
         // - Atlas Resources -
 
-        
+        FAtlasHandle::IndexType m_AtlasIndexAllocator = 0;
+        FHashMap<FAtlasHandle, IPtr<FTextureAtlas>> m_AtlasesByHandle;
     };
 
 } // namespace Fusion

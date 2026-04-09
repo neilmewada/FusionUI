@@ -38,6 +38,8 @@
 
 #include "Fusion/Misc/IntrusivePtr.h"
 
+#include "Fusion/Image/Image.h"
+
 #include "Fusion/Misc/RTTI.h"
 
 #include "Fusion/Object/Ref.h"

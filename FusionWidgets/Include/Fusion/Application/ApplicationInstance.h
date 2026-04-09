@@ -3,8 +3,10 @@
 // Copyright (c) 2026 Neil Mewada
 // SPDX-License-Identifier: MIT
 
+
 namespace Fusion
 {
+	class FFontAtlas;
 	class FAnimation;
 	class FWidget;
 	class FSurface;
@@ -31,20 +33,23 @@ namespace Fusion
 		f32    GetDpiScaleForWindow(FWindowHandle windowHandle);
 		FVec2i GetWindowSizeInPixels(FWindowHandle windowHandle);
 
+		IFPlatformBackend* GetPlatformBackend() const { return m_PlatformBackend; }
+		IFRenderBackend*   GetRenderBackend()   const { return m_RenderBackend; }
+
 		// - Input State -
 
 		FVec2 GetScreenMousePos()     const { return m_ScreenMousePos; }
 		FVec2 GetPrevScreenMousePos() const { return m_PrevScreenMousePos; }
 		FVec2 GetMouseWheelDelta()    const { return m_WheelDelta; }
 
-		bool IsKeyDown(EKeyCode key)              { return m_PlatformBackend->IsKeyDown(key); }
-		bool IsKeyUp(EKeyCode key)                { return m_PlatformBackend->IsKeyUp(key); }
-		bool IsMouseButtonDown(EMouseButton btn)  { return m_PlatformBackend->IsMouseButtonDown(btn); }
-		bool IsMouseButtonUp(EMouseButton btn)    { return m_PlatformBackend->IsMouseButtonUp(btn); }
-		bool IsMouseButtonHeld(EMouseButton btn)  { return m_PlatformBackend->IsMouseButtonHeld(btn); }
-		int  GetMouseButtonClicks(EMouseButton btn) { return m_PlatformBackend->GetMouseButtonClicks(btn); }
-		bool         TestModifiers(EKeyModifier modifier) { return m_PlatformBackend->TestModifiers(modifier); }
-		EKeyModifier GetKeyModifiers()                   { return m_PlatformBackend->GetModifierStates(); }
+		bool 		 IsKeyDown(EKeyCode key)                { return m_PlatformBackend->IsKeyDown(key); }
+		bool 		 IsKeyUp(EKeyCode key)                  { return m_PlatformBackend->IsKeyUp(key); }
+		bool 		 IsMouseButtonDown(EMouseButton btn)    { return m_PlatformBackend->IsMouseButtonDown(btn); }
+		bool 		 IsMouseButtonUp(EMouseButton btn)      { return m_PlatformBackend->IsMouseButtonUp(btn); }
+		bool 		 IsMouseButtonHeld(EMouseButton btn)    { return m_PlatformBackend->IsMouseButtonHeld(btn); }
+		int  		 GetMouseButtonClicks(EMouseButton btn) { return m_PlatformBackend->GetMouseButtonClicks(btn); }
+		bool         TestModifiers(EKeyModifier modifier)   { return m_PlatformBackend->TestModifiers(modifier); }
+		EKeyModifier GetKeyModifiers()                      { return m_PlatformBackend->GetModifierStates(); }
 
 		// - Window API -
 
@@ -72,7 +77,7 @@ namespace Fusion
 		void                ReleaseRenderTarget(FRenderTargetHandle renderTarget);
 		void                SubmitSnapshot(FRenderTargetHandle renderTarget, IntrusivePtr<FRenderSnapshot> snapshot);
 
-		// - Style -
+		// - Theme -
 
 		Ref<FTheme> GetTheme() const { return m_RootTheme; }
 
@@ -87,6 +92,10 @@ namespace Fusion
 		void TerminateAnimation(Ref<FObject> owner, FName slot, bool complete = false);
 
 		void TerminateAllAnimations(Ref<FObject> owner, bool complete = false);
+
+		// - Font -
+
+		Ref<FFontAtlas> GetFontAtlas() { return m_FontAtlas; }
 
 	protected:
 
@@ -123,6 +132,8 @@ namespace Fusion
 
 		// Flat list of (ownerUuid, slot) pairs queued for removal this tick
 		FArray<FPair<FUuid, FName>> m_AnimationsToDestroy;
+
+		Ref<FFontAtlas> m_FontAtlas;
 
 	private:
 

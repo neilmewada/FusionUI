@@ -60,6 +60,7 @@ namespace Fusion
 		// - Atlas -
 
 		virtual FAtlasHandle CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers) = 0;
+    	virtual void DestroyAtlas(FAtlasHandle atlas) = 0;
 
 		// - Rendering -
 

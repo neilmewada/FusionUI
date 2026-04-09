@@ -59,18 +59,20 @@ namespace Fusion::Vulkan
         FVulkanRenderBackend* m_Backend = nullptr;
         VkDevice m_Device = VK_NULL_HANDLE;
 
-        FArray<IPtr<FTexture>> m_ImagesPerFrame;
-
         VkImageCreateInfo m_ImageCI{};
         VkImageViewCreateInfo m_ImageViewCI{};
         VmaAllocationCreateInfo m_AllocCI{};
 
-        bool m_SparseResidency = false;
+        VmaAllocation m_Allocation = nullptr;
+        VmaAllocationInfo m_AllocationInfo{};
+        VkImage m_Image = VK_NULL_HANDLE;
+        VkImageView m_ImageView = VK_NULL_HANDLE;
+
         u32 m_Size = 0;
         u32 m_LayerCount = 0;
         VkFormat m_Format = VK_FORMAT_UNDEFINED;
 
-        VkExtent3D m_ImageGranularity{};
+        FArray<IPtr<FMappedBuffer>> m_StagingBuffers;
     };
     
 } // namespace Fusion::Vulkan

@@ -54,6 +54,13 @@ namespace Fusion
 		}
 	}
 
+	template<typename T>
+	SizeT CombineHash(SizeT runningHash, const T& value)
+	{
+		return GetCombinedHash(runningHash, GetHash<T>(value));
+	}
+
+
 	FUSION_DECL_HASH(u8);
 	FUSION_DECL_HASH(u16);
 	FUSION_DECL_HASH(u32);

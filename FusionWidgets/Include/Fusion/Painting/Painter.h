@@ -30,7 +30,7 @@ namespace Fusion
 
         FAffineTransform GetCurrentTransform();
 
-        //void SetFont(const FFont& font) { currentFont = font; }
+        void SetFont(const FFont& font) { m_CurrentFont = font; }
         void SetPen(const FPen& pen) { m_CurrentPen = pen; }
         void SetBrush(const FBrush& brush) { m_CurrentBrush = brush; }
 
@@ -98,7 +98,8 @@ namespace Fusion
         FLayer* m_Layer = nullptr;
         FUIDrawList* m_DrawList = nullptr;
 
-        FPen m_CurrentPen;
+        FFont  m_CurrentFont;
+        FPen   m_CurrentPen;
         FBrush m_CurrentBrush;
 
         FPathArray m_Path;

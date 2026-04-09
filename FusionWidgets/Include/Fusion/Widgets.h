@@ -13,6 +13,9 @@
 #include <Fusion/VulkanRHI.h>
 #endif
 
+#include <freetype/config/ftconfig.h>
+#include <freetype/freetype.h>
+
 #include "Macros.h"
 
 // Application
@@ -35,6 +38,7 @@
 #include "Style/Gradient.h"
 #include "Style/Pen.h"
 #include "Style/Brush.h"
+#include "Style/Font.h"
 #include "Style/StyleState.h"
 #include "Style/Style.h"
 #include "Style/Theme.h"

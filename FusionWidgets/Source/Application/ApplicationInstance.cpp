@@ -64,13 +64,19 @@ namespace Fusion
 		m_RenderCapabilities = m_RenderBackend->GetRenderCapabilities();
 		FUSION_ASSERT(m_RenderCapabilities.MinStructuredBufferOffsetAlignment > 0, "Invalid value for MinStructuredBufferOffsetAlignment.");
 
+		m_FontAtlas = NewObject<FFontAtlas>(this, this);
 		m_RenderBackend->CreateLayeredAtlas(true, 2048, 4);
+
+		m_FontAtlas->Initialize();
 
 		return true;
 	}
 
 	void FApplicationInstance::Shutdown()
 	{
+		m_FontAtlas->Shutdown();
+		m_FontAtlas = nullptr;
+
 		if (m_RenderBackend)
 		{
 			m_RenderBackend->ShutdownInstance(m_InstanceHandle);
