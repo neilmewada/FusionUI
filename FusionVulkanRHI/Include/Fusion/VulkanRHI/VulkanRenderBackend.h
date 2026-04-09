@@ -307,7 +307,6 @@ namespace Fusion::Vulkan
         
         FArray<FDescriptorPool*, kImageCount> m_PoolsPerFrame;
         FArray<IntrusivePtr<FMappedBuffer>, kImageCount> m_UIDrawDataBuffers;
-        FArray<IntrusivePtr<FMappedBuffer>, kImageCount> m_StagingBuffers;
 
         FArray<VkCommandBuffer, kImageCount> m_CommandBuffers;
         FArray<VkSemaphore, kImageCount> m_RenderFinishedSemaphores;

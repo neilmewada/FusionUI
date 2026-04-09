@@ -1483,15 +1483,6 @@ namespace Fusion::Vulkan
 			m_UIDrawDataBuffers[i] = new FMappedBuffer(this, kBufferInitialSize, kBufferGrowSize);
 		}
 
-		// - Staging Buffer -
-
-		m_StagingBuffers.Resize(kImageCount);
-
-		for (int i = 0; i < kImageCount; i++)
-		{
-			m_StagingBuffers[i] = new FMappedBuffer(this, kStagingBufferInitialSize, kStagingBufferGrowSize);
-		}
-
 		// - Null Buffer -
 
 		m_NullBuffer = new FBuffer(this, 256);
