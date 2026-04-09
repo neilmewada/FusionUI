@@ -108,6 +108,8 @@ namespace Fusion
 		void OnWindowKeyboardFocusChanged(FWindowHandle window, bool gotFocus) override;
 		void OnWindowMouseFocusChanged(FWindowHandle window, bool gotFocus) override;
 
+		void OnWindowDisplayChanged(FWindowHandle window, FDisplayId displayId) override;
+
 		void NotifyWindowResize(FWindowHandle window);
 
 		FInstanceHandle m_InstanceHandle = FInstanceHandle::NullValue;

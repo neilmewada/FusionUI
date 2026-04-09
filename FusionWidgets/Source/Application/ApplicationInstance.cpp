@@ -362,6 +362,12 @@ namespace Fusion
 		FocusSurface(it->second);
 	}
 
+	void FApplicationInstance::OnWindowDisplayChanged(FWindowHandle window, FDisplayId displayId)
+	{
+		f32 scale = GetDpiScaleForWindow(window);
+		FUSION_LOG_INFO("Application", "OnWindowDisplayChanged called: {} ; {}", displayId.Get(), scale);
+	}
+
 	void FApplicationInstance::NotifyWindowResize(FWindowHandle window)
 	{
 		auto it = m_NativeSurfacesByWindow.Find(window);

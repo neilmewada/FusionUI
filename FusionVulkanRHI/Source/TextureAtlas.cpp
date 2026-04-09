@@ -77,8 +77,6 @@ namespace Fusion::Vulkan
 
 		VkResult result = vmaCreateImage(m_Backend->GetVmaAllocator(), &m_ImageCI, &m_AllocCI, &m_Image, &m_Allocation, &m_AllocationInfo);
 		VULKAN_CHECK(result, "FTextureAtlas failed to vmaCreateImage");
-
-		m_StagingBuffers.Resize(imageCount);
 	}
 
 	FTextureAtlas::~FTextureAtlas()

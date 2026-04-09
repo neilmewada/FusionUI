@@ -502,6 +502,11 @@ namespace Fusion
 		{
 			FDisplayId displayId = (FDisplayId)event.window.data1;
 
+			// Force a resize event so the renderer re-evaluates the swapchain for the new
+			// display's DPI. SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED may not fire if both
+			// displays report the same pixel size.
+			ProcessWindowResizeEvent(event.window.windowID);
+
 			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)

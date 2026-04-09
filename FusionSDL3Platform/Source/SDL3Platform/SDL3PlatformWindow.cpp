@@ -89,7 +89,11 @@ namespace Fusion
 
 	f32 FSDL3PlatformWindow::GetDpiScale()
 	{
-		return SDL_GetWindowDisplayScale(sdlWindow);
+		int pixelW = 0, logicalW = 0;
+		SDL_GetWindowSizeInPixels(sdlWindow, &pixelW, nullptr);
+		SDL_GetWindowSize(sdlWindow, &logicalW, nullptr);
+		if (logicalW == 0) return 1.0f;
+		return (f32)pixelW / (f32)logicalW;
 	}
 } // namespace Fusion
 
