@@ -724,12 +724,12 @@ namespace Fusion::Vulkan
 			if (it == m_AtlasesByHandle.End())
 				continue;
 
+			m_StagingBuffers[m_FrameSlot]->EnsureCapacity(curUploadOffset + atlasUploadRegion.DataSize);
+
 			u8* dstData = m_StagingBuffers[m_FrameSlot]->m_MappedData + curUploadOffset;
 			memcpy(dstData, m_UploadArena.GetData() + atlasUploadRegion.DataOffset, atlasUploadRegion.DataSize);
 
 			atlasUploadRegion.MappedDataOffset = curUploadOffset;
-
-			m_StagingBuffers[m_FrameSlot]->EnsureCapacity(curUploadOffset);
 
 			curUploadOffset += atlasUploadRegion.DataSize;
 		}

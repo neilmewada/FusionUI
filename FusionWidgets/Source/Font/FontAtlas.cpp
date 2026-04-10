@@ -207,7 +207,10 @@ namespace Fusion
                 outX += kSdfPadding / 2;
                 outY += kSdfPadding / 2;
 
-
+                renderBackend->UploadAtlasRegionAsync(m_AtlasHandle, m_CurLayerIndex,
+                    FVec2i(outX, outY),
+                    FVec2i(glyphSize.width, glyphSize.height),
+                    pixels, bitmap.pitch);
             }
         }
     }
