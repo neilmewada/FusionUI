@@ -65,12 +65,14 @@ namespace Fusion
     		FVec2i pos, FVec2i size,
     		const u8* pixels, int pitch) = 0;
 
+		virtual void SetFontAtlas(FInstanceHandle instance, FAtlasHandle atlas) = 0;
+
     	virtual void DestroyAtlas(FAtlasHandle atlas) = 0;
 
 		// - Rendering -
 
-		virtual FRenderTargetHandle AcquireWindowRenderTarget(FWindowHandle window) = 0;
-		virtual void ReleaseRenderTarget(FRenderTargetHandle renderTarget) = 0;
+		virtual FRenderTargetHandle AcquireWindowRenderTarget(FInstanceHandle instance, FWindowHandle window) = 0;
+		virtual void ReleaseRenderTarget(FInstanceHandle instance, FRenderTargetHandle renderTarget) = 0;
 
 		// Render loop, only called when using FApplication.Run()
 		virtual void RenderTick() = 0;

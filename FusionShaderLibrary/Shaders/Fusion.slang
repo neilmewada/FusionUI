@@ -95,6 +95,10 @@ float4 PSMain(VSOutput input) : SV_Target
             }
         }
     }
+    else if (item.shaderType == FUIShaderType::SDFText)
+    {
+        
+    }
 
     return color;
 }

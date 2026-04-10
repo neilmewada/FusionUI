@@ -252,7 +252,7 @@ namespace Fusion::Vulkan
 
 	bool FVulkanRenderBackend::InitializeInstance(FInstanceHandle instance)
 	{
-		if (instances.KeyExists(instance))
+		if (m_Instances.KeyExists(instance))
 		{
 			return true;
 		}
@@ -264,21 +264,21 @@ namespace Fusion::Vulkan
 
 		IPtr<FRenderInstance> renderInstance = new FRenderInstance();
 
-		instances.Add(instance, renderInstance);
+		m_Instances.Add(instance, renderInstance);
 
 		return true;
 	}
 
 	void FVulkanRenderBackend::ShutdownInstance(FInstanceHandle instance)
 	{
-		if (!instances.KeyExists(instance))
+		if (!m_Instances.KeyExists(instance))
 		{
 			return;
 		}
 
-		instances.Remove(instance);
+		m_Instances.Remove(instance);
 
-		if (instances.IsEmpty())
+		if (m_Instances.IsEmpty())
 		{
 			ShutdownVulkan();
 		}
@@ -290,7 +290,7 @@ namespace Fusion::Vulkan
 		if (it == m_RenderTargetsByHandle.End())
 			return;
 
-		it->second->m_Snapshot = snapshot;
+		it->second->Snapshot = snapshot;
 	}
 
 	FAtlasHandle FVulkanRenderBackend::CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers)
@@ -339,12 +339,20 @@ namespace Fusion::Vulkan
 		});
 	}
 
+	void FVulkanRenderBackend::SetFontAtlas(FInstanceHandle instance, FAtlasHandle atlas)
+	{
+		if (!IsInitialized(instance))
+			return;
+
+		m_Instances[instance]->FontAtlas = atlas;
+	}
+
 	void FVulkanRenderBackend::DestroyAtlas(FAtlasHandle atlas)
 	{
 		m_AtlasesByHandle.Remove(atlas);
 	}
 
-	FRenderTargetHandle FVulkanRenderBackend::AcquireWindowRenderTarget(FWindowHandle window)
+	FRenderTargetHandle FVulkanRenderBackend::AcquireWindowRenderTarget(FInstanceHandle instance, FWindowHandle window)
 	{
 		if (window.IsNull())
 			return {};
@@ -357,15 +365,16 @@ namespace Fusion::Vulkan
 		auto handle = FRenderTargetHandle(m_RenderTargetIndexAllocator);
 
 		IPtr<FRenderTarget> renderTarget = new FRenderTarget;
-		renderTarget->m_Type = ERenderTargetType::Window;
-		renderTarget->m_Window = window;
+		renderTarget->Instance = instance;
+		renderTarget->Type = ERenderTargetType::Window;
+		renderTarget->Window = window;
 
 		m_RenderTargetsByHandle[handle] = renderTarget;
 
 		return handle;
 	}
 
-	void FVulkanRenderBackend::ReleaseRenderTarget(FRenderTargetHandle renderTarget)
+	void FVulkanRenderBackend::ReleaseRenderTarget(FInstanceHandle instance, FRenderTargetHandle renderTarget)
 	{
 		auto it = m_RenderTargetsByHandle.Find(renderTarget);
 
@@ -434,16 +443,17 @@ namespace Fusion::Vulkan
 
 		for (auto [renderTargetHandle, renderTarget] : m_RenderTargetsByHandle)
 		{
-			if (!renderTarget->m_Snapshot)
+			if (!renderTarget->Snapshot)
 				continue;
 
-			auto snapshot = renderTarget->m_Snapshot;
+			auto snapshot = renderTarget->Snapshot;
 
 			if (currentDrawBufferOffset > 0)
 				currentDrawBufferOffset = FMappedBuffer::AlignUp(currentDrawBufferOffset, alignment);
 			
 			FDrawDataBufferViews views{};
 
+			views.Instance = renderTarget->Instance;
 			views.RenderTarget = renderTargetHandle;
 
 			views.VertexBuffer.StartOffset = currentDrawBufferOffset;
@@ -521,7 +531,7 @@ namespace Fusion::Vulkan
 		{
 			FDrawDataBufferViews& views = m_OffsetDataPerSnapshot[i];
 			IPtr<FRenderTarget> renderTarget = m_RenderTargetsByHandle[views.RenderTarget];
-			IPtr<FRenderSnapshot> snapshot = renderTarget->m_Snapshot;
+			IPtr<FRenderSnapshot> snapshot = renderTarget->Snapshot;
 
 			VkDescriptorSetLayout viewDataSetLayout = m_MainGraphicsPipeline->m_SetLayouts[1];
 			VkDescriptorSetLayout layerTransformsSetLayout = m_MainGraphicsPipeline->m_SetLayouts[2];
@@ -837,14 +847,14 @@ namespace Fusion::Vulkan
 				const FDrawDataBufferViews& views = m_OffsetDataPerSnapshot[snapshotIdx];
 
 				IPtr<FRenderTarget> renderTarget = m_RenderTargetsByHandle[views.RenderTarget];
-				if (renderTarget->m_Type != ERenderTargetType::Window)
+				if (renderTarget->Type != ERenderTargetType::Window)
 					continue;
 
-				IPtr<FRenderSnapshot> snapshot = renderTarget->m_Snapshot;
+				IPtr<FRenderSnapshot> snapshot = renderTarget->Snapshot;
 				if (!snapshot)
 					continue;
 
-				IPtr<FSwapChain> swapChain = m_SwapChainsByWindowHandle[renderTarget->m_Window];
+				IPtr<FSwapChain> swapChain = m_SwapChainsByWindowHandle[renderTarget->Window];
 				if (!swapChain)
 					continue;
 

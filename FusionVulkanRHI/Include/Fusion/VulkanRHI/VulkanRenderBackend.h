@@ -83,11 +83,13 @@ namespace Fusion::Vulkan
 
     struct FRenderTarget : FIntrusiveBase
     {
-        ERenderTargetType m_Type = ERenderTargetType::Window;
+        FInstanceHandle Instance;
 
-        FWindowHandle m_Window{};
+        ERenderTargetType Type = ERenderTargetType::Window;
 
-        IPtr<FRenderSnapshot> m_Snapshot = nullptr;
+        FWindowHandle Window{};
+
+        IPtr<FRenderSnapshot> Snapshot = nullptr;
     };
 
     // - Render Instance -
@@ -96,6 +98,7 @@ namespace Fusion::Vulkan
     {
         // Per ApplicationInstance data goes here
 
+        FAtlasHandle FontAtlas;
     };
 
     // - Render Backend -
@@ -172,7 +175,7 @@ namespace Fusion::Vulkan
 
         bool IsInitialized(FInstanceHandle instance) override
         {
-            return instances.KeyExists(instance);
+            return m_Instances.KeyExists(instance);
         }
 
         bool InitializeInstance(FInstanceHandle instance) override;
@@ -200,13 +203,15 @@ namespace Fusion::Vulkan
             FVec2i pos, FVec2i size,
             const u8* pixels, int pitch) override;
 
+        void SetFontAtlas(FInstanceHandle instance, FAtlasHandle atlas) override;
+
         void DestroyAtlas(FAtlasHandle atlas) override;
 
         // - Render Target -
 
-        FRenderTargetHandle AcquireWindowRenderTarget(FWindowHandle window) override;
+        FRenderTargetHandle AcquireWindowRenderTarget(FInstanceHandle instance, FWindowHandle window) override;
 
-        void ReleaseRenderTarget(FRenderTargetHandle renderTarget) override;
+        void ReleaseRenderTarget(FInstanceHandle instance, FRenderTargetHandle renderTarget) override;
 
 	private:
 
@@ -245,7 +250,7 @@ namespace Fusion::Vulkan
         using FArena = FStableGrowthArray<u8, kUploadArenaGrowSize>;
         using FBufferImageCopyArray = FStableGrowthArray<VkBufferImageCopy, 128>;
 
-        FHashMap<FInstanceHandle, IntrusivePtr<FRenderInstance>> instances;
+        FHashMap<FInstanceHandle, IntrusivePtr<FRenderInstance>> m_Instances;
 
         // - Vulkan Data -
 		

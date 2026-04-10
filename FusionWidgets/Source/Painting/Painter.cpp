@@ -847,9 +847,13 @@ namespace Fusion
 
 	void FPainter::DrawText(const FVec2& pos, const FString& text)
 	{
+		return;
+
 		FFontAtlas* atlas = m_Application->GetFontAtlas().Get();
 
 		const f32 scale = m_CurrentFont.GetPointSize() / (f32)FFontAtlas::kSdfRenderSize;
+
+		u32 color = m_CurrentPen.GetColor().ToU32();
 
 		f32 cursorX = pos.x;
 		f32 cursorY = pos.y;
@@ -885,9 +889,9 @@ namespace Fusion
 			f32 u1 = (f32)(glyph.X + glyph.Width) / glyph.AtlasSize;
 			f32 v1 = (f32)(glyph.Y + glyph.Height) / glyph.AtlasSize;
 
+			m_DrawList->AddQuad(FRect::FromSize(quadX, quadY, quadW, quadH), FVec2(u0, v0), FVec2(u1, v1), color, drawItemIndex);
+			
 			cursorX += (f32)glyph.Advance * scale;
-
-			m_DrawList->AddQuad()
 		}
 	}
 

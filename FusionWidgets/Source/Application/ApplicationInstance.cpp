@@ -201,12 +201,12 @@ namespace Fusion
 
 	FRenderTargetHandle FApplicationInstance::AcquireWindowRenderTarget(FWindowHandle window)
 	{
-		return m_RenderBackend->AcquireWindowRenderTarget(window);
+		return m_RenderBackend->AcquireWindowRenderTarget(m_InstanceHandle, window);
 	}
 
 	void FApplicationInstance::ReleaseRenderTarget(FRenderTargetHandle renderTarget)
 	{
-		m_RenderBackend->ReleaseRenderTarget(renderTarget);
+		m_RenderBackend->ReleaseRenderTarget(m_InstanceHandle, renderTarget);
 	}
 
 	void FApplicationInstance::SubmitSnapshot(FRenderTargetHandle renderTarget, IntrusivePtr<FRenderSnapshot> snapshot)

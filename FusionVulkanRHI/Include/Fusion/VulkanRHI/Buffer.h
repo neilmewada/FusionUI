@@ -12,6 +12,7 @@ namespace Fusion::Vulkan
 
     struct FDrawDataBufferViews
     {
+        FInstanceHandle Instance;
         FRenderTargetHandle RenderTarget;
 
         FBufferView VertexBuffer;
