@@ -858,7 +858,7 @@ namespace Fusion
 
 		FFontMetrics metrics = atlas->GetScaledMetrics(m_CurrentFont);
 
-		u32 drawItemIndex = m_DrawList->AddDrawItem({
+		FUIDrawItem drawItem = {
 			.shaderType = EUIShaderType::SDFText,
 			.textureIndex = 0,
 			.samplerIndex = 0,
@@ -868,7 +868,11 @@ namespace Fusion
 			.gradientStopCount = 0,
 			.userFlags = 0,
 			.data = {}
-		});
+		};
+		drawItem.data[0] = 16.0; // pxRange
+		drawItem.data[1] = FFontAtlas::kAtlasSize;
+
+		u32 drawItemIndex = m_DrawList->AddDrawItem(drawItem);
 
 		for (char32_t codepoint : text.Codepoints())
 		{

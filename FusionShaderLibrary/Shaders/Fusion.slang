@@ -97,8 +97,27 @@ float4 PSMain(VSOutput input) : SV_Target
     }
     else if (item.shaderType == FUIShaderType::SDFText)
     {
-        float sd = _FontAtlas.Sample(_FontAtlasSampler, float3(uv, asfloat(item.textureIndex)));
-        color.a = sd;
+        float pxRange = item.data[0];
+        float atlasSize = item.data[1];
+
+        // How many atlas texels correspond to one unit of SDF distance
+        float2 unitRange = float2(pxRange / atlasSize, pxRange / atlasSize);
+
+        float2 fw = fwidth(uv);
+
+        // How many screen pixels correspond to one atlas texel at current scale
+        // float2 screenTexSize = float2(1.0) / fw;
+        float2 screenTexSize = rsqrt(sqr(ddx(uv)) + sqr(ddy(uv)));
+
+        // Effective screen-pixel range of the SDF transition band
+        float screenPxRange = max(0.5 * dot(unitRange, screenTexSize), 1.0);
+
+        float sd = _FontAtlas.Sample(_FontAtlasSampler, float3(uv, float(item.textureIndex)));
+
+        float screenPxDistance = screenPxRange * (sd - 0.5);
+        float alpha = clamp(screenPxDistance + 0.5, 0.0, 1.0);
+
+        color.a *= alpha;
     }
 
     return color;

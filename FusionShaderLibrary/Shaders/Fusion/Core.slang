@@ -118,6 +118,7 @@ inline float4 UnpackColor(uint packedColor)
     return float4((float)((packedColor) & 0xFF) / 255.0, (float)((packedColor >> 8) & 0xFF) / 255.0, (float)((packedColor >> 16) & 0xFF) / 255.0, (float)((packedColor >> 24) & 0xFF) / 255.0);
 }
 
+inline float2 sqr(float2 x) { return x * x; }
 
 // ---------------------------------------------------------
 // - Vertex Input

@@ -64,7 +64,7 @@ function(fusion_compile_shader)
     # Debugging symbols flag
     set(slangc_debug_args "")
     if(FUSION_SHADER_DEBUG_SYMBOLS)
-        list(APPEND slangc_debug_args -g2)
+        list(APPEND slangc_debug_args -g3)
     endif()
 
     # ---- Collect implicit dependencies (imported modules) ------------------

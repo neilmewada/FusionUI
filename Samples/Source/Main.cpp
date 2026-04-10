@@ -225,7 +225,19 @@ public:
 
 		painter.SetPen(FPen::Solid(FColors::White));
 
-		painter.DrawText(FVec2(200, 400), "Hello World");
+		FString text = "Hello World Good";
+
+		painter.DrawText(FVec2(100, 400), text);
+
+		painter.SetFont(
+			FFont::Regular(FFont::kDefaultFamilyName, 20)
+			.Style(EFontStyle::Normal)
+			.Weight(EFontWeight::Regular)
+		);
+
+		painter.SetPen(FPen::Solid(FColors::White));
+
+		painter.DrawText(FVec2(200, 400), text);
 	}
 
 	FUSION_PROPERTY(f32, GradientOffset);
@@ -245,9 +257,11 @@ int main(int argc, char* argv[])
 
 	theme->MergeStyleSheet(FUSION_STYLE_SHEET
 	{
+		FColor BackgroundColor = FColor(0.13f, 0.13f, 0.15f);
+
 		FUSION_STYLE(SampleWindow, "SampleWindow", Background, Padding)
 		{
-			Background = FColor(0.13f, 0.13f, 0.15f);
+			Background = BackgroundColor;
 			Padding	   = FMargin(1, 1, 1, 1) * 5;
 		}
 		

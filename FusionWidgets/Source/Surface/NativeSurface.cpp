@@ -20,6 +20,7 @@ namespace Fusion
 			FVec2i pixelSize = application->GetWindowSizeInPixels(m_WindowHandle);
 
 			m_AvailableSize = FVec2((float)pixelSize.x, (float)pixelSize.y) / m_DpiScale;
+			m_PixelSize = pixelSize.ToVec2();
 		}
 	}
 
@@ -52,6 +53,7 @@ namespace Fusion
 			if (m_AvailableSize != availableSize)
 			{
 				m_AvailableSize = availableSize;
+				m_PixelSize = pixelSize.ToVec2();
 
 				OnSurfaceResize();
 			}
