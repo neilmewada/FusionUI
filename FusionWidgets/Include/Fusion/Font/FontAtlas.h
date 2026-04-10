@@ -46,6 +46,8 @@ namespace Fusion
 
         void Shutdown();
 
+        FAtlasHandle GetHandle() const { return m_AtlasHandle; }
+
         void LoadFace(FName familyName, EFontWeight weight, EFontStyle style, const u8* data, SizeT dataSize);
 
         FFontMetrics GetScaledMetrics(const FFont& font);

@@ -493,7 +493,7 @@ namespace Fusion
         indexWritePtr += indexCount;
 
         vertexCurrentIdx += vertexCount;
-        drawCmd.IndexCount = indexCount;
+        drawCmd.IndexCount += indexCount;
     }
 
 }

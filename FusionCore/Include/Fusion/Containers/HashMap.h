@@ -125,6 +125,16 @@ namespace Fusion
             return Impl.at(key);
         }
 
+        inline bool TryGet(const KeyType& key, ValueType& outValue) const
+        {
+            auto it = Find(key);
+            if (it != End())
+            {
+                outValue = it->second;
+            }
+            return it != End();
+        }
+
         inline void Add(const KeyType& key, const ValueType& value)
         {
             Impl.insert({ key, value });

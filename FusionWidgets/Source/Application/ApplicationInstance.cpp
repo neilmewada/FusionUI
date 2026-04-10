@@ -164,6 +164,8 @@ namespace Fusion
 			surface->TickSurface();
 		}
 
+		m_RenderBackend->SetFontAtlas(m_InstanceHandle, m_FontAtlas->GetHandle());
+
 		m_PreviousTime = MoveTemp(curTime);
 	}
 

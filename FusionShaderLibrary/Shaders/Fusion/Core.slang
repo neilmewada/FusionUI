@@ -63,6 +63,9 @@ Texture2DArray<float4> _TextureArray;
 [[vk::binding(2, 0)]]
 Texture2DArray<float> _FontAtlas;
 
+[[vk::binding(3, 0)]]
+SamplerState _FontAtlasSampler;
+
 // = Per Surface Resources =
 
 [[vk::binding(0, 1)]]

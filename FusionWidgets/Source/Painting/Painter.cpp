@@ -847,8 +847,6 @@ namespace Fusion
 
 	void FPainter::DrawText(const FVec2& pos, const FString& text)
 	{
-		return;
-
 		FFontAtlas* atlas = m_Application->GetFontAtlas().Get();
 
 		const f32 scale = m_CurrentFont.GetPointSize() / (f32)FFontAtlas::kSdfRenderSize;

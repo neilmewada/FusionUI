@@ -53,6 +53,8 @@ namespace Fusion::Vulkan
         VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
         
         VkPipeline m_Pipeline = VK_NULL_HANDLE;
+
+        FArray<VkSampler> m_ImmutableSamplers{};
     };
 
     struct FUSIONVULKANRHI_API FSwapChain : FIntrusiveBase
@@ -99,6 +101,8 @@ namespace Fusion::Vulkan
         // Per ApplicationInstance data goes here
 
         FAtlasHandle FontAtlas;
+
+        VkDescriptorSet GlobalSet = VK_NULL_HANDLE;
     };
 
     // - Render Backend -
@@ -125,6 +129,11 @@ namespace Fusion::Vulkan
         static constexpr VkDeviceSize kStagingBufferGrowSize = 16_MB;
 
         static constexpr SizeT kUploadArenaGrowSize = 16_MB;
+
+        static constexpr int kGlobalSetIndex = 0;
+        static constexpr int kViewDataSetIndex = 1;
+        static constexpr int kLayerTransformsSetIndex = 2;
+        static constexpr int kDrawDataSetIndex = 3;
 
         FVulkanRenderBackend(IFPlatformBackend* platformBackend) : IFRenderBackend(platformBackend)
         {

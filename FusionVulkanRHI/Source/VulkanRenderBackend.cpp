@@ -233,6 +233,12 @@ namespace Fusion::Vulkan
 		vkDestroyPipeline(m_Device, m_Pipeline, VULKAN_CPU_ALLOCATOR);
 		vkDestroyPipelineLayout(m_Device, m_PipelineLayout, VULKAN_CPU_ALLOCATOR);
 
+		for (int i = 0; i < m_ImmutableSamplers.Size(); i++)
+		{
+			vkDestroySampler(m_Device, m_ImmutableSamplers[i], VULKAN_CPU_ALLOCATOR);
+		}
+		m_ImmutableSamplers.Clear();
+
 		vkDestroyShaderModule(m_Device, m_VertexModule, VULKAN_CPU_ALLOCATOR);
 		vkDestroyShaderModule(m_Device, m_FragmentModule, VULKAN_CPU_ALLOCATOR);
 	}
@@ -349,7 +355,20 @@ namespace Fusion::Vulkan
 
 	void FVulkanRenderBackend::DestroyAtlas(FAtlasHandle atlas)
 	{
-		m_AtlasesByHandle.Remove(atlas);
+		for (auto [instanceHandle, instance] : m_Instances)
+		{
+			if (instance->FontAtlas == atlas)
+			{
+				instance->FontAtlas = {};
+			}
+		}
+
+		auto it = m_AtlasesByHandle.Find(atlas);
+		if (it != m_AtlasesByHandle.End())
+		{
+			it->second->DeferredDestroy();
+			m_AtlasesByHandle.Remove(atlas);
+		}
 	}
 
 	FRenderTargetHandle FVulkanRenderBackend::AcquireWindowRenderTarget(FInstanceHandle instance, FWindowHandle window)
@@ -533,9 +552,9 @@ namespace Fusion::Vulkan
 			IPtr<FRenderTarget> renderTarget = m_RenderTargetsByHandle[views.RenderTarget];
 			IPtr<FRenderSnapshot> snapshot = renderTarget->Snapshot;
 
-			VkDescriptorSetLayout viewDataSetLayout = m_MainGraphicsPipeline->m_SetLayouts[1];
-			VkDescriptorSetLayout layerTransformsSetLayout = m_MainGraphicsPipeline->m_SetLayouts[2];
-			VkDescriptorSetLayout drawDataSetLayout = m_MainGraphicsPipeline->m_SetLayouts[3];
+			VkDescriptorSetLayout viewDataSetLayout = m_MainGraphicsPipeline->m_SetLayouts[kViewDataSetIndex];
+			VkDescriptorSetLayout layerTransformsSetLayout = m_MainGraphicsPipeline->m_SetLayouts[kLayerTransformsSetIndex];
+			VkDescriptorSetLayout drawDataSetLayout = m_MainGraphicsPipeline->m_SetLayouts[kDrawDataSetIndex];
 
 			views.ViewDataSet = pool->Allocate(viewDataSetLayout);
 
@@ -551,7 +570,7 @@ namespace Fusion::Vulkan
 				memcpy(dataPtr + views.IndexBuffer.StartOffset, snapshot->indexArray.GetData(), views.IndexBuffer.ByteSize);
 			}
 
-			// View Data
+			// View Data Set
 			{
 				VkDescriptorBufferInfo viewDataBufferInfo{
 					.buffer = drawBuffer->m_Buffer,
@@ -751,6 +770,40 @@ namespace Fusion::Vulkan
 			}
 		}
 
+		// - Global Set -
+
+		for (auto [instanceHandle, instance] : m_Instances)
+		{
+			instance->GlobalSet = VK_NULL_HANDLE;
+
+			FAtlasHandle atlasHandle = instance->FontAtlas;
+			if (atlasHandle.IsNull())
+				continue;
+
+			auto it = m_AtlasesByHandle.Find(atlasHandle);
+			if (it == m_AtlasesByHandle.End())
+				continue;
+
+			IPtr<FTextureAtlas> atlas = it->second;
+
+			instance->GlobalSet = m_PoolsPerFrame[m_FrameSlot]->Allocate(m_MainGraphicsPipeline->m_SetLayouts[kGlobalSetIndex]);
+
+			VkDescriptorImageInfo fontAtlasInfo{};
+			fontAtlasInfo.imageView = atlas->m_ImageView;
+			fontAtlasInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+			VkWriteDescriptorSet fontAtlasBinding{};
+			fontAtlasBinding.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			fontAtlasBinding.descriptorCount = 1;
+			fontAtlasBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			fontAtlasBinding.dstArrayElement = 0;
+			fontAtlasBinding.dstBinding = 2;
+			fontAtlasBinding.dstSet = instance->GlobalSet;
+			fontAtlasBinding.pImageInfo = &fontAtlasInfo;
+			
+			vkUpdateDescriptorSets(m_Device, 1, &fontAtlasBinding, 0, nullptr);
+		}
+
 		// - Acquire SwapChain -
 
 		for (auto [windowHandle, swapChain] : m_SwapChainsByWindowHandle)
@@ -846,6 +899,13 @@ namespace Fusion::Vulkan
 
 				const FDrawDataBufferViews& views = m_OffsetDataPerSnapshot[snapshotIdx];
 
+				if (views.Instance.IsNull())
+					continue;
+
+				IPtr<FRenderInstance> instance = nullptr;
+				if (!m_Instances.TryGet(views.Instance, instance) || instance == nullptr)
+					continue;
+
 				IPtr<FRenderTarget> renderTarget = m_RenderTargetsByHandle[views.RenderTarget];
 				if (renderTarget->Type != ERenderTargetType::Window)
 					continue;
@@ -889,9 +949,12 @@ namespace Fusion::Vulkan
 
 					vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_Pipeline);
 
+					vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_PipelineLayout,
+						kGlobalSetIndex, 1, &instance->GlobalSet, 0, nullptr);
+
 					// View Data set
 					vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_PipelineLayout,
-						1, 1, &views.ViewDataSet, 0, nullptr);
+						kViewDataSetIndex, 1, &views.ViewDataSet, 0, nullptr);
 
 					// Vertex & Index Buffers
 					vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &drawBuffer->m_Buffer, (const VkDeviceSize*)&views.VertexBuffer.StartOffset);
@@ -1441,7 +1504,45 @@ namespace Fusion::Vulkan
 			{
 				VkDescriptorSetLayoutCreateInfo setLayoutCI{};
 				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-				setLayoutCI.bindingCount = 0;
+				
+				FArray<VkDescriptorSetLayoutBinding> bindings{};
+
+				bindings.Add({ // _FontAtlas
+					.binding = 2,
+					.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+					.descriptorCount = 1,
+					.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+					.pImmutableSamplers = nullptr
+				});
+
+				VkSamplerCreateInfo fontSamplerCI{};
+				fontSamplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+				fontSamplerCI.addressModeU = fontSamplerCI.addressModeV = fontSamplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+				fontSamplerCI.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+				fontSamplerCI.anisotropyEnable = VK_FALSE;
+				fontSamplerCI.compareEnable = VK_FALSE;
+				fontSamplerCI.minLod = 0;
+				fontSamplerCI.minFilter = VK_FILTER_LINEAR;
+				fontSamplerCI.magFilter = VK_FILTER_LINEAR;
+				fontSamplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+				fontSamplerCI.unnormalizedCoordinates = VK_FALSE;
+
+				VkSampler sampler = VK_NULL_HANDLE;
+				result = vkCreateSampler(m_Device, &fontSamplerCI, VULKAN_CPU_ALLOCATOR, &sampler);
+				VULKAN_CHECK(result, "Failed to create sampler.");
+
+				bindings.Add({ // _FontAtlasSampler
+					.binding = 3,
+					.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
+					.descriptorCount = 1,
+					.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+					.pImmutableSamplers = &sampler
+				});
+
+				m_MainGraphicsPipeline->m_ImmutableSamplers.Add(sampler);
+
+				setLayoutCI.bindingCount = bindings.Size();
+				setLayoutCI.pBindings = bindings.Data();
 
 				VkDescriptorSetLayout setLayout = nullptr;
 				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);

@@ -97,7 +97,8 @@ float4 PSMain(VSOutput input) : SV_Target
     }
     else if (item.shaderType == FUIShaderType::SDFText)
     {
-        
+        float sd = _FontAtlas.Sample(_FontAtlasSampler, float3(uv, asfloat(item.textureIndex)));
+        color.a = sd;
     }
 
     return color;
