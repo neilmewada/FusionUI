@@ -52,9 +52,13 @@ namespace Fusion::Vulkan
     {
     public:
 
-        FTextureAtlas(FVulkanRenderBackend* backend, u32 size, u32 layerCount, VkFormat format, int imageCount);
+        FTextureAtlas(FVulkanRenderBackend* backend, u32 size, u32 layerCount, VkFormat format);
 
         ~FTextureAtlas();
+
+        void DeferredDestroy();
+
+        void Create();
 
         FVulkanRenderBackend* m_Backend = nullptr;
         VkDevice m_Device = VK_NULL_HANDLE;
@@ -63,8 +67,8 @@ namespace Fusion::Vulkan
         VkImageViewCreateInfo m_ImageViewCI{};
         VmaAllocationCreateInfo m_AllocCI{};
 
-        VmaAllocation m_Allocation = nullptr;
         VmaAllocationInfo m_AllocationInfo{};
+        VmaAllocation m_Allocation = nullptr;
         VkImage m_Image = VK_NULL_HANDLE;
         VkImageView m_ImageView = VK_NULL_HANDLE;
 
@@ -72,6 +76,8 @@ namespace Fusion::Vulkan
         u32 m_LayerCount = 0;
         VkFormat m_Format = VK_FORMAT_UNDEFINED;
         VkImageLayout m_CurLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        VkImageSubresourceRange m_SubresourceRange{};
     };
     
 } // namespace Fusion::Vulkan

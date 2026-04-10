@@ -218,6 +218,8 @@ namespace Fusion::Vulkan
 
 		void ShutdownVulkan();
 
+        void TransitionImageLayout(VkCommandBuffer cmdBuffer, VkImage image, VkImageLayout curLayout, VkImageLayout toLayout, VkImageSubresourceRange subresourceRange);
+
         // - Window & SwapChain -
 
         void UpdateAllSwapChains();
@@ -241,6 +243,7 @@ namespace Fusion::Vulkan
     private:
 
         using FArena = FStableGrowthArray<u8, kUploadArenaGrowSize>;
+        using FBufferImageCopyArray = FStableGrowthArray<VkBufferImageCopy, 128>;
 
         FHashMap<FInstanceHandle, IntrusivePtr<FRenderInstance>> instances;
 
@@ -323,6 +326,8 @@ namespace Fusion::Vulkan
         FArray<FDrawDataBufferViews> m_OffsetDataPerSnapshot;
         FStaticArray<IPtr<FMappedBuffer>, kImageCount> m_StagingBuffers;
 
+        FBufferImageCopyArray m_BufferImageCopies;
+
         // - Upload Arena -
 
         FArena m_UploadArena;
@@ -348,7 +353,7 @@ namespace Fusion::Vulkan
 
         FAtlasHandle::IndexType m_AtlasIndexAllocator = 0;
         FHashMap<FAtlasHandle, IPtr<FTextureAtlas>> m_AtlasesByHandle;
-        FHashMap<FAtlasHandle, FAtlasUploadRegion> m_PendingAtlasUploads;
+        FHashMap<FAtlasHandle, FArray<FAtlasUploadRegion>> m_PendingAtlasUploads;
     };
 
 } // namespace Fusion

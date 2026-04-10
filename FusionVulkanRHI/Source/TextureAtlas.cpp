@@ -40,7 +40,7 @@ namespace Fusion::Vulkan
 	// Texture Atlas
 	// -----------------------------------------------------------------
 
-	FTextureAtlas::FTextureAtlas(FVulkanRenderBackend* backend, u32 size, u32 layerCount, VkFormat format, int imageCount)
+	FTextureAtlas::FTextureAtlas(FVulkanRenderBackend* backend, u32 size, u32 layerCount, VkFormat format)
 		: m_Backend(backend), m_Device(backend->GetVkDevice()), m_Size(size), m_LayerCount(layerCount), m_Format(format)
 	{
 		FUSION_ASSERT(layerCount > 0, "FTextureAtlas: invalid layerCount");
@@ -75,13 +75,59 @@ namespace Fusion::Vulkan
 		m_ImageViewCI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		m_ImageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
 
+		m_SubresourceRange = m_ImageViewCI.subresourceRange;
+
 		VkResult result = vmaCreateImage(m_Backend->GetVmaAllocator(), &m_ImageCI, &m_AllocCI, &m_Image, &m_Allocation, &m_AllocationInfo);
 		VULKAN_CHECK(result, "FTextureAtlas failed to vmaCreateImage");
+
+		m_ImageViewCI.image = m_Image;
+
+		result = vkCreateImageView(m_Device, &m_ImageViewCI, VULKAN_CPU_ALLOCATOR, &m_ImageView);
+		VULKAN_CHECK(result, "FTextureAtlas failed to create VkImageView.");
 	}
 
 	FTextureAtlas::~FTextureAtlas()
 	{
 		vmaDestroyImage(m_Backend->GetVmaAllocator(), m_Image, m_Allocation);
+		
+		vkDestroyImageView(m_Device, m_ImageView, VULKAN_CPU_ALLOCATOR);
+	}
+
+	void FTextureAtlas::DeferredDestroy()
+	{
+		VmaAllocator allocator = m_Backend->GetVmaAllocator();
+		VkImage image = m_Image;
+		VkImageView imageView = m_ImageView;
+		VkDevice device = m_Device;
+		VmaAllocation allocation = m_Allocation;
+
+		m_Backend->DeferDestruction([allocator, image, imageView, device, allocation]
+		{
+			vmaDestroyImage(allocator, image, allocation);
+
+			vkDestroyImageView(device, imageView, VULKAN_CPU_ALLOCATOR);
+		});
+
+		m_AllocationInfo = {};
+		m_ImageView = VK_NULL_HANDLE;
+		m_Image = VK_NULL_HANDLE;
+		m_Allocation = VK_NULL_HANDLE;
+	}
+
+	void FTextureAtlas::Create()
+	{
+		if (m_Image != VK_NULL_HANDLE)
+		{
+			DeferredDestroy();
+		}
+
+		VkResult result = vmaCreateImage(m_Backend->GetVmaAllocator(), &m_ImageCI, &m_AllocCI, &m_Image, &m_Allocation, &m_AllocationInfo);
+		VULKAN_CHECK(result, "FTextureAtlas failed to vmaCreateImage");
+
+		m_ImageViewCI.image = m_Image;
+
+		result = vkCreateImageView(m_Device, &m_ImageViewCI, VULKAN_CPU_ALLOCATOR, &m_ImageView);
+		VULKAN_CHECK(result, "FTextureAtlas failed to create VkImageView.");
 	}
 
 } // namespace Fusion::Vulkan

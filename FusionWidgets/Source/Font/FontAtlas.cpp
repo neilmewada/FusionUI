@@ -180,8 +180,10 @@ namespace Fusion
             if (glyphIndex == 0)
                 continue;
 
-            FT_Load_Glyph(face.Face, glyphIndex, FT_LOAD_DEFAULT);
-            FT_Render_Glyph(face.Face->glyph, FT_RENDER_MODE_SDF);
+            if (FT_Load_Glyph(face.Face, glyphIndex, FT_LOAD_DEFAULT) != 0)
+                continue;
+            if (FT_Render_Glyph(face.Face->glyph, FT_RENDER_MODE_SDF) != 0)
+                continue;
 
             FT_GlyphSlot slot = face.Face->glyph;
 
@@ -207,10 +209,15 @@ namespace Fusion
                 outX += kSdfPadding / 2;
                 outY += kSdfPadding / 2;
 
-                renderBackend->UploadAtlasRegionAsync(m_AtlasHandle, m_CurLayerIndex,
-                    FVec2i(outX, outY),
-                    FVec2i(glyphSize.width, glyphSize.height),
-                    pixels, bitmap.pitch);
+                layer->Glyphs.Add({ .Family = key.Family, .Weight = key.Weight, .Style = key.Style, .CodePoint = codePoint }, glyph);
+
+                if (pixels != nullptr)
+                {
+                    renderBackend->UploadAtlasRegionAsync(m_AtlasHandle, m_CurLayerIndex,
+                        FVec2i(outX, outY),
+                        FVec2i(bitmap.width, bitmap.rows),
+                        pixels, bitmap.pitch);
+                }
             }
         }
     }

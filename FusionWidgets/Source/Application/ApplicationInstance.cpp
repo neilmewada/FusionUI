@@ -65,7 +65,6 @@ namespace Fusion
 		FUSION_ASSERT(m_RenderCapabilities.MinStructuredBufferOffsetAlignment > 0, "Invalid value for MinStructuredBufferOffsetAlignment.");
 
 		m_FontAtlas = NewObject<FFontAtlas>(this, this);
-		m_RenderBackend->CreateLayeredAtlas(true, 2048, 4);
 
 		m_FontAtlas->Initialize();
 

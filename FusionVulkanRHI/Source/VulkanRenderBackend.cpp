@@ -298,7 +298,7 @@ namespace Fusion::Vulkan
 		m_AtlasIndexAllocator += 1;
 		FAtlasHandle handle = FAtlasHandle(m_AtlasIndexAllocator);
 
-		IPtr<FTextureAtlas> atlas = new FTextureAtlas(this, resolution, maxLayers, grayscale ? VK_FORMAT_R8_UNORM : VK_FORMAT_R8G8B8A8_UNORM, kImageCount);
+		IPtr<FTextureAtlas> atlas = new FTextureAtlas(this, resolution, maxLayers, grayscale ? VK_FORMAT_R8_UNORM : VK_FORMAT_R8G8B8A8_UNORM);
 
 		m_AtlasesByHandle[handle] = atlas;
 
@@ -329,7 +329,7 @@ namespace Fusion::Vulkan
 			m_UploadArena.Insert(pixels + row * pitch, bytesPerRow);
 		}
 
-		m_PendingAtlasUploads.Add(handle, {
+		m_PendingAtlasUploads[handle].Add({
 			.Handle = handle,
 			.Layer = layer,
 			.Pos = pos,
@@ -718,20 +718,27 @@ namespace Fusion::Vulkan
 
 		// - Upload Atlas Regions -
 
-		for (auto& [atlasHandle, atlasUploadRegion]: m_PendingAtlasUploads)
+		bool atlasUploadRequired = false;
+
+		for (auto& [atlasHandle, atlasUploadRegions]: m_PendingAtlasUploads)
 		{
-			auto it = m_AtlasesByHandle.Find(atlasUploadRegion.Handle);
+			auto it = m_AtlasesByHandle.Find(atlasHandle);
 			if (it == m_AtlasesByHandle.End())
 				continue;
 
-			m_StagingBuffers[m_FrameSlot]->EnsureCapacity(curUploadOffset + atlasUploadRegion.DataSize);
+			for (auto& atlasUploadRegion : atlasUploadRegions)
+			{
+				m_StagingBuffers[m_FrameSlot]->EnsureCapacity(curUploadOffset + atlasUploadRegion.DataSize);
 
-			u8* dstData = m_StagingBuffers[m_FrameSlot]->m_MappedData + curUploadOffset;
-			memcpy(dstData, m_UploadArena.GetData() + atlasUploadRegion.DataOffset, atlasUploadRegion.DataSize);
+				u8* dstData = m_StagingBuffers[m_FrameSlot]->m_MappedData + curUploadOffset;
+				memcpy(dstData, m_UploadArena.GetData() + atlasUploadRegion.DataOffset, atlasUploadRegion.DataSize);
 
-			atlasUploadRegion.MappedDataOffset = curUploadOffset;
+				atlasUploadRegion.MappedDataOffset = curUploadOffset;
 
-			curUploadOffset += atlasUploadRegion.DataSize;
+				curUploadOffset += atlasUploadRegion.DataSize;
+
+				atlasUploadRequired = true;
+			}
 		}
 
 		// - Acquire SwapChain -
@@ -777,6 +784,48 @@ namespace Fusion::Vulkan
 		vkBeginCommandBuffer(cmdBuffer, &beginInfo);
 		{
 			// - Uploads -
+
+			if (atlasUploadRequired)
+			{
+				for (auto& [atlasHandle, atlasUploadRegions] : m_PendingAtlasUploads)
+				{
+					auto it = m_AtlasesByHandle.Find(atlasHandle);
+					if (it == m_AtlasesByHandle.End())
+						continue;
+
+					IPtr<FTextureAtlas> atlas = it->second;
+
+					m_BufferImageCopies.RemoveAll();
+
+					for (const auto& atlasUploadRegion : atlasUploadRegions)
+					{
+						VkBufferImageCopy copy{};
+						copy.imageSubresource.baseArrayLayer = atlasUploadRegion.Layer;
+						copy.imageSubresource.layerCount = 1;
+						copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+						copy.imageSubresource.mipLevel = 0;
+						copy.imageOffset.x = atlasUploadRegion.Pos.x;
+						copy.imageOffset.y = atlasUploadRegion.Pos.y;
+						copy.imageOffset.z = 0;
+						copy.imageExtent.width = atlasUploadRegion.Size.width;
+						copy.imageExtent.height = atlasUploadRegion.Size.height;
+						copy.imageExtent.depth = 1.0f;
+						copy.bufferOffset = atlasUploadRegion.MappedDataOffset;
+						copy.bufferRowLength = 0;
+						copy.bufferImageHeight = 0;
+
+						m_BufferImageCopies.Insert(copy);
+					}
+
+					TransitionImageLayout(cmdBuffer, atlas->m_Image, atlas->m_CurLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, atlas->m_SubresourceRange);
+					atlas->m_CurLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+					vkCmdCopyBufferToImage(cmdBuffer, m_StagingBuffers[m_FrameSlot]->m_Buffer, atlas->m_Image, atlas->m_CurLayout, m_BufferImageCopies.GetCount(), m_BufferImageCopies.GetData());
+
+					TransitionImageLayout(cmdBuffer, atlas->m_Image, atlas->m_CurLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, atlas->m_SubresourceRange);
+					atlas->m_CurLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				}
+			}
 
 			// - Render Passes -
 
@@ -1095,15 +1144,30 @@ namespace Fusion::Vulkan
 		vkEnumerateDeviceExtensionProperties(m_PhysicalDevice, nullptr, &deviceExtensionCount, deviceExtensionProperties.Data());
 
 		deviceExtensionNames.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		bool nonSemanticInfoExtFound = false;
 
 		for (uint32_t i = 0; i < deviceExtensionCount; ++i)
 		{
+			const char* extName = deviceExtensionProperties[i].extensionName;
+
 			// Required rule by Vulkan Specs, especially on Apple platform.
-			if (strcmp(deviceExtensionProperties[i].extensionName, "VK_KHR_portability_subset") == 0)
+			if (strcmp(extName, "VK_KHR_portability_subset") == 0)
 			{
-				deviceExtensionNames.Add(deviceExtensionProperties[i].extensionName);
+				deviceExtensionNames.Add(extName);
+			}
+
+			// Needed for SPIR-V shader debug info (SPV_KHR_non_semantic_info).
+			// Only present when the driver supports it; not required for release builds.
+			if (strcmp(extName, VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME) == 0)
+			{
+				nonSemanticInfoExtFound = true;
+				deviceExtensionNames.Add(extName);
 			}
 		}
+
+#if FUSION_SHADER_DEBUG_SYMBOLS
+		FUSION_ASSERT(nonSemanticInfoExtFound, "Shader debug symbols were enabled when the Vulkan Device does not support VK_KHR_shader_non_semantic_info extension!");
+#endif
 
 		VkDeviceCreateInfo deviceCI{};
 		deviceCI.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -1552,15 +1616,17 @@ namespace Fusion::Vulkan
 			.range = m_NullBuffer->m_BufferSize
 		};
 
-		// - Upload Arena -
+		// - Transient Resources -
 
 		m_UploadArena.Grow();
+		m_BufferImageCopies.Grow();
 	}
 
 	void FVulkanRenderBackend::ShutdownVulkan()
 	{
 		vkDeviceWaitIdle(m_Device);
 
+		m_BufferImageCopies.Free();
 		m_UploadArena.Free();
 
 		m_AtlasIndexAllocator = 0;
@@ -1653,6 +1719,70 @@ namespace Fusion::Vulkan
 
 		vkDestroyInstance(m_VulkanInstance, VULKAN_CPU_ALLOCATOR);
 		m_VulkanInstance = VK_NULL_HANDLE;
+	}
+
+	void FVulkanRenderBackend::TransitionImageLayout(VkCommandBuffer cmdBuffer, VkImage image, VkImageLayout curLayout, VkImageLayout toLayout, VkImageSubresourceRange subresourceRange)
+	{
+		if (curLayout == toLayout)
+			return;
+
+		VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		VkDependencyFlags dependencyFlags = 0;
+
+		VkImageMemoryBarrier imageBarrier{};
+		imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+		switch (curLayout)
+		{
+		case VK_IMAGE_LAYOUT_UNDEFINED:
+			imageBarrier.srcAccessMask = 0;
+			break;
+		case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+			srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+			break;
+		case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+			srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+			break;
+		case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+			srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+			imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+			break;
+		}
+
+		switch (toLayout)
+		{
+		case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+			dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+			break;
+		case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+			dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+			break;
+		case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+			dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+			imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+			break;
+		case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+			dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			break;
+		}
+		
+		imageBarrier.oldLayout = curLayout;
+		imageBarrier.newLayout = toLayout;
+		imageBarrier.image = image;
+		imageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageBarrier.subresourceRange = subresourceRange;
+
+		vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, dependencyFlags, 
+			0, nullptr, 
+			0, nullptr, 
+			1, &imageBarrier);
 	}
 
 	void FVulkanRenderBackend::UpdateAllSwapChains()

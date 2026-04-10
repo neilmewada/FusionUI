@@ -61,6 +61,12 @@ function(fusion_compile_shader)
         list(APPEND slangc_include_args -I "${inc_dir}")
     endforeach()
 
+    # Debugging symbols flag
+    set(slangc_debug_args "")
+    if(FUSION_SHADER_DEBUG_SYMBOLS)
+        list(APPEND slangc_debug_args -g2)
+    endif()
+
     # ---- Collect implicit dependencies (imported modules) ------------------
     # Glob all .slang files in every include dir so that editing any module
     # triggers a recompile, not just the top-level file.
@@ -95,6 +101,7 @@ function(fusion_compile_shader)
                     -stage  "${ARG_STAGE}"
                     -emit-spirv-via-glsl
                     ${slangc_include_args}
+                    ${slangc_debug_args}
                     -o      "${spv_file}"
             DEPENDS ${slang_deps}
             COMMENT "[Fusion] slangc: ${var_name} -> SPIR-V"
@@ -129,6 +136,7 @@ function(fusion_compile_shader)
                     -entry  "${ARG_ENTRY}"
                     -stage  "${ARG_STAGE}"
                     ${slangc_include_args}
+                    ${slangc_debug_args}
                     -o      "${msl_file}"
             DEPENDS ${slang_deps}
             COMMENT "[Fusion] slangc: ${var_name} -> MSL"
