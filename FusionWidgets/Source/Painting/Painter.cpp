@@ -76,6 +76,12 @@ namespace Fusion
 	{
 		m_DrawList = &layer->m_DrawList;
 		m_DpiScale = layer->GetDpiScale();
+		
+		m_Surface = layer->GetWidgetSurface().Get();
+		FUSION_ASSERT(m_Surface != nullptr, "Could not get widget's surface in FPainter.");
+
+		m_Application = m_Surface->GetApplication().Get();
+		FUSION_ASSERT(m_Application != nullptr, "Could not get application reference in FPainter.");
 
 		m_DrawList->fringeScale = 1.0f;
 
@@ -838,4 +844,49 @@ namespace Fusion
 
 		return true;
 	}
+
+	void FPainter::DrawText(const FVec2& pos, const FString& text)
+	{
+		FFontAtlas* atlas = m_Application->GetFontAtlas().Get();
+
+		const f32 scale = m_CurrentFont.GetPointSize() / (f32)FFontAtlas::kSdfRenderSize;
+
+		f32 cursorX = pos.x;
+		f32 cursorY = pos.y;
+
+		FFontMetrics metrics = atlas->GetScaledMetrics(m_CurrentFont);
+
+		u32 drawItemIndex = m_DrawList->AddDrawItem({
+			.shaderType = EUIShaderType::SDFText,
+			.textureIndex = 0,
+			.samplerIndex = 0,
+			.drawItemFlags = EUIDrawItemFlags::None,
+			.clipRectIndex = GetCurrentClipIndex(),
+			.gradientStartIndex = 0,
+			.gradientStopCount = 0,
+			.userFlags = 0,
+			.data = {}
+		});
+
+		for (char32_t codepoint : text.Codepoints())
+		{
+			FGlyph glyph = atlas->FindOrAddGlyph(m_CurrentFont, codepoint);
+			if (!glyph.IsValid())
+				continue;
+
+			f32 quadW = glyph.Width * scale;
+			f32 quadH = glyph.Height * scale;
+
+			f32 quadX = cursorX + glyph.BearingX * scale;
+			f32 quadY = cursorY - glyph.BearingY * scale;  // cursorY is the baseline
+
+			f32 u0 = (f32)glyph.X / glyph.AtlasSize;
+			f32 v0 = (f32)glyph.Y / glyph.AtlasSize;
+			f32 u1 = (f32)(glyph.X + glyph.Width) / glyph.AtlasSize;
+			f32 v1 = (f32)(glyph.Y + glyph.Height) / glyph.AtlasSize;
+
+			cursorX += (f32)glyph.Advance * scale;
+		}
+	}
+
 } // namespace Fusion

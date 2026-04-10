@@ -37,6 +37,8 @@ namespace Fusion
 
         void AddConvexPolyFilled(const FVec2* points, int numPoints, u32 color, bool antiAliased, FRect* minMaxPos, u32 drawItemIndex = 0);
 
+        void AddQuad(const FRect& rect, FVec2 uvMin, FVec2 uvMax, u32 color, u32 drawItemIndex = 0);
+
         void PrimReserve(int vertexCount, int indexCount);
 
         // - Types & Constants -

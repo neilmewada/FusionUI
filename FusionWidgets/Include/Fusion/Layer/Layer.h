@@ -17,6 +17,8 @@ namespace Fusion
 
         Ref<FWidget> GetOwningWidget() { return m_OwningWidget.Lock(); }
 
+        Ref<FSurface> GetWidgetSurface();
+
         Ref<FLayer> GetParentLayer() { return m_Parent.Lock(); }
 
         f32 GetDpiScale();

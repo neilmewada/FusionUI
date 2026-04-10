@@ -114,20 +114,4 @@ namespace Fusion::Vulkan
 		m_Allocation = VK_NULL_HANDLE;
 	}
 
-	void FTextureAtlas::Create()
-	{
-		if (m_Image != VK_NULL_HANDLE)
-		{
-			DeferredDestroy();
-		}
-
-		VkResult result = vmaCreateImage(m_Backend->GetVmaAllocator(), &m_ImageCI, &m_AllocCI, &m_Image, &m_Allocation, &m_AllocationInfo);
-		VULKAN_CHECK(result, "FTextureAtlas failed to vmaCreateImage");
-
-		m_ImageViewCI.image = m_Image;
-
-		result = vkCreateImageView(m_Device, &m_ImageViewCI, VULKAN_CPU_ALLOCATOR, &m_ImageView);
-		VULKAN_CHECK(result, "FTextureAtlas failed to create VkImageView.");
-	}
-
 } // namespace Fusion::Vulkan

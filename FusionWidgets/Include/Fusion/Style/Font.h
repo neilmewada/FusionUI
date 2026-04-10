@@ -31,6 +31,8 @@ namespace Fusion
     {
     public:
 
+        static constexpr auto kDefaultFamilyName = "Roboto";
+
         FFont() = default;
 
         // Implicit ctor — family + size covers the common case

@@ -58,8 +58,6 @@ namespace Fusion::Vulkan
 
         void DeferredDestroy();
 
-        void Create();
-
         FVulkanRenderBackend* m_Backend = nullptr;
         VkDevice m_Device = VK_NULL_HANDLE;
 

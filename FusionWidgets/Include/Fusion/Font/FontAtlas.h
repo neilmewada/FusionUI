@@ -2,6 +2,8 @@
 
 namespace Fusion
 {
+    class FFont;
+
     struct FFontMetrics
     {
         f32 Ascender = 0;
@@ -14,12 +16,14 @@ namespace Fusion
     {
         u32 CodePoint = 0;
         u32 AtlasLayerIndex = 0;
-        u16 X = 0, Y = 0;
-        u16 Width = 0, Height = 0;
+        u32 X = 0, Y = 0;
+        u32 Width = 0, Height = 0;
         int BearingX = 0, BearingY = 0;
         int Advance = 0;
 
         u32 AtlasSize = 0;
+
+        bool IsValid() const { return CodePoint > 0; }
     };
 
     class FUSIONWIDGETS_API FFontAtlas : public FObject
@@ -35,7 +39,6 @@ namespace Fusion
         static constexpr u32 kMaxLayers = 8;
         static constexpr u32 kSdfRenderSize = 32;
         static constexpr u32 kSdfPadding = 4;
-        static constexpr auto kDefaultFamilyName = "Roboto";
 
         ~FFontAtlas();
 
@@ -44,6 +47,10 @@ namespace Fusion
         void Shutdown();
 
         void LoadFace(FName familyName, EFontWeight weight, EFontStyle style, const u8* data, SizeT dataSize);
+
+        FFontMetrics GetScaledMetrics(const FFont& font);
+
+        FGlyph FindOrAddGlyph(const FFont& font, u32 codePoint);
 
     private:
 
@@ -111,8 +118,6 @@ namespace Fusion
             //u8* Ptr = nullptr;
             FArray<FRowSegment> Rows;
 
-            FHashMap<FFontGlyphKey, FGlyph> Glyphs;
-
             bool TryInsertGlyph(FVec2i glyphSize, int& outX, int& outY);
         };
 
@@ -127,6 +132,8 @@ namespace Fusion
 
         FArray<IPtr<FAtlasImageLayer>> m_AtlasImageLayers;
         int m_CurLayerIndex = -1;
+
+        FHashMap<FFontGlyphKey, FGlyph> m_Glyphs;
 
         FAtlasHandle m_AtlasHandle;
     };

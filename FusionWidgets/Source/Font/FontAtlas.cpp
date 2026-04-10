@@ -39,10 +39,10 @@ namespace Fusion
         m_AtlasImageLayers.Add(new FAtlasImageLayer);
         m_CurLayerIndex = 0;
 
-        LoadFace(kDefaultFamilyName, EFontWeight::Regular, EFontStyle::Normal,
-            resource->Data, resource->Size);
+        LoadFace(FFont::kDefaultFamilyName, EFontWeight::Regular, EFontStyle::Normal,
+                 resource->Data, resource->Size);
 
-        LoadGlyphs({.Family = kDefaultFamilyName, .Weight = EFontWeight::Regular, .Style = EFontStyle::Normal},
+        LoadGlyphs({.Family = FFont::kDefaultFamilyName, .Weight = EFontWeight::Regular, .Style = EFontStyle::Normal},
             kEnglishCodePoints, FUSION_COUNT(kEnglishCodePoints));
     }
 
@@ -85,6 +85,40 @@ namespace Fusion
         };
 
         m_FontFaces[key] = face;
+    }
+
+    FFontMetrics FFontAtlas::GetScaledMetrics(const FFont& font)
+    {
+        FFontFaceKey key{
+            .Family = font.GetFamily(),
+            .Weight = font.GetWeight(),
+            .Style = font.GetStyle()
+        };
+
+        auto it = m_FontFaces.Find(key);
+
+        if (it == m_FontFaces.End())
+            return {};
+
+        return it->second.GetScaledMetrics(font.GetPointSize());
+    }
+
+    FGlyph FFontAtlas::FindOrAddGlyph(const FFont& font, u32 codePoint)
+    {
+        auto it = m_Glyphs.Find({
+            .Family = font.GetFamily(),
+            .Weight = font.GetWeight(),
+            .Style = font.GetStyle(),
+            .CodePoint = codePoint
+        });
+
+        if (it == m_Glyphs.End())
+        {
+            // TODO: Add this new glyph to the atlas
+            return {};
+        }
+
+        return it->second;
     }
 
     SizeT FFontAtlas::FFontFaceKey::GetHash() const
@@ -201,15 +235,19 @@ namespace Fusion
             u8* pixels = bitmap.buffer;
 
             IPtr<FAtlasImageLayer> layer = m_AtlasImageLayers[m_CurLayerIndex];
-            FVec2i glyphSize = FVec2i(glyph.Width + kSdfPadding, glyph.Height + kSdfPadding);
+            FVec2i glyphRectSize = FVec2i(glyph.Width + kSdfPadding, glyph.Height + kSdfPadding);
             int outX = 0, outY = 0;
 
-            if (layer->TryInsertGlyph(glyphSize, outX, outY))
+            if (layer->TryInsertGlyph(glyphRectSize, outX, outY))
             {
                 outX += kSdfPadding / 2;
                 outY += kSdfPadding / 2;
 
-                layer->Glyphs.Add({ .Family = key.Family, .Weight = key.Weight, .Style = key.Style, .CodePoint = codePoint }, glyph);
+                glyph.AtlasLayerIndex = m_CurLayerIndex;
+                glyph.X = outX;
+                glyph.Y = outY;
+
+                m_Glyphs.Add({ .Family = key.Family, .Weight = key.Weight, .Style = key.Style, .CodePoint = codePoint }, glyph);
 
                 if (pixels != nullptr)
                 {
@@ -218,6 +256,10 @@ namespace Fusion
                         FVec2i(bitmap.width, bitmap.rows),
                         pixels, bitmap.pitch);
                 }
+            }
+            else
+            {
+	            // TODO: Allocate new layer and increment m_CurLayerIndex
             }
         }
     }

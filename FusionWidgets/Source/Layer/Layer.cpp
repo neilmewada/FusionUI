@@ -10,6 +10,16 @@ namespace Fusion
 		
 	}
 
+	Ref<FSurface> FLayer::GetWidgetSurface()
+	{
+		if (Ref<FWidget> widget = GetOwningWidget())
+		{
+			return widget->GetParentSurface();
+		}
+
+		return nullptr;
+	}
+
 	f32 FLayer::GetDpiScale()
 	{
 		if (Ref<FWidget> widget = m_OwningWidget.Lock())

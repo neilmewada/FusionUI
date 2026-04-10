@@ -72,6 +72,10 @@ namespace Fusion
         void PushClip(const FRect& rect, const FShape& shape);
         void PopClip();
 
+        // - Text -
+
+        void DrawText(const FVec2& pos, const FString& text);
+
     private:
 
         int CalculateNumCircleSegments(float radius) const;
@@ -96,6 +100,8 @@ namespace Fusion
         static constexpr u32 kArcFastTableSize = 48;
 
         FLayer* m_Layer = nullptr;
+        FSurface* m_Surface = nullptr;
+        FApplicationInstance* m_Application = nullptr;
         FUIDrawList* m_DrawList = nullptr;
 
         FFont  m_CurrentFont;

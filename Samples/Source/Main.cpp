@@ -216,6 +216,16 @@ public:
 			P(0.65f, 0.50f), P(0.75f, 1.00f), P(0.88f, 1.00f), P(1.00f, 0.50f));
 
 		painter.PathStroke(false);
+
+		painter.SetFont(
+			FFont::Regular(FFont::kDefaultFamilyName, 12)
+			.Style(EFontStyle::Normal)
+			.Weight(EFontWeight::Regular)
+		);
+
+		painter.SetPen(FPen::Solid(FColors::White));
+
+		painter.DrawText(FVec2(200, 400), "Hello World");
 	}
 
 	FUSION_PROPERTY(f32, GradientOffset);
