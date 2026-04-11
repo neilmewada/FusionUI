@@ -459,6 +459,8 @@ namespace Fusion
 
     void FUIDrawList::AddQuad(const FRect& rect, FVec2 uvMin, FVec2 uvMax, u32 color, u32 drawItemIndex)
     {
+        ZoneScoped;
+
         const int indexCount = 6;
         const int vertexCount = 4;
         

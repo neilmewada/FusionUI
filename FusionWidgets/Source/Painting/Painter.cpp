@@ -847,6 +847,8 @@ namespace Fusion
 
 	void FPainter::DrawText(const FVec2& pos, const FString& text)
 	{
+		ZoneScoped;
+
 		FFontAtlas* atlas = m_Application->GetFontAtlas().Get();
 
 		const f32 scale = m_CurrentFont.GetPointSize() / (f32)FFontAtlas::kSdfRenderSize;
@@ -869,7 +871,7 @@ namespace Fusion
 			.userFlags = 0,
 			.data = {}
 		};
-		drawItem.data[0] = 16.0; // pxRange
+		drawItem.data[0] = FFontAtlas::kPxRange;
 		drawItem.data[1] = FFontAtlas::kAtlasSize;
 
 		u32 drawItemIndex = m_DrawList->AddDrawItem(drawItem);
@@ -890,6 +892,12 @@ namespace Fusion
 			f32 v0 = (f32)glyph.Y / glyph.AtlasSize;
 			f32 u1 = (f32)(glyph.X + glyph.Width) / glyph.AtlasSize;
 			f32 v1 = (f32)(glyph.Y + glyph.Height) / glyph.AtlasSize;
+
+			if (drawItem.textureIndex != glyph.AtlasLayerIndex)
+			{
+				drawItem.textureIndex = glyph.AtlasLayerIndex;
+				drawItemIndex = m_DrawList->AddDrawItem(drawItem);
+			}
 
 			m_DrawList->AddQuad(FRect::FromSize(quadX, quadY, quadW, quadH), FVec2(u0, v0), FVec2(u1, v1), color, drawItemIndex);
 			

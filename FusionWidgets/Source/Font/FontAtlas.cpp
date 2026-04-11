@@ -105,6 +105,8 @@ namespace Fusion
 
     FGlyph FFontAtlas::FindOrAddGlyph(const FFont& font, u32 codePoint)
     {
+        ZoneScoped;
+
         auto it = m_Glyphs.Find({
             .Family = font.GetFamily(),
             .Weight = font.GetWeight(),

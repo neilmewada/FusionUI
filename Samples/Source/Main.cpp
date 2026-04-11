@@ -227,7 +227,7 @@ public:
 
 		FString text = "Hello World Good";
 
-		painter.DrawText(FVec2(100, 400), text);
+		painter.DrawText(FVec2(100, 350), text);
 
 		painter.SetFont(
 			FFont::Regular(FFont::kDefaultFamilyName, 20)
@@ -237,7 +237,7 @@ public:
 
 		painter.SetPen(FPen::Solid(FColors::White));
 
-		painter.DrawText(FVec2(200, 400), text);
+		painter.DrawText(FVec2(250, 350), text);
 	}
 
 	FUSION_PROPERTY(f32, GradientOffset);
