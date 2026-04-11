@@ -214,7 +214,7 @@ namespace Fusion
             if (glyphIndex == 0)
                 continue;
 
-            if (FT_Load_Glyph(face.Face, glyphIndex, FT_LOAD_DEFAULT) != 0)
+            if (FT_Load_Glyph(face.Face, glyphIndex, FT_LOAD_RENDER) != 0)
                 continue;
             if (FT_Render_Glyph(face.Face->glyph, FT_RENDER_MODE_SDF) != 0)
                 continue;

@@ -38,7 +38,7 @@ namespace Fusion
         static constexpr u32 kAtlasSize = 2048;
         static constexpr u32 kMaxLayers = 8;
         static constexpr u32 kSdfRenderSize = 64;
-        static constexpr u32 kSdfPadding = 4;
+        static constexpr u32 kSdfPadding = 8;
 
         ~FFontAtlas();
 
