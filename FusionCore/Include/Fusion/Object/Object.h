@@ -12,6 +12,7 @@
 
 #define FUSION_CLASS_BODY(SelfClass) typedef SelfClass Self;\
     public:\
+		static FName StaticClassName() { thread_local const Fusion::FName className = #SelfClass; return className; }\
 	    virtual FTypeID GetClassTypeID() const { thread_local const FTypeID typeId = ::Fusion::GetTypeID<Self>(); return typeId; }\
 	    virtual FName GetClassName() const { thread_local const Fusion::FName className = #SelfClass; return className; }
 
