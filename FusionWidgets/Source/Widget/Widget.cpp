@@ -222,8 +222,8 @@ namespace Fusion
 		m_WidgetFlags &= ~EWidgetFlags::LayoutDirty;
 
 		FVec2 newLayoutSize = ApplyLayoutConstraints(finalSize);
-		if (m_LayoutSize == newLayoutSize)
-			return;
+		//if (m_LayoutSize == newLayoutSize)
+		//	return;
 
 		m_LayoutSize = newLayoutSize;
 

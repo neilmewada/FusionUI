@@ -154,6 +154,8 @@
 // Dirty-kind dispatch — maps the trailing tag to the right property macro.
 #define __FUSION_SP_PROP_Paint(Type, Name)   __FUSION_STYLE_PROPERTY(Type, Name, self.MarkPaintDirty())
 #define __FUSION_SP_PROP_Layout(Type, Name)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty())
+#define __FUSION_SP_PROP_LayoutAndPaint(Type, Name)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty(); self.MarkPaintDirty())
+#define __FUSION_SP_PROP_PaintAndLayout(Type, Name)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty(); self.MarkPaintDirty())
 
 // DECL: unpack via juxtaposition, then dispatch on the trailing DirtyKind tag.
 #define __FUSION_SP_DECL(Tuple)                    __FUSION_SP_DECL_I Tuple

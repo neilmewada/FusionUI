@@ -78,6 +78,7 @@ namespace Fusion
         FStyle& Float(const FName& propertyName, f32 value, EStyleState state = EStyleState::Default);
         FStyle& Vec2(const FName& propertyName, const FVec2& value, EStyleState state = EStyleState::Default);
         FStyle& Vec4(const FName& propertyName, const FVec4& value, EStyleState state = EStyleState::Default);
+        FStyle& Font(const FName& propertyName, const FFont& value, EStyleState state = EStyleState::Default);
 
         template<typename T>
         FStyle& Set(const FName& propertyName, const T& value, EStyleState state = EStyleState::Default)
@@ -89,6 +90,7 @@ namespace Fusion
             else if constexpr (std::is_same_v<T, f32>)     return Float(propertyName, value, state);
             else if constexpr (std::is_same_v<T, FVec2>)   return Vec2(propertyName, value, state);
             else if constexpr (std::is_same_v<T, FVec4>)   return Vec4(propertyName, value, state);
+            else if constexpr (std::is_same_v<T, FFont>)   return Font(propertyName, value, state);
             else static_assert(sizeof(T) == 0, "FStyle::Set — unsupported property type");
 
             return *this;
@@ -103,6 +105,7 @@ namespace Fusion
         bool TryGet(const FName& propertyName, f32& outFloat, EStyleState state);
         bool TryGet(const FName& propertyName, FVec2& outVec2, EStyleState state);
         bool TryGet(const FName& propertyName, FVec4& outVec4, EStyleState state);
+        bool TryGet(const FName& propertyName, FFont& outFont, EStyleState state);
 
     private:
 
@@ -115,6 +118,7 @@ namespace Fusion
         FHashMap<FName, FStyleValue<f32>>    m_FloatValues;
         FHashMap<FName, FStyleValue<FVec2>>  m_Vec2Values;
         FHashMap<FName, FStyleValue<FVec4>>  m_Vec4Values;
+        FHashMap<FName, FStyleValue<FFont>>  m_FontValues;
 
         friend class FTheme;
     };

@@ -225,7 +225,7 @@ public:
 
 		painter.SetPen(FPen::Solid(FColors::White));
 
-		FString text = "Hello World Good";
+		FString text = "Hello World, Good bye!";
 
 		painter.DrawText(FVec2(100, 350), text);
 
@@ -257,11 +257,11 @@ int main(int argc, char* argv[])
 
 	theme->MergeStyleSheet(FUSION_STYLE_SHEET
 	{
-		FColor BackgroundColor = FColor(0.13f, 0.13f, 0.15f);
+		FColor WindowBackgroundColor = FColor(0.13f, 0.13f, 0.15f);
 
 		FUSION_STYLE(SampleWindow, "SampleWindow", Background, Padding)
 		{
-			Background = BackgroundColor;
+			Background = WindowBackgroundColor;
 			Padding	   = FMargin(1, 1, 1, 1) * 5;
 		}
 		

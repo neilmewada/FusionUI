@@ -45,6 +45,12 @@ namespace Fusion
 		return *this;
 	}
 
+	FStyle& FStyle::Font(const FName& propertyName, const FFont& value, EStyleState state)
+	{
+		m_FontValues[propertyName].Add(value, state);
+		return *this;
+	}
+
 	FStyle& FStyle::CopyFrom(const FStyle& other)
 	{
 		for (auto& [name, val] : other.m_BrushValues)  m_BrushValues[name] = val;
@@ -120,4 +126,12 @@ namespace Fusion
 		return true;
 	}
 
+	bool FStyle::TryGet(const FName& propertyName, FFont& outFont, EStyleState state)
+	{
+		auto it = m_FontValues.Find(propertyName);
+		if (it == m_FontValues.End())
+			return false;
+		outFont = it->second.Resolve(state);
+		return true;
+	}
 } // namespace Fusion
