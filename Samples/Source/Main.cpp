@@ -60,7 +60,7 @@ public:
 				.ContentHAlign(EHAlign::Center)
 				.ContentVAlign(EVAlign::Center)
 				.Spacing(10)
-				//.ClipContent(true)
+				.ClipContent(true)
 				.Name("hstack")
 				(
 					FAssignNew(FButton, btn0)
@@ -292,13 +292,13 @@ int main(int argc, char* argv[])
 			Padding	   = FMargin(1, 1, 1, 1) * 5;
 		}
 		
-		FUSION_STYLE(FButton, "Button/Base", Shape, Background, Border)
+		FUSION_STYLE(FButton, "Button/Base", Shape, Background, Border, Outline)
 		{
 			Shape = FRoundedRectangle(5.0f);
 
 			FUSION_ON(Focused)
 			{
-				Border = FPen::Solid(FColor(1.0f, 0.0f, 0.0f, 0.9f)).Thickness(2.0f);
+				Outline = FPen::Solid(FColor(0.47f, 0.73f, 1.0f, 0.85f)).Thickness(2.0f);
 			}
 
 			FUSION_ON(Disabled)

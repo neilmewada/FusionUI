@@ -439,7 +439,6 @@ namespace Fusion
             }
 
             curFocusedWidget = nextFocus;
-            nextFocusWidget = nullptr;
         }
 	}
 
