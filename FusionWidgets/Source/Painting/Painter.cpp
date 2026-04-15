@@ -855,8 +855,9 @@ namespace Fusion
 
 		u32 color = m_CurrentPen.GetColor().ToU32();
 
-		f32 cursorX = pos.x;
-		f32 cursorY = pos.y;
+		FVec2 cursor = GetCurrentTransform().TransformPoint(pos);
+		f32 cursorX = cursor.x;
+		f32 cursorY = cursor.y;
 
 		FUIDrawItem drawItem = {
 			.shaderType = EUIShaderType::SDFText,

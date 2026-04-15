@@ -5,7 +5,7 @@ namespace Fusion
 	FLabel::FLabel()
 	{
 		m_Color = FColors::White;
-		m_Font = FFont::Regular(FFont::kDefaultFamilyName, 12);
+		m_Font = FFont::Regular(FFont::kDefaultFamilyName, 16);
 	}
 
 	FVec2 FLabel::MeasureContent(FVec2 availableSize)

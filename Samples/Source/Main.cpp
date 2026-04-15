@@ -60,7 +60,7 @@ public:
 				.ContentHAlign(EHAlign::Center)
 				.ContentVAlign(EVAlign::Center)
 				.Spacing(10)
-				.ClipContent(true)
+				//.ClipContent(true)
 				.Name("hstack")
 				(
 					FAssignNew(FButton, btn0)
@@ -93,7 +93,10 @@ public:
 					.Child(
 						FNew(FLabel)
 						.Text("Primary")
-						.Color(FColors::Black)
+						.Color(FColors::White)
+						.HAlign(EHAlign::Center)
+						.VAlign(EVAlign::Center)
+						//.Transform(FAffineTransform::Rotation(FMath::Deg2Rad(45)))
 					),
 
 					FNew(FButton)
@@ -114,6 +117,8 @@ public:
 						FNew(FLabel)
 						.Text("Secondary")
 						.Color(FColors::White)
+						.HAlign(EHAlign::Center)
+						.VAlign(EVAlign::Center)
 					),
 
 					FNew(FButton)
@@ -137,7 +142,14 @@ public:
 						.Play();
 
 						gradientToggled = !gradientToggled;
-					}),
+					})
+					.Child(
+						FNew(FLabel)
+						.Text("Destructive")
+						.Color(FColors::White)
+						.HAlign(EHAlign::Center)
+						.VAlign(EVAlign::Center)
+					),
 
 					FNew(FButton)
 					.FillRatio(1.0f)
