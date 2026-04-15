@@ -89,7 +89,12 @@ public:
 						.From(0.0f)
 						.To(1.0f)
 						.Play();
-					}),
+					})
+					.Child(
+						FNew(FLabel)
+						.Text("Primary")
+						.Color(FColors::Black)
+					),
 
 					FNew(FButton)
 					.FillRatio(1.0f)
@@ -104,7 +109,12 @@ public:
 						.Play();
 
 						rotated = !rotated;
-					}),
+					})
+					.Child(
+						FNew(FLabel)
+						.Text("Secondary")
+						.Color(FColors::White)
+					),
 
 					FNew(FButton)
 					.FillRatio(1.0f)

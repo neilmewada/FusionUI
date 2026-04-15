@@ -55,7 +55,7 @@ namespace Fusion
         f32         GetTracking()  const { return m_Tracking; }
         f32         GetLineHeight() const { return m_LineHeight; }
 
-        bool IsValid() const { return m_Family.IsValid() && m_PointSize > 0.0f; }
+        bool Valid() const { return m_Family.IsValid() && m_PointSize > 0.0f; }
 
         // - Fluent setters -
 

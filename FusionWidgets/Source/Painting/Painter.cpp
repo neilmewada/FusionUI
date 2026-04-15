@@ -858,8 +858,6 @@ namespace Fusion
 		f32 cursorX = pos.x;
 		f32 cursorY = pos.y;
 
-		FFontMetrics metrics = atlas->GetScaledMetrics(m_CurrentFont);
-
 		FUIDrawItem drawItem = {
 			.shaderType = EUIShaderType::SDFText,
 			.textureIndex = 0,
