@@ -60,7 +60,7 @@ namespace Fusion
             height = metrics.LineHeight + pad.top + pad.bottom;
         }
 
-        return ApplyLayoutConstraints(FVec2(availableSize.x, height));
+        return m_DesiredSize = ApplyLayoutConstraints(FVec2(availableSize.x, height));
     }
 
     void FTextInput::ArrangeContent(FVec2 finalSize)
