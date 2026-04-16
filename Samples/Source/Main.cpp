@@ -59,8 +59,8 @@ public:
 				FAssignNew(FHorizontalStack, hstack)
 				.ContentHAlign(EHAlign::Center)
 				.ContentVAlign(EVAlign::Center)
-				.Spacing(10)
-				//.ClipContent(true)
+				//.Spacing(10)
+				.ClipContent(true)
 				.Name("hstack")
 				(
 					FAssignNew(FButton, btn0)
@@ -184,7 +184,7 @@ public:
 		m_DashPhase = 0.0f;
 	}
 	
-	void PaintOverlay(FPainter& painter) override
+	void PaintOverContent(FPainter& painter) override
 	{
 		f32 go = GradientOffset();
 

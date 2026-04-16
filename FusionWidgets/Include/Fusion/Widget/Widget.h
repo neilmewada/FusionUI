@@ -139,8 +139,7 @@ namespace Fusion
         // - Paint -
 
         virtual void Paint(FPainter& painter);
-
-        virtual void PaintOverlay(FPainter& painter);
+        virtual void PaintOverContent(FPainter& painter);
 
         // - Event -
 

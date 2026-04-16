@@ -32,6 +32,7 @@ namespace Fusion
     public:
 
         static constexpr auto kDefaultFamilyName = "Roboto";
+        static constexpr f32 kDefaultPointSize = 14;
 
         FFont() = default;
 

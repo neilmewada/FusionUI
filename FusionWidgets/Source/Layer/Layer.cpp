@@ -182,10 +182,9 @@ namespace Fusion
 			painter.PopClip();
 		}
 
-		painter.SetBrush(FBrush());
-		painter.SetPen(FPen());
+		painter.ResetState();
 
-		widget->PaintOverlay(painter);
+		widget->PaintOverContent(painter);
 
 		painter.PopTransform();
 	}

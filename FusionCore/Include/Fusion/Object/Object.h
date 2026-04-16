@@ -40,6 +40,40 @@ namespace Fusion
     protected:
         FObject(FName name = "Object");
 
+        // Creates a subobject during this object's construction.
+        // Only valid inside a constructor (guarded by PendingConstruction flag).
+        // Avoids the WeakRef-to-uninitialized-control-block crash that NewObject
+        // would cause when called with 'this' as outer during construction.
+        template<FObjectType TObject, typename... TArgs>
+        Ref<TObject> CreateSubobject(TArgs&&... args)
+        {
+            FUSION_ASSERT(FEnumHasFlag(m_Flags, EObjectFlags::PendingConstruction),
+                "CreateSubobject can only be called during construction. Use NewObject after construction.");
+
+            Ref<TObject> object = new TObject(std::forward<TArgs>(args)...);
+
+            FObject* raw = static_cast<FObject*>(object.Get());
+            raw->m_Flags &= ~EObjectFlags::PendingConstruction;
+
+            // object has a valid control block now — fix up its own subobjects
+            // (created via CreateSubobject inside object's constructor)
+            for (auto& subobject : raw->m_Subobjects)
+            {
+                if (subobject->m_Outer.IsNull())
+                    subobject->m_Outer = object;
+            }
+
+            raw->OnConstruct();
+
+            // Push directly into subobjects — do NOT call AttachSubobject which
+            // would create a WeakRef(this) while this->m_Control is still null.
+            // m_Outer on object is left null here and fixed up by NewObject (or the
+            // parent's CreateSubobject) after this object's construction completes.
+            m_Subobjects.Add(object);
+
+            return object;
+        }
+
     public:
 
         FObject(const FObject&)            = delete;
@@ -108,8 +142,20 @@ namespace Fusion
     Ref<TObject> NewObject(FObject* outer, TArgs&&... args)
     {
         Ref<TObject> object = new TObject(std::forward<TArgs>(args)...);
-        static_cast<FObject*>(object.Get())->m_Flags &= ~EObjectFlags::PendingConstruction;
-        static_cast<FObject*>(object.Get())->OnConstruct();
+
+        FObject* raw = static_cast<FObject*>(object.Get());
+        raw->m_Flags &= ~EObjectFlags::PendingConstruction;
+
+        // Fix up outers for any subobjects created via CreateSubobject during
+        // construction. Control block is valid now so WeakRef assignment is safe.
+        for (auto& subobject : raw->m_Subobjects)
+        {
+            if (subobject->m_Outer.IsNull())
+                subobject->m_Outer = object;
+        }
+
+        raw->OnConstruct();
+
         if (outer)
         {
             outer->AttachSubobject(object);

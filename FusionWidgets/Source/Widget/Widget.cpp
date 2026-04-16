@@ -322,7 +322,7 @@ namespace Fusion
 	{
 	}
 
-	void FWidget::PaintOverlay([[maybe_unused]] FPainter& painter)
+	void FWidget::PaintOverContent([[maybe_unused]] FPainter& painter)
 	{
 	}
 

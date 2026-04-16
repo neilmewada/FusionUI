@@ -98,8 +98,10 @@ namespace Fusion
 	{
 		m_CurrentBrush = {};
 		m_CurrentPen = {};
+		m_CurrentFont = FFont::Regular(FFont::kDefaultFamilyName, FFont::kDefaultPointSize);
 		PathClear();
 		m_AntiAliased = true;
+		m_ClipEnabled = true;
 	}
 
 	void FPainter::PushTransform(const FAffineTransform& transform)

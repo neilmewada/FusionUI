@@ -142,7 +142,7 @@ namespace Fusion
 
         bool mouseInSurface = FRect::FromSize(FVec2(), GetAvailableSize()).Contains(surfaceMousePos);
 
-        Ref<FWidget> captured = capturedWidget.Lock();
+        Ref<FWidget> captured = m_CapturedWidget.Lock();
 
         Ref<FWidget> hitWidget = mouseInSurface ? HitTestWidget(surfaceMousePos) : nullptr;
 
@@ -152,7 +152,7 @@ namespace Fusion
         BuildHoverStack(hoveredWidget.Get(), newHoverStack);
 
         // Mouse Leave
-        for (WeakRef<FWidget>& weakWidget : hoveredWidgetStack)
+        for (WeakRef<FWidget>& weakWidget : m_HoveredWidgetStack)
         {
             Ref<FWidget> widget = weakWidget.Lock();
             if (!widget || newHoverStack.Contains(widget))
@@ -185,7 +185,7 @@ namespace Fusion
         {
             Ref<FWidget> widget = newHoverStack[i];
 
-            bool wasHovered = hoveredWidgetStack.Contains(widget);
+            bool wasHovered = m_HoveredWidgetStack.Contains(widget);
             if (wasHovered)
                 continue;
 
@@ -210,9 +210,9 @@ namespace Fusion
             }
         }
 
-        hoveredWidgetStack.Clear();
+        m_HoveredWidgetStack.Clear();
         for (Ref<FWidget> widget : newHoverStack)
-            hoveredWidgetStack.Add(widget);
+            m_HoveredWidgetStack.Add(widget);
 
         if (hoveredWidget)
         {
@@ -247,7 +247,7 @@ namespace Fusion
             // Mouse Wheel
             if (abs(wheelDelta.x) >= epsilon || abs(wheelDelta.y) >= epsilon)
             {
-                for (WeakRef<FWidget>& weakWidget : hoveredWidgetStack)
+                for (WeakRef<FWidget>& weakWidget : m_HoveredWidgetStack)
                 {
                     Ref<FWidget> widget = weakWidget.Lock();
                     if (!widget) continue;
@@ -295,6 +295,16 @@ namespace Fusion
         {
             if (application->IsMouseButtonDown(kButtons[i]))
             {
+                if (kButtons[i] == EMouseButton::Left || kButtons[i] == EMouseButton::Right)
+                {
+                    // Only clear focus if clicking empty space
+                    // If a widget is hit, it or an ancestor may claim focus via ShouldFocusSelf
+                    if (!hitWidget)
+                    {
+	                    m_NextFocusWidget = nullptr;
+                    }
+                }
+
                 Ref<FWidget> target = captured ? captured : hitWidget;
                 if (target)
                 {
@@ -342,13 +352,13 @@ namespace Fusion
                         current = parent;
                     }
 
-                    pressedWidgetPerButton[i] = target;
+                    m_PressedWidgetPerButton[i] = target;
                 }
             }
 
             if (application->IsMouseButtonUp(kButtons[i]))
             {
-                Ref<FWidget> pressed = pressedWidgetPerButton[i].Lock();
+                Ref<FWidget> pressed = m_PressedWidgetPerButton[i].Lock();
                 FWidget* upTarget = captured ? captured.Get()
                     : pressed ? pressed.Get()
                     : nullptr;
@@ -387,12 +397,12 @@ namespace Fusion
                     }
                 }
 
-                pressedWidgetPerButton[i] = nullptr;
+                m_PressedWidgetPerButton[i] = nullptr;
             }
         }
 
-        Ref<FWidget> nextFocus = nextFocusWidget.Lock();
-        Ref<FWidget> curFocus = curFocusedWidget.Lock();
+        Ref<FWidget> nextFocus = m_NextFocusWidget.Lock();
+        Ref<FWidget> curFocus = m_CurFocusedWidget.Lock();
 
         if (nextFocus != curFocus)
         {
@@ -438,7 +448,7 @@ namespace Fusion
                 }
             }
 
-            curFocusedWidget = nextFocus;
+            m_CurFocusedWidget = nextFocus;
         }
 	}
 
@@ -450,7 +460,7 @@ namespace Fusion
 		if (!application)
 			return;
 
-		Ref<FWidget> focusedWidget = curFocusedWidget.Lock();
+		Ref<FWidget> focusedWidget = m_CurFocusedWidget.Lock();
 		if (!focusedWidget)
 			return;
 
@@ -557,16 +567,16 @@ namespace Fusion
 	void FSurface::ProcessReply(Ref<FWidget> sender, const FEventReply& reply)
 	{
         if (reply.ShouldFocusSelf())
-            nextFocusWidget = sender;
+            m_NextFocusWidget = sender;
 
         switch (reply.GetMouseCaptureOp())
         {
         case FEventReply::MouseCaptureOp::Capture: 
-        	capturedWidget = sender; 
+        	m_CapturedWidget = sender; 
         	break;
         case FEventReply::MouseCaptureOp::Release: 
-            if (capturedWidget == sender)
-        		capturedWidget = nullptr; 
+            if (m_CapturedWidget == sender)
+        		m_CapturedWidget = nullptr; 
         	break;
         default: 
         	break;
@@ -663,6 +673,14 @@ namespace Fusion
 		IPtr<FRenderSnapshot> snapshot = new FRenderSnapshot();
 
 		CompositeLayer(snapshot, m_LayerTree->GetRootLayer(), 0);
+
+        if (Ref<FLayer> overlayLayer = m_LayerTree->GetOverlayLayer())
+        {
+            if (overlayLayer->m_NeedsCompositing)
+            {
+	            CompositeLayer(snapshot, overlayLayer, (int)snapshot->vertexSplits.GetCount());
+            }
+        }
 
 		snapshot->viewData.PixelResolution = m_PixelSize;
 		snapshot->viewData.ProjectionMatrix = FMat4::OrthographicProjection(

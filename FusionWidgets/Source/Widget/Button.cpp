@@ -88,7 +88,6 @@ namespace Fusion
 
 	void FButton::OnFocusChanged(FFocusEvent& event)
 	{
-		FUSION_LOG_INFO("Widget", "FButton:Focused: {}", event.GotFocus());
 		SetStyleStateFlag(EStyleState::Focused, event.GotFocus());
 	}
 

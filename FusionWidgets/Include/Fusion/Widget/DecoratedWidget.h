@@ -14,6 +14,8 @@ namespace Fusion
 
         void Paint(FPainter& painter) override;
 
+        void PaintOverContent(FPainter& painter) override;
+
     public:
 
         // - Fusion Properties -

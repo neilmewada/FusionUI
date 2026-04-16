@@ -34,6 +34,8 @@ namespace Fusion
 
         Ref<FLayerTree> GetLayerTree() const { return m_LayerTree; }
 
+        Ref<FWidget> GetFocusedWidget() const { return m_CurFocusedWidget.Lock(); }
+
         Ref<FApplicationInstance> GetApplication() const { return m_Application.Lock(); }
 
         virtual bool IsNativeSurface() const { return false; }
@@ -120,10 +122,10 @@ namespace Fusion
 
         // - Event -
 
-        FArray<WeakRef<FWidget>> hoveredWidgetStack;
-        std::array<WeakRef<FWidget>, 5> pressedWidgetPerButton;
-        WeakRef<FWidget> curFocusedWidget, nextFocusWidget;
-        WeakRef<FWidget> capturedWidget;
+        FArray<WeakRef<FWidget>> m_HoveredWidgetStack;
+        std::array<WeakRef<FWidget>, 5> m_PressedWidgetPerButton;
+        WeakRef<FWidget> m_CurFocusedWidget, m_NextFocusWidget;
+        WeakRef<FWidget> m_CapturedWidget;
 
         friend class FApplicationInstance;
     };

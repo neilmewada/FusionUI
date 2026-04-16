@@ -7,7 +7,7 @@ namespace Fusion
 {
 	FLayerTree::FLayerTree() : Super("LayerTree")
 	{
-		m_OverlayLayer = NewObject<FLayer>(this, "OverlayLayer");
+		m_OverlayLayer = CreateSubobject<FLayer>("OverlayLayer");
 	}
 
 	void FLayerTree::MarkSyncNeeded()

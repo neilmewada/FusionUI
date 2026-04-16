@@ -69,6 +69,7 @@ namespace Fusion
 
         // - Clipping -
 
+        void SetClipEnabled(bool enabled) { m_ClipEnabled = enabled; }
         void PushClip(const FRect& rect, const FShape& shape);
         void PopClip();
 
@@ -80,7 +81,12 @@ namespace Fusion
 
         int CalculateNumCircleSegments(float radius) const;
 
-        int GetCurrentClipIndex() const { return m_ClipStack.GetCount() - 1; }
+        int GetCurrentClipIndex() const
+        {
+            if (!m_ClipEnabled)
+                return -1;
+	        return m_ClipStack.GetCount() - 1;
+        }
 
         // - Path Internals -
 
@@ -116,6 +122,7 @@ namespace Fusion
         FOpacityStack m_OpacityStack;
         FTransformStack m_TransformStack;
         FClipStack m_ClipStack;
+        bool m_ClipEnabled = true;
 
         f32 m_DpiScale = 1.0f;
 

@@ -29,6 +29,8 @@ namespace Fusion
 
         void DoPaintIfNeeded();
 
+        void DoPaint();
+
         u32 GetChildCount() { return (u32)m_Children.Size(); }
 
         Ref<FLayer> GetChild(u32 index) { return m_Children[index]; }
@@ -44,8 +46,6 @@ namespace Fusion
         FAffineTransform GetGlobalTransform();
 
     protected:
-
-        void DoPaint();
 
         void DoPaint(Ref<FWidget> widget, FPainter& painter);
 

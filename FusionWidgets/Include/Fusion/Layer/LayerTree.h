@@ -25,6 +25,8 @@ namespace Fusion
 
         Ref<FLayer> GetRootLayer() { return m_RootLayer; }
 
+        Ref<FLayer> GetOverlayLayer() { return m_OverlayLayer; }
+
     protected:
 
         void SyncWidget(Ref<FWidget> widget, Ref<FLayer> parentLayer, FHashSet<FUuid>& visited);
