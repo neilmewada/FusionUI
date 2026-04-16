@@ -35,6 +35,23 @@ namespace Fusion
         return count;
     }
 
+    char32_t FTextInput::CpAt(const char* str, int cpIndex)
+    {
+        const char* ptr = str + CpToByteOffset(str, cpIndex);
+        uint8_t b = (uint8_t)*ptr;
+        if (b < 0x80) return (char32_t)b;
+        if (b < 0xE0) return ((char32_t)(b & 0x1F) << 6)  | ((uint8_t)ptr[1] & 0x3F);
+        if (b < 0xF0) return ((char32_t)(b & 0x0F) << 12) | (((uint8_t)ptr[1] & 0x3F) << 6)  | ((uint8_t)ptr[2] & 0x3F);
+        return           ((char32_t)(b & 0x07) << 18) | (((uint8_t)ptr[1] & 0x3F) << 12) | (((uint8_t)ptr[2] & 0x3F) << 6) | ((uint8_t)ptr[3] & 0x3F);
+    }
+
+    bool FTextInput::IsWordChar(char32_t cp)
+    {
+        if (cp < 128)
+            return isalnum((int)cp) || cp == '_';
+        return true; // treat non-ASCII codepoints as word characters
+    }
+
     // -----------------------------------------------------------------------
     // Construction
     // -----------------------------------------------------------------------
@@ -419,20 +436,75 @@ namespace Fusion
         if (!event.IsLeftButton())
             return FEventReply::Unhandled();
 
-        // Convert surface-space position to widget-local coordinates
         FVec2 localPos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
+        FMargin pad    = Padding();
+        f32 textX      = localPos.x - pad.left;
 
-        FMargin pad  = Padding();
-        f32     textX = localPos.x - pad.left;
+        if (event.ClickCount >= 3)
+        {
+            // Triple-click: select all
+            m_SelectionAnchor = 0;
+            m_CursorPos       = CpCount(m_Text);
+            m_IsDragging      = false;
 
+            EnterEditing();
+            ResetBlink();
+            MarkPaintDirty();
+            return FEventReply::Handled().FocusSelf();
+        }
+
+        if (event.ClickCount == 2)
+        {
+            // Double-click: select the word (or whitespace run) under the cursor
+            int totalCp = CpCount(m_Text);
+            int cpIndex = FMath::Clamp(HitTestCursorIndex(textX), 0, totalCp);
+
+            if (totalCp > 0)
+            {
+                // Use the character to the right of the cursor (or last char if at end)
+                int charIdx = (cpIndex < totalCp) ? cpIndex : totalCp - 1;
+                const char* str = m_Text.CStr();
+                char32_t refCp = CpAt(str, charIdx);
+
+                // Characters belong to the same class if they're both word chars,
+                // both spaces, or both "other" (punctuation etc.)
+                auto CharClass = [](char32_t cp) -> int {
+                    if (cp >= 128)        return 0; // non-ASCII = word
+                    if (isalnum((int)cp) || cp == '_') return 0; // word
+                    if (isspace((int)cp)) return 1; // whitespace
+                    return 2;                        // punctuation / other
+                };
+
+                int refClass = CharClass(refCp);
+
+                int wordStart = cpIndex;
+                while (wordStart > 0 && CharClass(CpAt(str, wordStart - 1)) == refClass)
+                    wordStart--;
+
+                int wordEnd = (cpIndex < totalCp) ? cpIndex : totalCp;
+                while (wordEnd < totalCp && CharClass(CpAt(str, wordEnd)) == refClass)
+                    wordEnd++;
+
+                m_SelectionAnchor = wordStart;
+                m_CursorPos       = wordEnd;
+            }
+
+            m_IsDragging = false;
+
+            EnterEditing();
+            ResetBlink();
+            MarkPaintDirty();
+            return FEventReply::Handled().FocusSelf();
+        }
+
+        // Single click: position cursor and begin potential drag-selection
         m_CursorPos       = HitTestCursorIndex(textX);
-        m_SelectionAnchor = m_CursorPos; // will become selection if mouse moves
+        m_SelectionAnchor = m_CursorPos;
         m_IsDragging      = true;
 
         EnterEditing();
         ResetBlink();
         MarkPaintDirty();
-
         return FEventReply::Handled().FocusSelf().CaptureMouse();
     }
 

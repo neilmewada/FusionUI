@@ -40,6 +40,8 @@ namespace Fusion
         static const char* Utf8Advance(const char* ptr);
         static int         CpToByteOffset(const char* str, int cpIndex);
         static int         CpCount(const FString& str);
+        static char32_t    CpAt(const char* str, int cpIndex);
+        static bool        IsWordChar(char32_t cp);
 
         // - Text measurement -
 

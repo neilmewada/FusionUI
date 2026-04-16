@@ -310,8 +310,8 @@ namespace Fusion
                     downEvent.MousePosition = surfaceMousePos;
                     downEvent.PrevMousePosition = prevSurfaceMousePos;
                     downEvent.Buttons = kMasks[i];
-                    downEvent.bIsInside = true;
-                    downEvent.bIsDoubleClick = application->GetMouseButtonClicks(kButtons[i]) == 2;
+                    downEvent.bIsInside  = true;
+                    downEvent.ClickCount = application->GetMouseButtonClicks(kButtons[i]);
                     downEvent.KeyModifiers = keyModifiers;
 
                     // Bubble up until handled

@@ -123,8 +123,8 @@ namespace Fusion
         FVec2            WheelDelta;
         EMouseButtonMask Buttons      = EMouseButtonMask::None;
         EKeyModifier     KeyModifiers = EKeyModifier::None;
-        bool             bIsInside     = false;
-        bool             bIsDoubleClick = false;
+        bool             bIsInside  = false;
+        int              ClickCount = 1;   // 1 = single, 2 = double, 3 = triple, etc.
 
         bool IsLeftButton()   const { return FEnumHasFlag(Buttons, EMouseButtonMask::Left); }
         bool IsRightButton()  const { return FEnumHasFlag(Buttons, EMouseButtonMask::Right); }
