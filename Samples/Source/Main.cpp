@@ -53,6 +53,13 @@ public:
 			.Spacing(10)
 			.Name("RootStack")
 			(
+				FAssignNew(FDecoratedWidget, gradientBorder)
+				.Border(gradientPen)
+				.Background(FColors::White)
+				.Shape(FRoundedRectangle(5.0f))
+				.Height(35)
+				.Name("GradientBorder"),
+
 				FAssignNew(FHorizontalStack, hstack)
 				.ContentHAlign(EHAlign::Center)
 				.ContentVAlign(EVAlign::Center)
@@ -152,13 +159,6 @@ public:
 					.Placeholder("Type here...")
 					.FillRatio(1.0f)
 				),
-
-				FAssignNew(FDecoratedWidget, gradientBorder)
-				.Border(gradientPen)
-				.Background(FColors::White)
-				.Shape(FRoundedRectangle(5.0f))
-				.Height(35)
-				.Name("GradientBorder"),
 
 				FAssignNew(FDecoratedWidget, gradientWidget)
 				.Background(gradient)

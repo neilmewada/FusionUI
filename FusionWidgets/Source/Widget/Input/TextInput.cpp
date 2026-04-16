@@ -442,8 +442,18 @@ namespace Fusion
     FEventReply FTextInput::OnKeyDown(FKeyEvent& event)
     {
         bool shift   = FEnumHasFlag(event.Modifiers, EKeyModifier::Shift);
-        bool ctrl    = FEnumHasFlag(event.Modifiers, EKeyModifier::Ctrl)
-                    || FEnumHasFlag(event.Modifiers, EKeyModifier::Gui); // Cmd on Mac
+        bool ctrl    = FEnumHasFlag(event.Modifiers, EKeyModifier::Ctrl);
+        bool alt     = FEnumHasFlag(event.Modifiers, EKeyModifier::Alt);
+#if FUSION_PLATFORM_MAC
+        bool cmd     = FEnumHasFlag(event.Modifiers, EKeyModifier::Gui);
+        bool wordMod = alt;   // Option+Left/Right → word jump
+        bool lineMod = cmd;   // Cmd+Left/Right    → line start/end
+        bool selAll  = cmd;   // Cmd+A             → select all
+#else
+        bool wordMod = ctrl;  // Ctrl+Left/Right   → word jump
+        bool lineMod = false; // Home/End keys handle line start/end
+        bool selAll  = ctrl;  // Ctrl+A            → select all
+#endif
         bool editing = TestStyleState(EStyleState::Editing);
 
         // --- Focus-mode transitions (handled regardless of editing state) ---
@@ -522,7 +532,11 @@ namespace Fusion
 
         case EKeyCode::Left:
         {
-            if (ctrl)
+            if (lineMod)
+            {
+                MoveCursor(0);
+            }
+            else if (wordMod)
             {
                 // Word backward: skip spaces then skip non-spaces
                 int pos = m_CursorPos;
@@ -542,7 +556,11 @@ namespace Fusion
 
         case EKeyCode::Right:
         {
-            if (ctrl)
+            if (lineMod)
+            {
+                MoveCursor(totalCp);
+            }
+            else if (wordMod)
             {
                 // Word forward: skip non-spaces then skip spaces
                 int pos = m_CursorPos;
@@ -583,7 +601,7 @@ namespace Fusion
         // --- Select all ---
 
         case EKeyCode::A:
-            if (ctrl)
+            if (selAll)
             {
                 m_SelectionAnchor = 0;
                 m_CursorPos       = totalCp;
