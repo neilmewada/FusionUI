@@ -297,12 +297,8 @@ namespace Fusion
             {
                 if (kButtons[i] == EMouseButton::Left || kButtons[i] == EMouseButton::Right)
                 {
-                    // Only clear focus if clicking empty space
-                    // If a widget is hit, it or an ancestor may claim focus via ShouldFocusSelf
-                    if (!hitWidget)
-                    {
-	                    m_NextFocusWidget = nullptr;
-                    }
+                    // Clear focus on every left/right click. The widget will call FocusSelf() if needed.
+	                m_NextFocusWidget = nullptr;
                 }
 
                 Ref<FWidget> target = captured ? captured : hitWidget;
