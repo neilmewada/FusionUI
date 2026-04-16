@@ -59,6 +59,7 @@ namespace Fusion
     FTextInput::FTextInput()
     {
         m_ClipContent = true;
+        SetWidgetFlag(EWidgetFlags::Focusable, true);
     }
 
     // -----------------------------------------------------------------------
@@ -570,8 +571,11 @@ namespace Fusion
         case EKeyCode::Tab:
             // Exit editing first (if active), then let the focus system handle Tab
             if (editing)
+            {
                 ExitEditing();
-            return FEventReply::Unhandled();
+                return FEventReply::Unhandled();
+            }
+            return shift ? FEventReply::Handled().FocusPrev() : FEventReply::Handled().FocusNext();
 
         case EKeyCode::Escape:
             if (editing)
@@ -812,13 +816,13 @@ namespace Fusion
         if (!m_BlinkTimer)
         {
             FAssignNew(FTimer, m_BlinkTimer)
-                .Interval(0.53f)
-                .Loop(true)
-                .OnTick([this]
-                {
-                    m_CursorVisible = !m_CursorVisible;
-                    MarkPaintDirty();
-                });
+            .Interval(0.53f)
+            .Loop(true)
+            .OnTick([this]
+            {
+                m_CursorVisible = !m_CursorVisible;
+                MarkPaintDirty();
+            });
         }
 
         m_CursorVisible = true;

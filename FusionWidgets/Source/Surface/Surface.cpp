@@ -397,55 +397,7 @@ namespace Fusion
             }
         }
 
-        Ref<FWidget> nextFocus = m_NextFocusWidget.Lock();
-        Ref<FWidget> curFocus = m_CurFocusedWidget.Lock();
-
-        if (nextFocus != curFocus)
-        {
-            if (curFocus)
-            {
-                FFocusEvent lostEvent{};
-                lostEvent.Type = EEventType::FocusChanged;
-                lostEvent.bGotFocus = false;
-                lostEvent.FocusedWidget = nextFocus;
-                lostEvent.Sender = curFocus;
-
-                FWidget* parent = curFocus->GetParentWidget().Get();
-
-                FUSION_TRY
-                {
-                    curFocus->OnFocusChanged(lostEvent);
-                }
-                FUSION_CATCH (const FException& e)
-                {
-                    curFocus->SetFaulted();
-                    FUSION_LOG_ERROR("Widget", "FException in {}::OnFocusChanged(): {}\n{}", curFocus->GetClassName(), e.what(), e.GetStackTraceString(true));
-                }
-            }
-
-            if (nextFocus)
-            {
-                FFocusEvent gotEvent{};
-                gotEvent.Type = EEventType::FocusChanged;
-                gotEvent.bGotFocus = true;
-                gotEvent.FocusedWidget = nextFocus;
-                gotEvent.Sender = nextFocus;
-
-                FWidget* parent = nextFocus->GetParentWidget().Get();
-
-                FUSION_TRY
-                {
-                    nextFocus->OnFocusChanged(gotEvent);
-                }
-                FUSION_CATCH (const FException& e)
-                {
-                    nextFocus->SetFaulted();
-                    FUSION_LOG_ERROR("Widget", "FException in {}::OnFocusChanged(): {}\n{}", nextFocus->GetClassName(), e.what(), e.GetStackTraceString(true));
-                }
-            }
-
-            m_CurFocusedWidget = nextFocus;
-        }
+        ApplyPendingFocus();
 	}
 
 	void FSurface::DispatchKeyEvents()
@@ -558,25 +510,132 @@ namespace Fusion
 				current = parent;
 			}
 		}
+
+		ApplyPendingFocus();
 	}
 
 	void FSurface::ProcessReply(Ref<FWidget> sender, const FEventReply& reply)
 	{
-        if (reply.ShouldFocusSelf())
+        switch (reply.GetFocusOp())
+        {
+        case FEventReply::FocusOp::Self:
             m_NextFocusWidget = sender;
+            break;
+        case FEventReply::FocusOp::Next:
+            m_NextFocusWidget = FindNextFocusable(m_CurFocusedWidget.Lock(), false);
+            break;
+        case FEventReply::FocusOp::Prev:
+            m_NextFocusWidget = FindNextFocusable(m_CurFocusedWidget.Lock(), true);
+            break;
+        default:
+            break;
+        }
 
         switch (reply.GetMouseCaptureOp())
         {
-        case FEventReply::MouseCaptureOp::Capture: 
-        	m_CapturedWidget = sender; 
+        case FEventReply::MouseCaptureOp::Capture:
+        	m_CapturedWidget = sender;
         	break;
-        case FEventReply::MouseCaptureOp::Release: 
+        case FEventReply::MouseCaptureOp::Release:
             if (m_CapturedWidget == sender)
-        		m_CapturedWidget = nullptr; 
+        		m_CapturedWidget = nullptr;
         	break;
-        default: 
+        default:
         	break;
         }
+	}
+
+	Ref<FWidget> FSurface::FindNextFocusable(Ref<FWidget> current, bool reverse)
+	{
+        FArray<Ref<FWidget>> focusable;
+
+        std::function<void(Ref<FWidget>)> collect = [&](Ref<FWidget> widget)
+        {
+            if (!widget || widget->IsHidden() || widget->IsExcluded() || widget->TestStyleState(EStyleState::Disabled))
+                return;
+
+            if (widget->IsFocusable())
+                focusable.Add(widget);
+
+            u32 count = widget->GetChildCount();
+            for (u32 i = 0; i < count; i++)
+                collect(widget->GetChildAt(i));
+        };
+
+        collect(m_RootWidget);
+
+        if (focusable.Empty())
+            return nullptr;
+
+        if (!current)
+            return reverse ? focusable.Last() : focusable[0];
+
+        int idx = -1;
+        for (int i = 0; i < (int)focusable.Size(); i++)
+        {
+            if (focusable[i] == current)
+            {
+                idx = i;
+                break;
+            }
+        }
+
+        if (idx == -1)
+            return reverse ? focusable.Last() : focusable[0];
+
+        int next = reverse
+            ? (idx - 1 + (int)focusable.Size()) % (int)focusable.Size()
+            : (idx + 1) % (int)focusable.Size();
+        return focusable[next];
+	}
+
+	void FSurface::ApplyPendingFocus()
+	{
+        Ref<FWidget> nextFocus = m_NextFocusWidget.Lock();
+        Ref<FWidget> curFocus  = m_CurFocusedWidget.Lock();
+
+        if (nextFocus == curFocus)
+            return;
+
+        if (curFocus)
+        {
+            FFocusEvent lostEvent{};
+            lostEvent.Type         = EEventType::FocusChanged;
+            lostEvent.bGotFocus    = false;
+            lostEvent.FocusedWidget = nextFocus;
+            lostEvent.Sender       = curFocus;
+
+            FUSION_TRY
+            {
+                curFocus->OnFocusChanged(lostEvent);
+            }
+            FUSION_CATCH (const FException& e)
+            {
+                curFocus->SetFaulted();
+                FUSION_LOG_ERROR("Widget", "FException in {}::OnFocusChanged(): {}\n{}", curFocus->GetClassName(), e.what(), e.GetStackTraceString(true));
+            }
+        }
+
+        if (nextFocus)
+        {
+            FFocusEvent gotEvent{};
+            gotEvent.Type          = EEventType::FocusChanged;
+            gotEvent.bGotFocus     = true;
+            gotEvent.FocusedWidget = nextFocus;
+            gotEvent.Sender        = nextFocus;
+
+            FUSION_TRY
+            {
+                nextFocus->OnFocusChanged(gotEvent);
+            }
+            FUSION_CATCH (const FException& e)
+            {
+                nextFocus->SetFaulted();
+                FUSION_LOG_ERROR("Widget", "FException in {}::OnFocusChanged(): {}\n{}", nextFocus->GetClassName(), e.what(), e.GetStackTraceString(true));
+            }
+        }
+
+        m_CurFocusedWidget = nextFocus;
 	}
 
 	void FSurface::Initialize()

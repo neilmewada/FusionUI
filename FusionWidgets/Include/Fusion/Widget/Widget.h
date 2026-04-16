@@ -10,7 +10,7 @@ namespace Fusion
         FWidgetBuilder() {}
     };
 
-    enum class EWidgetFlags
+    enum class EWidgetFlags : u32
     {
 	    None = 0,
         PaintDirty = FUSION_BIT(0),
@@ -22,6 +22,7 @@ namespace Fusion
         CachedCompositingBoundary = FUSION_BIT(6),
         Hidden = FUSION_BIT(7),
         Excluded = FUSION_BIT(8),
+        Focusable = FUSION_BIT(9),
     };
     FUSION_ENUM_CLASS_FLAGS(EWidgetFlags);
     
@@ -44,11 +45,13 @@ namespace Fusion
 
         bool TestWidgetFlags(EWidgetFlags flags) const { return FEnumHasAllFlags(m_WidgetFlags, flags); }
 
-        bool IsHidden() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::Hidden); }
+        bool IsHidden()    const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::Hidden); }
 
-        bool IsFaulted() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::Faulted); }
+        bool IsFaulted()   const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::Faulted); }
 
-        bool IsExcluded() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::Excluded); }
+        bool IsExcluded()  const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::Excluded); }
+
+        bool IsFocusable() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::Focusable); }
 
         bool IsPaintDirty() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::PaintDirty); }
 

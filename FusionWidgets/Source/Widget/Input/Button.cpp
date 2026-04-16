@@ -4,6 +4,7 @@ namespace Fusion
 {
 	FButton::FButton()
 	{
+		SetWidgetFlag(EWidgetFlags::Focusable, true);
 	}
 
 	void FButton::OnMouseEnter(FMouseEvent& event)
@@ -66,6 +67,12 @@ namespace Fusion
 		{
 			SetStyleStateFlag(EStyleState::Pressed | EStyleState::Hovered, true);
 			return FEventReply::Handled();
+		}
+
+		if (event.Key == EKeyCode::Tab)
+		{
+			bool shift = FEnumHasFlag(event.Modifiers, EKeyModifier::Shift);
+			return shift ? FEventReply::Handled().FocusPrev() : FEventReply::Handled().FocusNext();
 		}
 
 		return FEventReply::Unhandled();

@@ -54,9 +54,7 @@ namespace Fusion
         FEventReply& FocusPrev() { m_FocusOp = FocusOp::Prev; return *this; }
 
         bool           IsHandled()         const { return m_Handled; }
-        bool           ShouldFocusSelf()   const { return m_FocusOp == FocusOp::Self; }
-        bool           ShouldFocusNext()   const { return m_FocusOp == FocusOp::Next; }
-        bool           ShouldFocusPrev()   const { return m_FocusOp == FocusOp::Prev; }
+        FocusOp        GetFocusOp()           const { return m_FocusOp; }
         MouseCaptureOp GetMouseCaptureOp() const { return m_MouseCaptureOp; }
         InputLockOp    GetInputLockOp()    const { return m_InputLockOp; }
         CursorOp       GetCursorOp()       const { return m_CursorOp; }

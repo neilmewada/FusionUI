@@ -62,6 +62,10 @@ namespace Fusion
 
         void ProcessReply(Ref<FWidget> sender, const FEventReply& reply);
 
+        // Returns the next/prev focusable widget in depth-first order, wrapping around.
+        // Pass reverse=true for Shift+Tab (backwards). Returns nullptr if none found.
+        Ref<FWidget> FindNextFocusable(Ref<FWidget> current, bool reverse);
+
         // - Lifecycle -
 
         virtual void Initialize();
@@ -95,6 +99,9 @@ namespace Fusion
         void RefreshStyleRecursively(Ref<FWidget> widget = nullptr);
 
     protected:
+
+        // Applies m_NextFocusWidget: fires FocusChanged events and updates m_CurFocusedWidget.
+        void ApplyPendingFocus();
 
         Ref<FLayerTree> m_LayerTree;
 
