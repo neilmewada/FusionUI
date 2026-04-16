@@ -33,7 +33,7 @@ namespace Fusion
 
     void FFontAtlas::Initialize()
     {
-        const Resources::FResource* resource = Resources::Find("/Fonts/Roboto-Regular.ttf");
+        const Resources::FResource* resource = Resources::Find("embed:/Fonts/Roboto-Regular.ttf");
         FUSION_ASSERT(resource != nullptr, "Failed to find required resource: /Fonts/Roboto-Regular.ttf");
 
         m_AtlasImageLayers.Add(new FAtlasImageLayer);

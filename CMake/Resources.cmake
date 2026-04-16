@@ -122,7 +122,7 @@ function(fusion_finalize_resource_registry target)
         foreach(path IN LISTS sorted_paths)
             list(FIND paths "${path}" idx)
             list(GET varnames ${idx} vname)
-            string(APPEND content "    { \"${path}\", Embedded::Res_${vname}(), Embedded::Res_${vname}_Size() },\n")
+            string(APPEND content "    { \"embed:${path}\", Embedded::Res_${vname}(), Embedded::Res_${vname}_Size() },\n")
         endforeach()
         string(APPEND content "};\n\n")
 
