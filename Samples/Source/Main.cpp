@@ -154,7 +154,6 @@ public:
 					FNew(FTextInput)
 					.Style("TextInput/Base")
 					.Placeholder("Type here...")
-					.Height(32)
 					.FillRatio(1.0f)
 				),
 
@@ -368,7 +367,7 @@ int main(int argc, char* argv[])
 			Shape            = FRoundedRectangle(5.0f);
 			Background       = FColor(0.10f, 0.10f, 0.12f);
 			Border           = FColor(0.30f, 0.30f, 0.34f);
-			Padding          = FMargin(8, 0, 8, 0);
+			Padding          = FMargin(8, 6, 8, 6);
 			Font             = FFont::Regular(FFont::kDefaultFamilyName, 14);
 			TextColor        = FColors::White;
 			PlaceholderColor = FColor(0.45f, 0.45f, 0.50f);

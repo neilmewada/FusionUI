@@ -50,6 +50,9 @@ namespace Fusion
 
         // - Events -
 
+        virtual void RequestTextInput() {}
+        virtual void ReleaseTextInput() {}
+
         virtual void DispatchSurfaceUnfocusEvent();
 
         virtual void DispatchSurfaceFocusEvent();

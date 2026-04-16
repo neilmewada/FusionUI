@@ -364,7 +364,7 @@ namespace Fusion
                 contentRect.left + cursorX,
                 contentRect.top + 2.0f,
                 1.5f,
-                contentRect.GetHeight() - 4.0f
+                contentRect.GetHeight() - 2.0f
             ));
         }
 
@@ -564,6 +564,9 @@ namespace Fusion
 
         if (event.GotFocus())
         {
+            if (Ref<FSurface> surface = GetParentSurface())
+                surface->RequestTextInput();
+
             // Lazy-create the blink timer once
             if (!m_BlinkTimer)
             {
@@ -583,6 +586,9 @@ namespace Fusion
         }
         else
         {
+            if (Ref<FSurface> surface = GetParentSurface())
+                surface->ReleaseTextInput();
+
             if (m_BlinkTimer)
                 m_BlinkTimer->Stop();
 

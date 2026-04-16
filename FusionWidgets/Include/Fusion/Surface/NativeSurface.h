@@ -23,6 +23,9 @@ namespace Fusion
 
         FVec2 ScreenToSurfacePoint(FVec2 position) override;
 
+        void RequestTextInput() override;
+        void ReleaseTextInput() override;
+
         void OnWindowResized();
 
     protected:

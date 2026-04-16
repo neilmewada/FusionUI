@@ -56,6 +56,9 @@ namespace Fusion
 
         virtual void SetContinuousResizeTick(const FDelegate<void()>& tick) {}
 
+        virtual void StartTextInput(FWindowHandle window) {}
+        virtual void StopTextInput(FWindowHandle window) {}
+
         // - Native Handles -
 
         virtual void* GetNativeWindowHandle(FWindowHandle handle) = 0;

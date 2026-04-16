@@ -402,6 +402,26 @@ namespace Fusion
 		return sdlWindow->GetDpiScale();
 	}
 
+	void FSDL3PlatformBackend::StartTextInput(FWindowHandle window)
+	{
+		if (!m_WindowsByHandle.KeyExists(window))
+			return;
+
+		FSDL3PlatformWindow* sdlWindow = m_WindowsByHandle[window];
+		if (sdlWindow)
+			SDL_StartTextInput(sdlWindow->GetSdlHandle());
+	}
+
+	void FSDL3PlatformBackend::StopTextInput(FWindowHandle window)
+	{
+		if (!m_WindowsByHandle.KeyExists(window))
+			return;
+
+		FSDL3PlatformWindow* sdlWindow = m_WindowsByHandle[window];
+		if (sdlWindow)
+			SDL_StopTextInput(sdlWindow->GetSdlHandle());
+	}
+
 	FArray<EKeyCode> FSDL3PlatformBackend::GetKeysDownThisTick()
 	{
 		FArray<EKeyCode> result;

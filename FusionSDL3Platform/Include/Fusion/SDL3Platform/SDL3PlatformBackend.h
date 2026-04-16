@@ -100,6 +100,9 @@ namespace Fusion
 
 		f32 GetDpiScaleForWindow(FWindowHandle window) override;
 
+        void StartTextInput(FWindowHandle window) override;
+        void StopTextInput(FWindowHandle window) override;
+
 	protected:
 
         void ProcessWindowEvents(SDL_Event& event);

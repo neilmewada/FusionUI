@@ -42,6 +42,18 @@ namespace Fusion
 #endif
 	}
 
+	void FNativeSurface::RequestTextInput()
+	{
+		if (Ref<FApplicationInstance> app = GetApplication())
+			app->GetPlatformBackend()->StartTextInput(m_WindowHandle);
+	}
+
+	void FNativeSurface::ReleaseTextInput()
+	{
+		if (Ref<FApplicationInstance> app = GetApplication())
+			app->GetPlatformBackend()->StopTextInput(m_WindowHandle);
+	}
+
 	void FNativeSurface::OnWindowResized()
 	{
 		if (Ref<FApplicationInstance> application = GetApplication())
