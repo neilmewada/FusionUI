@@ -80,6 +80,8 @@ namespace Fusion
         FStyle& Vec4(const FName& propertyName, const FVec4& value, EStyleState state = EStyleState::Default);
         FStyle& Font(const FName& propertyName, const FFont& value, EStyleState state = EStyleState::Default);
 
+        FStyle& Transition(const FName& propertyName, const FTransition& value);
+
         template<typename T>
         FStyle& Set(const FName& propertyName, const T& value, EStyleState state = EStyleState::Default)
         {
@@ -107,6 +109,8 @@ namespace Fusion
         bool TryGet(const FName& propertyName, FVec4& outVec4, EStyleState state);
         bool TryGet(const FName& propertyName, FFont& outFont, EStyleState state);
 
+        bool TryGetTransition(const FName& propertyName, FTransition& outTransition);
+
     private:
 
         WeakRef<FTheme> m_Theme;
@@ -119,6 +123,7 @@ namespace Fusion
         FHashMap<FName, FStyleValue<FVec2>>  m_Vec2Values;
         FHashMap<FName, FStyleValue<FVec4>>  m_Vec4Values;
         FHashMap<FName, FStyleValue<FFont>>  m_FontValues;
+        FHashMap<FName, FTransition>         m_PropertyTransitions;
 
         friend class FTheme;
     };

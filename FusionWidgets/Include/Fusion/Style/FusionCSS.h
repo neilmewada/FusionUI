@@ -97,6 +97,10 @@ namespace Fusion::CSS
 			if (Ref<FStyle> parent = theme->FindStyle(baseStyleName))                       \
 				_fusion_css_ctx.Style.CopyFrom(*parent);                                \
 		}; true)                                                                        \
+    if ([[maybe_unused]] auto Transition = [&]<class T>(const Fusion::CSS::FStyleProp<T>& property, const ::Fusion::FTransition& transition)\
+    {\
+            _fusion_css_ctx.Style.Transition(property.m_Name, transition);\
+        }; true)\
     if (auto [__VA_ARGS__] = std::tuple{                                               \
             FUSION_MACRO_EXPAND(                                                       \
                 FUSION_FOR_EACH_CTX(__FUSION_CSS_MAKE_PROP, WidgetClass, __VA_ARGS__)) \
@@ -112,17 +116,8 @@ namespace Fusion::CSS
 #define __FUSION_FOLD_STATES_6(a, b, c, d, e, f)    EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e | EStyleState::f
 #define __FUSION_FOLD_STATES_7(a, b, c, d, e, f, g) EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e | EStyleState::f | EStyleState::g
 
-/// @brief Folds one or more bare state names into a combined `EStyleState` bitmask.
-///
-/// Each name is prefixed with `EStyleState::` and the results are combined with `|`.
-/// Used internally by FUSION_ON, but available directly when a raw state mask is needed.
-///
-/// @param ...  One or more bare EStyleState names (e.g. Hovered, Pressed).
-///
-/// @example
-/// EStyleState mask = FUSION_FOLD_STATES(Hovered, Pressed);
-/// // expands to: EStyleState::Hovered | EStyleState::Pressed
-#define FUSION_FOLD_STATES(...) \
+// For internal use only!
+#define __FUSION_FOLD_STATES(...) \
     FUSION_MACRO_EXPAND(FUSION_CONCATENATE(__FUSION_FOLD_STATES_, FUSION_ARG_COUNT(__VA_ARGS__))(__VA_ARGS__))
 
 
@@ -144,11 +139,10 @@ namespace Fusion::CSS
 #define FUSION_ON(...)                                                                 \
     if (Fusion::CSS::FStateScope _fusion_state_scope{                                 \
             _fusion_css_ctx,                                                           \
-            FUSION_FOLD_STATES(__VA_ARGS__)};                                          \
+            __FUSION_FOLD_STATES(__VA_ARGS__)};                                          \
         true)
 
 /// @brief Defines a stylesheet lambda compatible with FTheme::MergeStyleSheet().
-/// The lambda receives an `FTheme* styleSheet` parameter used implicitly by FUSION_STYLE.
 ///
 /// @example
 /// theme->MergeStyleSheet(FUSION_STYLE_SHEET

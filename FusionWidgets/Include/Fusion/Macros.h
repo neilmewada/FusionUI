@@ -135,13 +135,54 @@
 			return self;\
 		}
 
-#define FUSION_APPLY_STYLE(PropertyName)\
+#define __FUSION_APPLY_STYLE(PropertyName)\
 	if (!m_Inline##PropertyName.has_value())\
 	{\
 		decltype(m_##PropertyName) value;\
 		if (style.TryGet(#PropertyName, value, GetStyleState()))\
 		{\
-			__StyleBypassSetter_##PropertyName(value);\
+			bool areEqual = false;\
+			if constexpr (TFEquitable<decltype(m_##PropertyName)>::Value)\
+			{\
+				areEqual = TFEquitable<decltype(m_##PropertyName)>::AreEqual(m_##PropertyName, value);\
+			}\
+			if constexpr (FAnimatable<decltype(m_##PropertyName)>::Supported)\
+			{\
+				FTransition transition;\
+				if (!areEqual && style.TryGetTransition(#PropertyName, transition))\
+				{\
+					if (transition.Type == ETransitionType::Tween)\
+					{\
+						__FAnimate_Tween(this, PropertyName, __StyleBypassSetter_)\
+						.To(value)\
+						.Duration(transition.Tween.Duration)\
+						.Easing(transition.Tween.Easing)\
+						.Delay(transition.Tween.Delay)\
+						.Play();\
+					}\
+					else if (transition.Type == ETransitionType::Spring)\
+					{\
+						__FAnimate_Spring(this, PropertyName, __StyleBypassSetter_)\
+						.Target(value)\
+						.Damping(transition.Spring.Damping)\
+						.Stiffness(transition.Spring.Stiffness)\
+						.Delay(transition.Spring.Delay)\
+						.Play();\
+					}\
+					else\
+					{\
+						__StyleBypassSetter_##PropertyName(value);\
+					}\
+				}\
+				else if (!areEqual)\
+				{\
+					__StyleBypassSetter_##PropertyName(value);\
+				}\
+			}\
+			else if (!areEqual)\
+			{\
+				__StyleBypassSetter_##PropertyName(value);\
+			}\
 		}\
 	}
 
@@ -162,10 +203,10 @@
 #define __FUSION_SP_DECL_I(Type, Name, DirtyKind)  FUSION_CONCATENATE(__FUSION_SP_PROP_, DirtyKind)(Type, Name)
 
 // APPLY: extract Name (2nd element) with an extra indirection so it is fully
-//        expanded before reaching the # / ## operators inside FUSION_APPLY_STYLE.
+//        expanded before reaching the # / ## operators inside __FUSION_APPLY_STYLE.
 #define __FUSION_SP_NAME(Type, Name, DirtyKind)  Name
 #define __FUSION_SP_APPLY(Tuple)                 __FUSION_SP_APPLY2(__FUSION_SP_NAME Tuple)
-#define __FUSION_SP_APPLY2(Name)                 FUSION_APPLY_STYLE(Name)
+#define __FUSION_SP_APPLY2(Name)                 __FUSION_APPLY_STYLE(Name)
 
 // For internal use only! Do not use this!
 #define __FUSION_STYLE_PROPERTIES_FWIDGET(...) \

@@ -53,6 +53,21 @@ namespace Fusion
 			return (HasGradient() || m_Color.a > 0.001f) && m_Thickness > 0.01f;
 		}
 
+		bool operator==(const FPen& rhs) const
+		{
+			return m_Style         == rhs.m_Style
+				&& m_GradientSpace == rhs.m_GradientSpace
+				&& m_Thickness     == rhs.m_Thickness
+				&& m_DashLength    == rhs.m_DashLength
+				&& m_DashGap       == rhs.m_DashGap
+				&& m_GradientOffset== rhs.m_GradientOffset
+				&& m_DashPhase     == rhs.m_DashPhase
+				&& m_Color         == rhs.m_Color
+				&& m_Gradient      == rhs.m_Gradient;
+		}
+
+		bool operator!=(const FPen& rhs) const { return !operator==(rhs); }
+
 		// - Fluent setters -
 
 		FPen& Color(const FColor& color)       { m_Color = color;           return *this; }

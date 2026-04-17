@@ -288,13 +288,19 @@ int main(int argc, char* argv[])
 			Padding	   = FMargin(1, 1, 1, 1) * 5;
 		}
 		
-		FUSION_STYLE(FButton, "Button/Base", Shape, Background, Border, Outline)
+		FUSION_STYLE(FButton, "Button/Base", Shape, Background, Border, Outline, OutlineOffset)
 		{
 			Shape = FRoundedRectangle(5.0f);
+			OutlineOffset = 0;
+
+			Transition(Background,		FTransition::MakeTween(0.1f));
+			Transition(Outline,			FTransition::MakeTween(0.15f));
+			Transition(OutlineOffset,	FTransition::MakeTween(0.3f));
 
 			FUSION_ON(FocusVisible)
 			{
 				Outline = FocusOutline;
+				OutlineOffset = 2.5f;
 			}
 
 			FUSION_ON(Disabled)

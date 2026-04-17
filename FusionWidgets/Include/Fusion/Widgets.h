@@ -40,6 +40,8 @@
 #include "Style/Brush.h"
 #include "Style/Font.h"
 #include "Style/StyleState.h"
+#include "Style/EasingCurve.h"
+#include "Style/Transition.h"
 #include "Style/Style.h"
 #include "Style/Theme.h"
 #include "Style/FusionCSS.h"
@@ -52,12 +54,10 @@
 
 // Animation
 #include "Animation/Animatable.h"
-#include "Animation/EasingCurve.h"
 #include "Animation/Animation.h"
 #include "Animation/TweenAnimation.h"
 #include "Animation/SpringAnimation.h"
 #include "Animation/AnimateBuilder.h"
-#include "Animation/Transition.h"
 
 // Painting
 #include "Painting/Painter.h"

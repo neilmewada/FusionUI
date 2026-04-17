@@ -51,6 +51,12 @@ namespace Fusion
 		return *this;
 	}
 
+	FStyle& FStyle::Transition(const FName& propertyName, const FTransition& value)
+	{
+		m_PropertyTransitions[propertyName] = value;
+		return *this;
+	}
+
 	FStyle& FStyle::CopyFrom(const FStyle& other)
 	{
 		for (auto& [name, val] : other.m_BrushValues)  m_BrushValues[name] = val;
@@ -60,6 +66,7 @@ namespace Fusion
 		for (auto& [name, val] : other.m_FloatValues)  m_FloatValues[name] = val;
 		for (auto& [name, val] : other.m_Vec2Values)   m_Vec2Values[name]  = val;
 		for (auto& [name, val] : other.m_Vec4Values)   m_Vec4Values[name]  = val;
+		for (auto& [name, val] : other.m_PropertyTransitions)   m_PropertyTransitions[name]  = val;
 		return *this;
 	}
 
@@ -134,4 +141,14 @@ namespace Fusion
 		outFont = it->second.Resolve(state);
 		return true;
 	}
+
+	bool FStyle::TryGetTransition(const FName& propertyName, FTransition& outTransition)
+	{
+		auto it = m_PropertyTransitions.Find(propertyName);
+		if (it == m_PropertyTransitions.End())
+			return false;
+		outTransition = it->second;
+		return true;
+	}
+
 } // namespace Fusion
