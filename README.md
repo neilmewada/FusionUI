@@ -2,7 +2,82 @@
 
 A C++23 retained-mode UI library with declarative widgets, a type-safe stylesheet system, animations, transitions, and pluggable platform and rendering backends.
 
+[Quick Start](#quick-start) | [Building](#building) | [Features](#features) | [License](#license)
+
 ![](./Screenshots/Sample.png)
+
+---
+
+## Quick start
+
+```cpp
+#include <Fusion/Core.h>
+#include <Fusion/SDL3Platform.h>
+#include <Fusion/Widgets.h>
+
+using namespace Fusion;
+
+class MyWindow : public FDecoratedWidget
+{
+    FUSION_WIDGET(MyWindow, FDecoratedWidget)
+public:
+    void Construct() override
+    {
+        Super::Construct();
+
+        Child(
+            FNew(FButton)
+            .Style("Button/Primary")
+            .Height(32)
+            .Width(160)
+            .HAlign(EHAlign::Center)
+            .VAlign(EVAlign::Center)
+            .OnClick([this] { FUSION_LOG_INFO("UI", "Clicked!"); })
+            .Child(
+                FNew(FLabel)
+                .Text("Hello Fusion")
+                .Color(FColors::White)
+                .HAlign(EHAlign::Center)
+                .VAlign(EVAlign::Center)
+            )
+        );
+    }
+};
+
+int main(int argc, char* argv[])
+{
+    FApplication app(argc, argv);
+
+    Ref<FTheme> theme = app.CreateDefaultTheme();
+    theme->MergeStyleSheet(FUSION_STYLE_SHEET
+    {
+        FUSION_STYLE(FButton, "Button/Primary", Shape, Background, Border)
+        {
+            Shape      = FRoundedRectangle(5.0f);
+            Background = FColor(0.23f, 0.51f, 0.96f);
+            Border     = FColor(0.16f, 0.40f, 0.82f);
+
+            Transition(Background, FTransition::MakeTween(0.1f));
+
+            FUSION_ON(Hovered)
+            {
+                Background = FColor(0.38f, 0.65f, 0.98f);
+                Border     = FColor(0.26f, 0.53f, 0.90f);
+            }
+
+            FUSION_ON(Pressed, Hovered)
+            {
+                Background = FColor(0.11f, 0.31f, 0.85f);
+                Border     = FColor(0.08f, 0.23f, 0.70f);
+            }
+        }
+    });
+
+    app.CreateMainWindow<MyWindow>();
+    app.SetInitialWindowSize(800, 600);
+    return app.Run();
+}
+```
 
 ---
 
@@ -68,7 +143,7 @@ Child(
 
 ## No global state
 
-`FApplicationInstance` is a plain object — no singletons, no shared statics. Every service (animation, font atlas, style, renderer resources) lives inside the instance. Two instances share zero state, which matters when loading multiple plugin instances in the same process or running parallel test contexts.
+`FApplicationInstance` is a plain object — no singletons, no shared statics. Every service (animation, font atlas, style, renderer resources) lives inside the instance. Two application instances share zero state, which matters when loading multiple plugin instances in the same process or running parallel test contexts.
 
 The rendering interface (`IFRenderBackend`) is public API — bring your own backend or use the Vulkan reference implementation that ships with the library. For embedding Fusion as a pass in your own frame graph, `FApplicationInstance` exposes `Tick()` directly.
 
@@ -96,61 +171,7 @@ cmake --build build
 
 **Platforms:** Windows, macOS, Linux
 
----
-
-## Quick start
-
-```cpp
-#include <Fusion/Core.h>
-#include <Fusion/SDL3Platform.h>
-#include <Fusion/Widgets.h>
-
-using namespace Fusion;
-
-class MyWindow : public FDecoratedWidget
-{
-    FUSION_WIDGET(MyWindow, FDecoratedWidget)
-public:
-    void Construct() override
-    {
-        Super::Construct();
-
-        Child(
-            FNew(FButton)
-            .Style("Button/Primary")
-            .Height(32)
-            .OnClick([this] { FUSION_LOG_INFO("UI", "Clicked!"); })
-            .Child(FNew(FLabel).Text("Hello Fusion").Color(FColors::White))
-        );
-    }
-};
-
-int main(int argc, char* argv[])
-{
-    FApplication app(argc, argv);
-
-    Ref<FTheme> theme = app.CreateDefaultTheme();
-    theme->MergeStyleSheet(FUSION_STYLE_SHEET
-    {
-        FUSION_STYLE(FButton, "Button/Primary", Background, Border)
-        {
-            Background = FColor(0.23f, 0.51f, 0.96f);
-            Border     = FColor(0.16f, 0.40f, 0.82f);
-
-            Transition(Background, FTransition::MakeTween(0.1f));
-
-            FUSION_ON(Hovered)
-            {
-                Background = FColor(0.38f, 0.65f, 0.98f);
-            }
-        }
-    });
-
-    app.CreateMainWindow<MyWindow>();
-    app.SetInitialWindowSize(800, 600);
-    return app.Run();
-}
-```
+**Dependencies:** [Vulkan SDK](https://vulkan.lunarg.com), [SDL3](https://github.com/libsdl-org/SDL), [FreeType](https://freetype.org), [xxHash](https://github.com/Cyan4973/xxHash), [cpptrace](https://github.com/jeremy-rifkin/cpptrace)
 
 ---
 
@@ -164,6 +185,4 @@ int main(int argc, char* argv[])
 
 ---
 
-## License
 
-MIT

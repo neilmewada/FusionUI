@@ -288,12 +288,10 @@ int main(int argc, char* argv[])
 			Padding	   = FMargin(1, 1, 1, 1) * 5;
 		}
 
-		FUSION_STYLE(FButton, "Button/Base", Shape, Background, Border, Outline, OutlineOffset)
+		FUSION_STYLE(FDecoratedWidget, "Base/FocusRing", Outline, OutlineOffset)
 		{
-			Shape = FRoundedRectangle(5.0f);
 			OutlineOffset = 0;
 
-			Transition(Background,		FTransition::MakeTween(0.1f));
 			Transition(Outline,			FTransition::MakeTween(0.15f));
 			Transition(OutlineOffset,	FTransition::MakeTween(0.3f));
 
@@ -302,6 +300,14 @@ int main(int argc, char* argv[])
 				Outline = FocusOutline;
 				OutlineOffset = 2.5f;
 			}
+		}
+
+		FUSION_STYLE(FButton, "Button/Base", Shape, Background, Border, Outline, OutlineOffset)
+		{
+			Extends("Base/FocusRing");
+			Shape = FRoundedRectangle(5.0f);
+
+			Transition(Background,		FTransition::MakeTween(0.1f));
 
 			FUSION_ON(Disabled)
 			{
@@ -368,6 +374,8 @@ int main(int argc, char* argv[])
 			Background, Border, Outline, Padding, Font,
 			TextColor, PlaceholderColor, SelectionColor, CursorColor)
 		{
+			Extends("Base/FocusRing");
+			
 			Shape            = FRoundedRectangle(5.0f);
 			Background       = FColor(0.10f, 0.10f, 0.12f);
 			Border           = FColor(0.30f, 0.30f, 0.34f);
