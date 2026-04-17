@@ -63,7 +63,7 @@ namespace Fusion
 		if (!Enabled())
 			return FEventReply::Unhandled();
 
-		if (event.Key == EKeyCode::Space || event.Key == EKeyCode::Return)
+		if (event.Key == EKeyCode::Space || event.Key == EKeyCode::Return || event.Key == EKeyCode::KeypadEnter)
 		{
 			SetStyleStateFlag(EStyleState::Pressed | EStyleState::Hovered, true);
 			return FEventReply::Handled();
@@ -83,7 +83,7 @@ namespace Fusion
 		if (!Enabled())
 			return FEventReply::Unhandled();
 
-		if (event.Key == EKeyCode::Space || event.Key == EKeyCode::Return)
+		if (event.Key == EKeyCode::Space || event.Key == EKeyCode::Return || event.Key == EKeyCode::KeypadEnter)
 		{
 			SetStyleStateFlag(EStyleState::Pressed | EStyleState::Hovered, false);
 			m_OnClick.Broadcast(this);

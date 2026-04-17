@@ -589,6 +589,7 @@ namespace Fusion
             return FEventReply::Unhandled();
 
         case EKeyCode::Return:
+        case EKeyCode::KeypadEnter:
             if (editing)
             {
                 ExitEditing();

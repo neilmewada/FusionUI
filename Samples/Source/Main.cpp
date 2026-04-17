@@ -327,7 +327,7 @@ int main(int argc, char* argv[])
 			Extends("Base/FocusRing");
 			Shape = FRoundedRectangle(5.0f);
 
-			Transition(Background,		FTransition::MakeTween(0.1f));
+			Transition(Background, FTransition::MakeTween(0.1f));
 
 			FUSION_ON(Disabled)
 			{
