@@ -57,6 +57,7 @@
 #include "Animation/TweenAnimation.h"
 #include "Animation/SpringAnimation.h"
 #include "Animation/AnimateBuilder.h"
+#include "Animation/Transition.h"
 
 // Painting
 #include "Painting/Painter.h"
