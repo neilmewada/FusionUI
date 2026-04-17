@@ -375,7 +375,7 @@ int main(int argc, char* argv[])
 			TextColor, PlaceholderColor, SelectionColor, CursorColor)
 		{
 			Extends("Base/FocusRing");
-			
+
 			Shape            = FRoundedRectangle(5.0f);
 			Background       = FColor(0.10f, 0.10f, 0.12f);
 			Border           = FColor(0.30f, 0.30f, 0.34f);
