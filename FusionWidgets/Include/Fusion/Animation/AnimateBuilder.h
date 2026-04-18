@@ -205,19 +205,3 @@ namespace Fusion
     
 } // namespace Fusion
 
-#define __FAnimate_Tween(widgetPtr, PropertyName, setterPrefix)\
-    FAnimate::Tween<TPtrType<decltype(widgetPtr)>::Type>(\
-        #PropertyName, TPtrType<decltype(widgetPtr)>::GetRawPtr(widgetPtr),\
-        (decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().PropertyName()) (TPtrType<decltype(widgetPtr)>::Type::*)() const)& TPtrType<decltype(widgetPtr)>::Type::PropertyName,\
-        (void (TPtrType<decltype(widgetPtr)>::Type::*)(const decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().PropertyName())&))& TPtrType<decltype(widgetPtr)>::Type::setterPrefix##PropertyName\
-    )
-
-#define __FAnimate_Spring(widgetPtr, PropertyName, setterPrefix)\
-    FAnimate::Spring<TPtrType<decltype(widgetPtr)>::Type>(\
-        #PropertyName, TPtrType<decltype(widgetPtr)>::GetRawPtr(widgetPtr),\
-        (decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().PropertyName()) (TPtrType<decltype(widgetPtr)>::Type::*)() const)& TPtrType<decltype(widgetPtr)>::Type::PropertyName,\
-        (void (TPtrType<decltype(widgetPtr)>::Type::*)(const decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().PropertyName())&))& TPtrType<decltype(widgetPtr)>::Type::setterPrefix##PropertyName\
-    )
-
-#define FAnimate_Tween(widgetPtr, PropertyName) __FAnimate_Tween(widgetPtr, PropertyName, __AnimBypassSetter_)
-#define FAnimate_Spring(widgetPtr, PropertyName) __FAnimate_Spring(widgetPtr, PropertyName, __AnimBypassSetter_)

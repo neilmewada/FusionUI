@@ -64,19 +64,19 @@
 			}\
 		}
 
-#define FUSION_PROPERTY_FORWARD(PropertyType, PropertyName, m_WrappingVariable)\
-	PropertyType PropertyName() const { return m_WrappingVariable->PropertyName(); }\
+#define FUSION_PROPERTY_FORWARD(PropertyType, PropertyName, m_ForwardingVariable, ForwardingPropertyName)\
+	PropertyType PropertyName() const { return m_ForwardingVariable->ForwardingPropertyName(); }\
 	template<typename TSelf>\
 	TSelf& PropertyName(this TSelf& self, PropertyType const& value) {\
-		static_assert(std::is_same_v<std::remove_cvref_t<decltype(std::declval<TPtrType<decltype(m_WrappingVariable)>::Type>().PropertyName())>, PropertyType>, "Property Type mismatch with the wrapped property.");\
-		self.m_WrappingVariable->PropertyName(value);\
+		static_assert(std::is_same_v<std::remove_cvref_t<decltype(std::declval<TPtrType<decltype(m_ForwardingVariable)>::Type>().ForwardingPropertyName())>, PropertyType>, "Property Type mismatch with the wrapped property.");\
+		self.m_ForwardingVariable->ForwardingPropertyName(value);\
 		return self;\
 	}\
 	void __StyleBypassSetter_##PropertyName(PropertyType const& value) {\
-		m_WrappingVariable->__StyleBypassSetter_##PropertyName(value);\
+		m_ForwardingVariable->__StyleBypassSetter_##ForwardingPropertyName(value);\
 	}\
 	void __AnimBypassSetter_##PropertyName(PropertyType const& value) {\
-		m_WrappingVariable->__AnimBypassSetter_##PropertyName(value);\
+		m_ForwardingVariable->__AnimBypassSetter_##ForwardingPropertyName(value);\
 	}\
 
 #define __FUSION_STYLE_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
@@ -151,54 +151,59 @@
 			return self;\
 		}
 
+#define __FUSION_APPLY_STYLE_WRITE(PropertyName, CurrentValue) \
+    { \
+        bool areEqual = false; \
+        if constexpr (TFEquitable<decltype(value)>::Value) \
+        { \
+            areEqual = TFEquitable<decltype(value)>::AreEqual(CurrentValue, value); \
+        } \
+        if constexpr (FAnimatable<decltype(value)>::Supported) \
+        { \
+            FTransition transition; \
+            if (!areEqual && style.TryGetTransition(#PropertyName, transition)) \
+            { \
+                if (transition.Type == ETransitionType::Tween) \
+                { \
+                    __FAnimate_Tween(this, PropertyName, __StyleBypassSetter_) \
+                    .To(value) \
+                    .Duration(transition.Tween.Duration) \
+                    .Easing(transition.Tween.Easing) \
+                    .Delay(transition.Tween.Delay) \
+                    .Play(); \
+                } \
+                else if (transition.Type == ETransitionType::Spring) \
+                { \
+                    __FAnimate_Spring(this, PropertyName, __StyleBypassSetter_) \
+                    .Target(value) \
+                    .Damping(transition.Spring.Damping) \
+                    .Stiffness(transition.Spring.Stiffness) \
+                    .Delay(transition.Spring.Delay) \
+                    .Play(); \
+                } \
+                else \
+                { \
+                    __StyleBypassSetter_##PropertyName(value); \
+                } \
+            } \
+            else if (!areEqual) \
+            { \
+                __StyleBypassSetter_##PropertyName(value); \
+            } \
+        } \
+        else if (!areEqual) \
+        { \
+            __StyleBypassSetter_##PropertyName(value); \
+        } \
+    }
+
 #define __FUSION_APPLY_STYLE(PropertyName)\
 	if (!m_Inline##PropertyName.has_value())\
 	{\
 		decltype(m_##PropertyName) value;\
 		if (style.TryGet(#PropertyName, value, GetStyleState()))\
 		{\
-			bool areEqual = false;\
-			if constexpr (TFEquitable<decltype(m_##PropertyName)>::Value)\
-			{\
-				areEqual = TFEquitable<decltype(m_##PropertyName)>::AreEqual(m_##PropertyName, value);\
-			}\
-			if constexpr (FAnimatable<decltype(m_##PropertyName)>::Supported)\
-			{\
-				FTransition transition;\
-				if (!areEqual && style.TryGetTransition(#PropertyName, transition))\
-				{\
-					if (transition.Type == ETransitionType::Tween)\
-					{\
-						__FAnimate_Tween(this, PropertyName, __StyleBypassSetter_)\
-						.To(value)\
-						.Duration(transition.Tween.Duration)\
-						.Easing(transition.Tween.Easing)\
-						.Delay(transition.Tween.Delay)\
-						.Play();\
-					}\
-					else if (transition.Type == ETransitionType::Spring)\
-					{\
-						__FAnimate_Spring(this, PropertyName, __StyleBypassSetter_)\
-						.Target(value)\
-						.Damping(transition.Spring.Damping)\
-						.Stiffness(transition.Spring.Stiffness)\
-						.Delay(transition.Spring.Delay)\
-						.Play();\
-					}\
-					else\
-					{\
-						__StyleBypassSetter_##PropertyName(value);\
-					}\
-				}\
-				else if (!areEqual)\
-				{\
-					__StyleBypassSetter_##PropertyName(value);\
-				}\
-			}\
-			else if (!areEqual)\
-			{\
-				__StyleBypassSetter_##PropertyName(value);\
-			}\
+			__FUSION_APPLY_STYLE_WRITE(PropertyName, value)\
 		}\
 	}
 
@@ -241,3 +246,21 @@
         Super::ApplyStyle(style); \
         FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_APPLY, __VA_ARGS__)) \
     }
+
+
+#define __FAnimate_Tween(widgetPtr, PropertyName, setterPrefix)\
+    FAnimate::Tween<TPtrType<decltype(widgetPtr)>::Type>(\
+        #PropertyName, TPtrType<decltype(widgetPtr)>::GetRawPtr(widgetPtr),\
+        (decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().PropertyName()) (TPtrType<decltype(widgetPtr)>::Type::*)() const)& TPtrType<decltype(widgetPtr)>::Type::PropertyName,\
+        (void (TPtrType<decltype(widgetPtr)>::Type::*)(const decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().PropertyName())&))& TPtrType<decltype(widgetPtr)>::Type::setterPrefix##PropertyName\
+    )
+
+#define __FAnimate_Spring(widgetPtr, PropertyName, setterPrefix)\
+    FAnimate::Spring<TPtrType<decltype(widgetPtr)>::Type>(\
+        #PropertyName, TPtrType<decltype(widgetPtr)>::GetRawPtr(widgetPtr),\
+        (decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().PropertyName()) (TPtrType<decltype(widgetPtr)>::Type::*)() const)& TPtrType<decltype(widgetPtr)>::Type::PropertyName,\
+        (void (TPtrType<decltype(widgetPtr)>::Type::*)(const decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().PropertyName())&))& TPtrType<decltype(widgetPtr)>::Type::setterPrefix##PropertyName\
+    )
+
+#define FAnimate_Tween(widgetPtr, PropertyName) __FAnimate_Tween(widgetPtr, PropertyName, __AnimBypassSetter_)
+#define FAnimate_Spring(widgetPtr, PropertyName) __FAnimate_Spring(widgetPtr, PropertyName, __AnimBypassSetter_)

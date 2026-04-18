@@ -20,7 +20,9 @@ namespace Fusion
 
     public: // - Properties -
 
-        FUSION_PROPERTY_FORWARD(FString, Text, m_Label);
+        FUSION_PROPERTY_FORWARD(FString, Text,      m_Label, Text);
+        FUSION_PROPERTY_FORWARD(FFont,   Font,      m_Label, Font);
+        FUSION_PROPERTY_FORWARD(FColor,  TextColor, m_Label, Color);
 
     };
     
