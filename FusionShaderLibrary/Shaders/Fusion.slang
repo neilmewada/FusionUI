@@ -41,7 +41,7 @@ float4 PSMain(VSOutput input) : SV_Target
 
     // - Shading -
 
-    /*if (item.shaderType == FUIShaderType::Texture)
+    if (item.shaderType == FUIShaderType::Texture)
     {
         float2 sampleUVMin = float2(item.data[0], item.data[1]);
         float2 sampleUVMax = float2(item.data[2], item.data[3]);
@@ -65,12 +65,12 @@ float4 PSMain(VSOutput input) : SV_Target
 
         if ((!tileX && (imgUV.x < 0 || imgUV.x > 1)) || (!tileY && (imgUV.y < 0 || imgUV.y > 1)))
             sampleColor = float4(0, 0, 0, 0);
-        //else
-        //    sampleColor = _Textures[item.textureIndex].Sample(_Samplers[item.samplerIndex], sampleUV);
+        else
+            sampleColor = _TextureArray.Sample(_FontAtlasSampler, float3(sampleUV, item.textureIndex));
 
         color *= sampleColor;
     }
-    else */if (item.shaderType == FUIShaderType::LinearGradient)
+    else if (item.shaderType == FUIShaderType::LinearGradient)
     {
         float angle = item.data[0];
         uv = fmod(uv, 1.00001f);

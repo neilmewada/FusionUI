@@ -801,23 +801,48 @@ namespace Fusion::Vulkan
 		{
 			instance->GlobalSet = VK_NULL_HANDLE;
 
-			FAtlasHandle atlasHandle = instance->FontAtlas;
-			if (atlasHandle.IsNull())
+			FAtlasHandle fontAtlasHandle = instance->FontAtlas;
+			if (fontAtlasHandle.IsNull())
+				continue;
+			
+			FAtlasHandle imageAtlasHandle = instance->ImageAtlas;
+			if (imageAtlasHandle.IsNull())
 				continue;
 
-			auto it = m_AtlasesByHandle.Find(atlasHandle);
+			auto it = m_AtlasesByHandle.Find(fontAtlasHandle);
 			if (it == m_AtlasesByHandle.End())
 				continue;
 
-			IPtr<FTextureAtlas> atlas = it->second;
+			auto it2 = m_AtlasesByHandle.Find(imageAtlasHandle);
+			if (it2 == m_AtlasesByHandle.End())
+				continue;
+
+			IPtr<FTextureAtlas> fontAtlas = it->second;
+			IPtr<FTextureAtlas> imageAtlas = it2->second;
 
 			instance->GlobalSet = m_PoolsPerFrame[m_FrameSlot]->Allocate(m_MainGraphicsPipeline->m_SetLayouts[kGlobalSetIndex]);
 
-			VkDescriptorImageInfo fontAtlasInfo{};
-			fontAtlasInfo.imageView = atlas->m_ImageView;
+			FStaticArray<VkDescriptorImageInfo, 2> imageInfos{};
+			FStaticArray<VkWriteDescriptorSet, 2> writeSets{};
+
+			VkDescriptorImageInfo& imageAtlasInfo = imageInfos[0];
+			imageAtlasInfo.imageView = imageAtlas->m_ImageView;
+			imageAtlasInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+			VkWriteDescriptorSet& imageAtlasBinding = writeSets[0];
+			imageAtlasBinding.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			imageAtlasBinding.descriptorCount = 1;
+			imageAtlasBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			imageAtlasBinding.dstArrayElement = 0;
+			imageAtlasBinding.dstBinding = 1;
+			imageAtlasBinding.dstSet = instance->GlobalSet;
+			imageAtlasBinding.pImageInfo = &imageAtlasInfo;
+
+			VkDescriptorImageInfo& fontAtlasInfo = imageInfos[1];
+			fontAtlasInfo.imageView = fontAtlas->m_ImageView;
 			fontAtlasInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-			VkWriteDescriptorSet fontAtlasBinding{};
+			VkWriteDescriptorSet& fontAtlasBinding = writeSets[1];
 			fontAtlasBinding.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			fontAtlasBinding.descriptorCount = 1;
 			fontAtlasBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
@@ -826,7 +851,7 @@ namespace Fusion::Vulkan
 			fontAtlasBinding.dstSet = instance->GlobalSet;
 			fontAtlasBinding.pImageInfo = &fontAtlasInfo;
 			
-			vkUpdateDescriptorSets(m_Device, 1, &fontAtlasBinding, 0, nullptr);
+			vkUpdateDescriptorSets(m_Device, writeSets.Size(), writeSets.Data(), 0, nullptr);
 		}
 
 		// - Acquire SwapChain -
@@ -1550,6 +1575,14 @@ namespace Fusion::Vulkan
 				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 				
 				FArray<VkDescriptorSetLayoutBinding> bindings{};
+
+				bindings.Add({ // _TextureArray
+					.binding = 1,
+					.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+					.descriptorCount = 1,
+					.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+					.pImmutableSamplers = nullptr
+				});
 
 				bindings.Add({ // _FontAtlas
 					.binding = 2,

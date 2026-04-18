@@ -54,8 +54,8 @@ struct FUIGradientStop
 // --------------------------------------------------------------
 // = Per Application Resources =
 
-[[vk::binding(0, 0)]]
-SamplerState _Samplers[16];
+//[[vk::binding(0, 0)]]
+//SamplerState _Samplers[16];
 
 [[vk::binding(1, 0)]]
 Texture2DArray<float4> _TextureArray;
