@@ -3,7 +3,7 @@
 namespace Fusion
 {
 
-    enum class EGradientType
+    enum class EGradientType : u8
     {
 	    Linear,
     	Radial,
@@ -11,7 +11,7 @@ namespace Fusion
     };
     FUSION_ENUM_CLASS(EGradientType);
 
-	enum class EGradientExtend
+	enum class EGradientExtend : u8
 	{
 		Clamp,
 		Repeat,
@@ -47,10 +47,10 @@ namespace Fusion
         bool IsRadial()  const { return m_Type == EGradientType::Radial; }
         bool IsConical() const { return m_Type == EGradientType::Conical; }
 
-        EGradientType                GetType()   const { return m_Type; }
-        EGradientExtend              GetExtend() const { return m_Extend; }
-        const FArray<FGradientStop>& GetStops()  const { return m_Stops; }
-        FArray<FGradientStop>&       GetStops()        { return m_Stops; }
+        EGradientType   GetType()   const { return m_Type; }
+        EGradientExtend GetExtend() const { return m_Extend; }
+        const auto&     GetStops()  const { return m_Stops; }
+        auto&           GetStops()        { return m_Stops; }
 
         f32   GetAngle()      const { return m_Angle; }       // Linear + Conical
         f32   GetStartPoint() const { return m_StartPoint; }  // Linear
@@ -68,15 +68,16 @@ namespace Fusion
 
     private:
 
-        EGradientType         m_Type   = EGradientType::Linear;
-        EGradientExtend       m_Extend = EGradientExtend::Clamp;
-        FArray<FGradientStop> m_Stops;
+        FArray<FGradientStop, 2> m_Stops;
 
         f32   m_Angle      = 0.0f;
         f32   m_StartPoint = 0.0f;
         f32   m_EndPoint   = 1.0f;
         FVec2 m_Center     = FVec2(0.5f, 0.5f);
         f32   m_Radius     = 0.5f;
+
+        EGradientType         m_Type = EGradientType::Linear;
+        EGradientExtend       m_Extend = EGradientExtend::Clamp;
     };
 
 } // namespace Fusion

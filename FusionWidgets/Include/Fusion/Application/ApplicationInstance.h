@@ -95,9 +95,10 @@ namespace Fusion
 
 		void TerminateAllAnimations(Ref<FObject> owner, bool complete = false);
 
-		// - Font -
+		// - Atlas -
 
-		Ref<FFontAtlas> GetFontAtlas() { return m_FontAtlas; }
+		Ref<FFontAtlas>  GetFontAtlas()  const { return m_FontAtlas; }
+		Ref<FImageAtlas> GetImageAtlas() const { return m_ImageAtlas; }
 
 		// - Timer -
 

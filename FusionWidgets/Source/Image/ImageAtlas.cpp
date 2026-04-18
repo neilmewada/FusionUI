@@ -69,7 +69,7 @@ namespace Fusion
         }
     }
 
-    FImageAtlas::FImageItem FImageAtlas::AddImage(const FName& name, const FImage& imageSource)
+    FImageAtlas::FAtlasItem FImageAtlas::AddImage(const FName& name, const FImage& imageSource)
     {
         if (!name.IsValid() || !imageSource.IsValid() || m_ImagesByName.KeyExists(name))
             return {};
@@ -117,14 +117,14 @@ namespace Fusion
         int posX = FMath::RoundToInt(insertNode->Rect.min.x) + kIconPadding / 2;
         int posY = FMath::RoundToInt(insertNode->Rect.min.y) + kIconPadding / 2;
 
-        FVec2 uvMin = FVec2((f32)posX / (f32)kAtlasSize, (f32)posY / (f32)kAtlasSize);
-        FVec2 uvMax = FVec2((f32)(posX + textureSize.width) / (f32)kAtlasSize, (f32)(posY + textureSize.height) / (f32)kAtlasSize);
+        FVec2 uvMin = FVec2(((f32)posX + 0.5f) / (f32)kAtlasSize, ((f32)posY + 0.5f) / (f32)kAtlasSize);
+        FVec2 uvMax = FVec2((f32)(posX + textureSize.width - 0.5f) / (f32)kAtlasSize, (f32)(posY + textureSize.height - 0.5f) / (f32)kAtlasSize);
 
         IFRenderBackend* backend = application->GetRenderBackend();
 
         backend->UploadAtlasRegionAsync(m_AtlasHandle, foundAtlas->LayerIndex, FVec2i(posX, posY), textureSize, imageSource.Data(), imageSource.Pitch());
 
-        FImageItem item = { .layerIndex = foundAtlas->LayerIndex, .uvMin = uvMin, .uvMax = uvMax };
+        FAtlasItem item = { .layerIndex = foundAtlas->LayerIndex, .uvMin = uvMin, .uvMax = uvMax };
         item.width = textureSize.width;
         item.height = textureSize.height;
 
@@ -159,6 +159,15 @@ namespace Fusion
         m_ImagesByName.Remove(name);
 
         return true;
+    }
+
+    FImageAtlas::FAtlasItem FImageAtlas::FindImage(const FName& name)
+    {
+        auto it = m_ImagesByName.Find(name);
+        if (it == m_ImagesByName.End())
+            return {};
+
+        return it->second;
     }
 
     // -------------------------------------------------------------------------------

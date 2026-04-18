@@ -4,9 +4,9 @@ namespace Fusion
 {
     FUSION_SIGNAL_TYPE(FTextSignal, const FString& text);
 
-    class FUSIONWIDGETS_API FTextInput : public FDecoratedWidget
+    class FUSIONWIDGETS_API FTextInput : public FDecoratedBox
     {
-        FUSION_WIDGET(FTextInput, FDecoratedWidget)
+        FUSION_WIDGET(FTextInput, FDecoratedBox)
     protected:
 
         FTextInput();

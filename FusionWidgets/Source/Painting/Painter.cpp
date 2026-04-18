@@ -1,5 +1,7 @@
 #include "Fusion/Widgets.h"
 
+#include <cfloat>
+
 // Copyright (c) 2026 Neil Mewada
 // SPDX-License-Identifier: MIT
 
@@ -779,6 +781,8 @@ namespace Fusion
 		if (minMax.GetWidth() <= 0 || minMax.GetHeight() <= 0)
 			return true;
 
+		FVec2 rectSize = minMax.GetSize();
+
 		FColor brushColor = m_CurrentBrush.GetColor();
 		brushColor.a *= GetCurrentOpacity();
 
@@ -796,6 +800,87 @@ namespace Fusion
 				FUIDrawItem drawItem{};
 				drawItem.clipRectIndex = GetCurrentClipIndex();
 				drawItem.shaderType = EUIShaderType::SolidColor;
+
+				drawItemIndex = m_DrawList->AddDrawItem(drawItem);
+			}
+		break;
+		case EBrushStyle::Image:
+			{
+				FUIDrawItem drawItem{};
+				drawItem.clipRectIndex = GetCurrentClipIndex();
+				drawItem.shaderType = EUIShaderType::Texture;
+				
+				FImageAtlas* imageAtlas = m_Application->GetImageAtlas().Get();
+				FUSION_ASSERT(imageAtlas != nullptr, "Image Atlas not found!");
+
+				FImageAtlas::FAtlasItem resolvedImage = imageAtlas->FindImage(m_CurrentBrush.GetImagePath());
+				if (!resolvedImage.IsValid())
+					return false;
+
+				drawItem.textureIndex = resolvedImage.layerIndex;
+				drawItem.drawItemFlags = EUIDrawItemFlags::None;
+
+				FVec2 brushPos = m_CurrentBrush.GetBrushPosition();
+				FVec2 brushSize = m_CurrentBrush.GetBrushSize();
+				EBrushTiling brushTiling = m_CurrentBrush.GetBrushTiling();
+				EImageFit imageFit = m_CurrentBrush.GetImageFit();
+
+				const bool tileX = FEnumHasFlag(brushTiling, EBrushTiling::TileX);
+				const bool tileY = FEnumHasFlag(brushTiling, EBrushTiling::TileY);
+
+				const bool autoSizeX = brushSize.x < -FLT_EPSILON;
+				const bool autoSizeY = brushSize.y < -FLT_EPSILON;
+
+				FVec2 imageSize = FVec2(resolvedImage.width, resolvedImage.height) / m_DpiScale;
+
+				if (tileX) drawItem.drawItemFlags |= EUIDrawItemFlags::TextureTileX;
+				if (tileY) drawItem.drawItemFlags |= EUIDrawItemFlags::TextureTileY;
+
+				drawItem.data[0] = resolvedImage.uvMin.x; drawItem.data[1] = resolvedImage.uvMin.y;
+				drawItem.data[2] = resolvedImage.uvMax.x; drawItem.data[3] = resolvedImage.uvMax.y;
+
+				FVec2 fitOffset = FVec2(0, 0);
+				FVec2 fitSize = FVec2(1, 1);
+
+				// TODO: apply image fit + tiling
+
+				if (autoSizeX) brushSize.x = imageSize.x;
+				if (autoSizeY) brushSize.y = imageSize.y;
+
+				if (imageFit == EImageFit::Fill)
+				{
+					fitSize.x = tileX ? brushSize.x / rectSize.x : 1.0f;
+					fitSize.y = tileY ? brushSize.y / rectSize.y : 1.0f;
+
+					fitOffset.x = (1.0f - fitSize.x) * brushPos.x;
+					fitOffset.y = (1.0f - fitSize.y) * brushPos.y;
+				}
+				else if (imageFit == EImageFit::Auto)
+				{
+					fitSize.x = (brushSize.x > 0 && rectSize.x > 0) ? (brushSize.x / rectSize.x) : 1.0f;
+					fitSize.y = (brushSize.y > 0 && rectSize.y > 0) ? (brushSize.y / rectSize.y) : 1.0f;
+
+					fitOffset.x = (1.0f - fitSize.x) * brushPos.x;
+					fitOffset.y = (1.0f - fitSize.y) * brushPos.y;
+				}
+				else if (imageFit == EImageFit::Contain || imageFit == EImageFit::Cover)
+				{
+					const f32 scale = imageFit == EImageFit::Contain
+						? FMath::Min(rectSize.x / brushSize.x, rectSize.y / brushSize.y)
+						: FMath::Max(rectSize.x / brushSize.x, rectSize.y / brushSize.y);
+
+					fitSize.x = (brushSize.x * scale) / rectSize.x;
+					fitSize.y = (brushSize.y * scale) / rectSize.y;
+					fitOffset.x = (1.0f - fitSize.x) * brushPos.x;
+					fitOffset.y = (1.0f - fitSize.y) * brushPos.y;
+
+					drawItem.drawItemFlags |= imageFit == EImageFit::Contain
+						? EUIDrawItemFlags::ImageFitContain
+						: EUIDrawItemFlags::ImageFitCover;
+				}
+
+				drawItem.data[4] = fitOffset.x; drawItem.data[5] = fitOffset.y;
+				drawItem.data[6] = fitSize.x; drawItem.data[7] = fitSize.y;
 
 				drawItemIndex = m_DrawList->AddDrawItem(drawItem);
 			}
@@ -852,6 +937,7 @@ namespace Fusion
 		ZoneScoped;
 
 		FFontAtlas* atlas = m_Application->GetFontAtlas().Get();
+		FUSION_ASSERT(atlas != nullptr, "Font Atlas not found!");
 
 		const f32 scale = m_CurrentFont.GetPointSize() / (f32)FFontAtlas::kSdfRenderSize;
 

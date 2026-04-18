@@ -5,13 +5,13 @@
 
 namespace Fusion
 {
-	FDecoratedWidget::FDecoratedWidget()
+	FDecoratedBox::FDecoratedBox()
 	{
 		m_Shape         = FRectangle();
 		m_OutlineOffset = 2.0f;
 	}
 
-	void FDecoratedWidget::Paint(FPainter& painter)
+	void FDecoratedBox::Paint(FPainter& painter)
 	{
 		Super::Paint(painter);
 
@@ -23,7 +23,7 @@ namespace Fusion
 		painter.FillAndStrokeShape(widgetRect, Shape());
 	}
 
-	void FDecoratedWidget::PaintOverContent(FPainter& painter)
+	void FDecoratedBox::PaintOverContent(FPainter& painter)
 	{
 		Super::PaintOverContent(painter);
 

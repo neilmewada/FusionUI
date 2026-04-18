@@ -27,7 +27,7 @@ namespace Fusion
 
         FAtlasHandle GetHandle() const { return m_AtlasHandle; }
 
-        struct FImageItem
+        struct FAtlasItem
         {
             int layerIndex = -1;
             FVec2 uvMin, uvMax;
@@ -36,8 +36,10 @@ namespace Fusion
             bool IsValid() const { return layerIndex >= 0; }
         };
 
-        FImageItem AddImage(const FName& name, const FImage& image);
+        FAtlasItem AddImage(const FName& name, const FImage& image);
         bool RemoveImage(const FName& name);
+
+        FAtlasItem FindImage(const FName& name);
 
         struct FUSIONCORE_API FBinaryNode : FIntrusiveBase
         {
@@ -150,9 +152,9 @@ namespace Fusion
 
         // - Cache -
 
-        FHashMap<FName, FImageItem> m_ImagesByName;
-        FImageItem m_WhitePixel{};
-        FImageItem m_TransparentPixel{};
+        FHashMap<FName, FAtlasItem> m_ImagesByName;
+        FAtlasItem m_WhitePixel{};
+        FAtlasItem m_TransparentPixel{};
     };
     
 } // namespace Fusion

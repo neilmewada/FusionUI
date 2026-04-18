@@ -6,12 +6,12 @@
 namespace Fusion
 {
     
-    class FUSIONWIDGETS_API FDecoratedWidget : public FCompoundWidget
+    class FUSIONWIDGETS_API FDecoratedBox : public FCompoundWidget
     {
-        FUSION_CLASS(FDecoratedWidget, FCompoundWidget)
+        FUSION_CLASS(FDecoratedBox, FCompoundWidget)
     public:
 
-        FDecoratedWidget();
+        FDecoratedBox();
 
     protected:
 

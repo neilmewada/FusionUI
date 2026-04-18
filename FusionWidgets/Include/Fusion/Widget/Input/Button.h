@@ -10,9 +10,9 @@ namespace Fusion
     FUSION_SIGNAL_TYPE(FButtonSignal, FButton* button);
 
 
-    class FUSIONVULKANRHI_API FButton : public FDecoratedWidget
+    class FUSIONVULKANRHI_API FButton : public FDecoratedBox
     {
-        FUSION_CLASS(FButton, FDecoratedWidget)
+        FUSION_CLASS(FButton, FDecoratedBox)
     public:
 
         FButton();

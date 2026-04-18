@@ -47,7 +47,6 @@ float4 PSMain(VSOutput input) : SV_Target
         float2 sampleUVMax = float2(item.data[2], item.data[3]);
         float2 fitOffset = float2(item.data[4], item.data[5]);
         float2 fitSize = float2(item.data[6], item.data[7]);
-        float2 halfTexel = float2(item.data[8], item.data[9]);
 
         const bool contain = flags & FUIDrawItemFlags::ImageFitContain;
         const bool cover = flags & FUIDrawItemFlags::ImageFitCover;
@@ -56,9 +55,8 @@ float4 PSMain(VSOutput input) : SV_Target
         const bool noTile = !tileX && !tileY;
 
         float2 imgUV = (input.uv - fitOffset) / fitSize;
-
-        sampleUVMin += halfTexel;
-        sampleUVMax -= halfTexel;
+        if (tileX) imgUV.x = frac(imgUV.x);
+        if (tileY) imgUV.y = frac(imgUV.y);
 
         float2 sampleUV = lerp(sampleUVMin, sampleUVMax, imgUV);
         float4 sampleColor;

@@ -3,15 +3,15 @@
 
 using namespace Fusion;
 
-class SampleWindow : public FDecoratedWidget
+class SampleWindow : public FDecoratedBox
 {
-	FUSION_WIDGET(SampleWindow, FDecoratedWidget)
+	FUSION_WIDGET(SampleWindow, FDecoratedBox)
 public:
 
 	Ref<FVerticalStack> vstack;
 	Ref<FHorizontalStack> hstack;
-	Ref<FDecoratedWidget> gradientBorder;
-	Ref<FDecoratedWidget> gradientWidget;
+	Ref<FDecoratedBox> gradientBorder;
+	Ref<FDecoratedBox> gradientWidget;
 
 	Ref<FTextButton> btn0;
 	Ref<FTimer> timer;
@@ -60,7 +60,7 @@ public:
 					hstack->Enabled(!hstack->Enabled());
 				}),
 
-				FAssignNew(FDecoratedWidget, gradientBorder)
+				FAssignNew(FDecoratedBox, gradientBorder)
 				.Border(gradientPen)
 				.Background(FColors::White)
 				.Shape(FRoundedRectangle(5.0f))
@@ -156,8 +156,13 @@ public:
 					})
 				),
 
-				FAssignNew(FDecoratedWidget, gradientWidget)
+				FAssignNew(FDecoratedBox, gradientWidget)
 				.Background(gradient)
+				.Shape(FRoundedRectangle(5.0f))
+				.Height(100),
+
+				FNew(FDecoratedBox)
+				.Background(FBrush::Image("embed:/Icons/TransparentPattern.png").BrushTiling(EBrushTiling::TileXY).ImageFit(EImageFit::Fill).BrushSize(FVec2(1, 1) * 32))
 				.Shape(FRoundedRectangle(5.0f))
 				.Height(100),
 
@@ -177,6 +182,8 @@ public:
 
 	void PaintOverContent(FPainter& painter) override
 	{
+		return;
+
 		f32 go = GradientOffset();
 
 		FPen gradientPen = FPen::Gradient(
@@ -284,7 +291,7 @@ int main(int argc, char* argv[])
 			Padding	   = FMargin(1, 1, 1, 1) * 5;
 		}
 
-		FUSION_STYLE(FDecoratedWidget, "Base/FocusRing", Outline, OutlineOffset)
+		FUSION_STYLE(FDecoratedBox, "Base/FocusRing", Outline, OutlineOffset)
 		{
 			OutlineOffset = 0;
 

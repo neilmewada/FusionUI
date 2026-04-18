@@ -28,10 +28,11 @@ namespace Fusion
 	// FPainter computes vertex UVs from this at tessellation time.
 	enum class EImageFit : u8
 	{
-		Fill = 0, // Stretch to fill the widget rect exactly (default, ignores aspect ratio)
-		Contain,  // Scale uniformly to fit within the rect, preserving aspect ratio (may letterbox)
-		Cover,    // Scale uniformly to fill the rect, preserving aspect ratio (may crop)
-		NineSlice // Fixed corners, stretched edges/center. Requires sliceMargins to be set.
+		Fill = 0,	// Stretch to fill the widget rect exactly (Default. ignores aspect ratio)
+		Auto,		// Renders the image at its natural size.
+		Contain,	// Scale uniformly to fit within the rect, preserving aspect ratio (may letterbox)
+		Cover,		// Scale uniformly to fill the rect, preserving aspect ratio (may crop)
+		NineSlice	// Fixed corners, stretched edges/center. Requires sliceMargins to be set.
 	};
 	FUSION_ENUM_CLASS(EImageFit);
 
@@ -99,11 +100,11 @@ namespace Fusion
 		FVec2 m_BrushSize = FVec2(-1, -1);
 		FVec2 m_BrushPos  = FVec2(0.5f, 0.5f);
 
+		FMargin m_SliceMargins;
+
 		EBrushTiling m_Tiling    = EBrushTiling::None;
 		EBrushStyle  m_BrushStyle = EBrushStyle::None;
 		EImageFit    m_ImageFit   = EImageFit::Fill;
-
-		FMargin m_SliceMargins;
 
     };
 
