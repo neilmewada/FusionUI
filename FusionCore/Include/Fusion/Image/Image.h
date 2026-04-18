@@ -61,6 +61,8 @@ namespace Fusion
 
         static IPtr<FImage> CreateExternal(FName name, EImageFormat format, int width, int height, u8* data);
 
+        static IPtr<FImage> CreateFromMemory(FName name, const u8* data, SizeT size, int desiredChannels = 4);
+
         bool IsValid() const;
 
         u8* Data() const { return m_Data; }

@@ -17,6 +17,7 @@ namespace Fusion
 
         static constexpr u32 kAtlasSize = 4096;
         static constexpr u32 kMaxLayers = 8;
+        static constexpr u32 kIconPadding = 4;
 
         ~FImageAtlas();
 

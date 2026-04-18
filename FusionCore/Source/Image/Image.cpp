@@ -7,6 +7,9 @@ namespace Fusion
 {
     FImage::~FImage()
     {
+        if (!m_Data)
+            return;
+
         if (m_UsesMalloc)
         {
             free(m_Data);
@@ -48,6 +51,24 @@ namespace Fusion
         image->BitsPerPixel = GetBitsPerPixel(format);
 
         image->m_Data = data;
+
+        return image;
+    }
+
+    IPtr<FImage> FImage::CreateFromMemory(FName name, const u8* data, SizeT size, int desiredChannels)
+    {
+        IPtr<FImage> image = new FImage();
+        image->m_Name = MoveTemp(name);
+    	image->m_Data = stbi_load_from_memory(data, size, &image->Width, &image->Height, &image->Channels, desiredChannels);
+        image->m_UsesMalloc = false;
+        image->m_UsesStbImage = true;
+
+    	if (image->Channels == 1)
+            image->Format = EImageFormat::R8;
+        else if (image->Channels >= 3)
+            image->Format = EImageFormat::RGBA8;
+
+        image->BitsPerPixel = GetBitsPerPixel(image->Format);
 
         return image;
     }

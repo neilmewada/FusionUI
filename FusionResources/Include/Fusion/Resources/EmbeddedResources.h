@@ -18,9 +18,9 @@ namespace Fusion::Resources
     // O(log n + k) where k is the number of matching resources.
     //
     // Examples:
-    //   for (const auto& r : Fusion::Resources::ListAll("/Fonts/")) { ... }
-    //   for (const auto& r : Fusion::Resources::ListAll("/"))       { ... } // all resources
-    FResourceView ListAll(const char* folderPath = "/");
+    //   for (const auto& r : Fusion::Resources::ListAll("embed:/Fonts/")) { ... }
+    //   for (const auto& r : Fusion::Resources::ListAll("embed:/"))       { ... } // all resources
+    FResourceView ListAll(const char* folderPath = "embed:/");
 
 } // namespace Fusion::Resources
 

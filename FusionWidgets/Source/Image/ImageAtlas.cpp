@@ -50,6 +50,12 @@ namespace Fusion
             IPtr<FImage> image = FImage::CreateExternal("__TransparentPixel", EImageFormat::RGBA8, 4, 4, (u8*)pixels);
             m_TransparentPixel = AddImage("__TransparentPixel", *image);
         }
+
+        for (Resources::FResource resource : Resources::ListAll("embed:/Icons"))
+        {
+            IPtr<FImage> image = FImage::CreateFromMemory("temp", resource.Data, resource.Size, 4);
+            AddImage(resource.Path, *image);
+        }
     }
 
     void FImageAtlas::Shutdown()
@@ -72,7 +78,7 @@ namespace Fusion
         if (!application)
             return {};
 
-        FVec2i textureSize = FVec2i(imageSource.Width, imageSource.Height);
+        FVec2i textureSize = FVec2i(imageSource.Width + kIconPadding, imageSource.Height + kIconPadding);
         u32 textureArea = textureSize.width * textureSize.height;
 
         IPtr<FAtlasLayer> foundAtlas = nullptr;
@@ -84,7 +90,7 @@ namespace Fusion
 
             insertNode = atlas->Root->Insert(textureSize);
 
-            if (insertNode == nullptr && atlas->Root->GetFreeArea() > textureArea * 2)
+            if (insertNode == nullptr && atlas->Root->GetFreeArea() > textureArea * 8)
             {
                 atlas->Root->DefragmentSlow();
 
@@ -101,13 +107,15 @@ namespace Fusion
 	    // TODO: Add a new atlas layer if insertNode is nullptr here.
         FUSION_ASSERT(insertNode, "TODO: Add a new atlas layer");
 
+        textureSize -= FVec2i(kIconPadding, kIconPadding);
+
         insertNode->ImageName = name;
         
         foundAtlas->Root->UsedArea += textureArea;
         foundAtlas->NodesByImageName[name] = insertNode;
 
-        int posX = FMath::RoundToInt(insertNode->Rect.min.x);
-        int posY = FMath::RoundToInt(insertNode->Rect.min.y);
+        int posX = FMath::RoundToInt(insertNode->Rect.min.x) + kIconPadding / 2;
+        int posY = FMath::RoundToInt(insertNode->Rect.min.y) + kIconPadding / 2;
 
         FVec2 uvMin = FVec2((f32)posX / (f32)kAtlasSize, (f32)posY / (f32)kAtlasSize);
         FVec2 uvMax = FVec2((f32)(posX + textureSize.width) / (f32)kAtlasSize, (f32)(posY + textureSize.height) / (f32)kAtlasSize);
