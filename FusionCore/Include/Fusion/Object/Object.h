@@ -190,4 +190,7 @@ namespace Fusion
         return object;
     }
 
+    template<class TObject>
+    concept TObjectType = std::is_base_of_v<FObject, TObject>;
+
 } // namespace Fusion

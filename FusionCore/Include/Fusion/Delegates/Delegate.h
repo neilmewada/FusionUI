@@ -36,12 +36,16 @@ namespace Fusion
         FDelegate& operator=(TCallable&& callable)
         {
             m_Function = std::forward<TCallable>(callable);
+            m_Target = nullptr;
+            m_bHasTarget = false;
             return *this;
         }
 
         FDelegate& operator=(std::nullptr_t)
         {
             m_Function = nullptr;
+            m_Target = nullptr;
+            m_bHasTarget = false;
             return *this;
         }
 
@@ -50,49 +54,77 @@ namespace Fusion
         void Bind(TCallable&& callable)
         {
             m_Function = std::forward<TCallable>(callable);
+            m_Target = nullptr;
+            m_bHasTarget = false;
         }
 
         // Bind a non-const member function
-        template<typename TObject, typename TMethod>
+        template<TObjectType TObject, typename TMethod>
         void Bind(TObject* object, TMethod method)
         {
-            m_Function = [object, method](TArgs... args) -> TReturn
+            Ref<TObject> ref = object;
+            if (ref.IsNull())
+                return;
+
+            m_Target = ref;
+            m_bHasTarget = true;
+
+            m_Function = [this, method](TArgs... args) -> TReturn
             {
-                return (object->*method)(std::forward<TArgs>(args)...);
+                Ref<FObject> target = m_Target.Lock();
+                FUSION_ASSERT(target.IsValid(), "Delegate called on a destroyed object!");
+
+                Ref<TObject> casted = FObject::CastTo<TObject>(target);
+
+                return (casted.Get()->*method)(std::forward<TArgs>(args)...);
             };
         }
 
-        // Bind a const member function
-        template<typename TObject, typename TMethod>
-        void Bind(const TObject* object, TMethod method)
-        {
-            m_Function = [object, method](TArgs... args) -> TReturn
-            {
-                return (object->*method)(std::forward<TArgs>(args)...);
-            };
-        }
-
-        // Bind a non-const member function via Ptr<T>
-        template<typename TObject, typename TMethod>
+        // Bind a non-const member function via Ref<T>
+        template<TObjectType TObject, typename TMethod>
         void Bind(Ref<TObject> object, TMethod method)
         {
-            m_Function = [object, method](TArgs... args) -> TReturn
+            if (object.IsNull())
+                return;
+
+            m_Target = object;
+            m_bHasTarget = true;
+
+            m_Function = [this, method](TArgs... args) -> TReturn
             {
-                return (object->*method)(std::forward<TArgs>(args)...);
+                Ref<FObject> target = m_Target.Lock();
+                FUSION_ASSERT(target.IsValid(), "Delegate called on a destroyed object!");
+
+                Ref<TObject> casted = FObject::CastTo<TObject>(target);
+
+                return (casted.Get()->*method)(std::forward<TArgs>(args)...);
             };
         }
 
-        // Bind a const member function via Ptr<T>
-        template<typename TObject, typename TMethod>
-        void Bind(Ref<const TObject> object, TMethod method)
+        // Bind a non-const member function via Ref<T>
+        template<TObjectType TObject, typename TMethod>
+        void Bind(WeakRef<TObject> object, TMethod method)
         {
-            m_Function = [object, method](TArgs... args) -> TReturn
-            {
-                return (object->*method)(std::forward<TArgs>(args)...);
-            };
+            Ref<FObject> ref = object.Lock();
+
+            if (ref.IsNull())
+                return;
+
+            m_Target = object;
+            m_bHasTarget = true;
+
+            m_Function = [this, method](TArgs... args) -> TReturn
+                {
+                    Ref<FObject> target = m_Target.Lock();
+                    FUSION_ASSERT(target.IsValid(), "Delegate called on a destroyed object!");
+
+                    Ref<TObject> casted = FObject::CastTo<TObject>(target);
+
+                    return (casted.Get()->*method)(std::forward<TArgs>(args)...);
+                };
         }
 
-        bool IsBound() const { return static_cast<bool>(m_Function); }
+        bool IsBound() const { return static_cast<bool>(m_Function) && (!m_bHasTarget || m_Target.IsValid()); }
 
         explicit operator bool() const { return IsBound(); }
 
@@ -120,8 +152,12 @@ namespace Fusion
 
         const FunctionType& GetFunction() const { return m_Function; }
 
+        Ref<FObject> GetTarget() const { return m_Target.Lock(); }
+
     private:
         FunctionType m_Function;
+        WeakRef<FObject> m_Target;
+        bool m_bHasTarget = false;
     };
 
 } // namespace Fusion

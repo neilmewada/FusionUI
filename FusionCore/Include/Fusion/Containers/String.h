@@ -79,6 +79,7 @@ namespace Fusion
         std::string_view View()        const;
         std::string      ToStdString() const;
 
+        size_t             Size()   const { return m_Size; }
         size_t             Length() const { return m_Size; }
         size_t         ByteLength() const { return m_Size; }
         CodepointRange Codepoints() const { return { Data(), Data() + m_Size }; }

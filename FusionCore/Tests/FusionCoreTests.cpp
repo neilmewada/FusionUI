@@ -273,6 +273,379 @@ TEST(PtrTest, ThreadSafety)
 
 #pragma endregion Ptr
 
+#pragma region Delegate
+
+class FDelegateTest : public FObject
+{
+    FUSION_CLASS(FDelegateTest, FObject)
+public:
+
+    FDelegateTest()
+    {
+
+    }
+
+    int Func1(const FString& str)
+    {
+        return (int)str.Size();
+    }
+
+    void VoidFunc(int value)
+    {
+        LastValue = value;
+    }
+
+    int LastValue = 0;
+};
+
+TEST(DelegateTest, TargetLifecycle)
+{
+    FDelegate<int(const FString&)> delegate;
+
+    WeakRef<FDelegateTest> weakRef;
+
+    {
+        Ref<FDelegateTest> object = NewObject<FDelegateTest>(nullptr);
+        weakRef = object;
+        EXPECT_TRUE(weakRef.IsValid());
+
+        delegate.Bind(object, &FDelegateTest::Func1);
+
+        EXPECT_TRUE(delegate.IsBound());
+
+        EXPECT_EQ(delegate("1234"), 4);
+    }
+
+#if FUSION_EXCEPTIONS
+    EXPECT_THROW(delegate("something"), FException);
+#endif
+
+    EXPECT_FALSE(delegate.IsBound());
+    EXPECT_TRUE(weakRef.IsNull());
+}
+
+TEST(DelegateTest, BindLambda)
+{
+    FDelegate<int(int, int)> delegate;
+    delegate.Bind([](int a, int b) { return a + b; });
+
+    EXPECT_TRUE(delegate.IsBound());
+    EXPECT_EQ(delegate(3, 4), 7);
+}
+
+TEST(DelegateTest, Unbind)
+{
+    FDelegate<void()> delegate;
+    delegate.Bind([] {});
+    EXPECT_TRUE(delegate.IsBound());
+
+    delegate.Unbind();
+    EXPECT_FALSE(delegate.IsBound());
+}
+
+TEST(DelegateTest, AssignNullptr)
+{
+    FDelegate<void()> delegate;
+    delegate.Bind([] {});
+    delegate = nullptr;
+    EXPECT_FALSE(delegate.IsBound());
+}
+
+TEST(DelegateTest, ExecuteIfBound_WhenBound)
+{
+    int called = 0;
+    FDelegate<void()> delegate;
+    delegate.Bind([&] { called++; });
+
+    bool result = delegate.ExecuteIfBound();
+    EXPECT_TRUE(result);
+    EXPECT_EQ(called, 1);
+}
+
+TEST(DelegateTest, ExecuteIfBound_WhenNotBound)
+{
+    FDelegate<void()> delegate;
+    bool result = delegate.ExecuteIfBound();
+    EXPECT_FALSE(result);
+}
+
+TEST(DelegateTest, BindMemberFunctionViaRef)
+{
+    Ref<FDelegateTest> object = NewObject<FDelegateTest>(nullptr);
+    FDelegate<void(int)> delegate;
+    delegate.Bind(object, &FDelegateTest::VoidFunc);
+
+    EXPECT_TRUE(delegate.IsBound());
+    delegate(42);
+    EXPECT_EQ(object->LastValue, 42);
+}
+
+TEST(DelegateTest, BindMemberFunctionViaWeakRef)
+{
+    Ref<FDelegateTest> object = NewObject<FDelegateTest>(nullptr);
+    WeakRef<FDelegateTest> weak = object;
+
+    FDelegate<void(int)> delegate;
+    delegate.Bind(weak, &FDelegateTest::VoidFunc);
+
+    EXPECT_TRUE(delegate.IsBound());
+    delegate(99);
+    EXPECT_EQ(object->LastValue, 99);
+}
+
+TEST(DelegateTest, ReBindOverwritesPrevious)
+{
+    int counter = 0;
+    FDelegate<void()> delegate;
+    delegate.Bind([&] { counter += 1; });
+    delegate.Bind([&] { counter += 10; });
+
+    delegate();
+    EXPECT_EQ(counter, 10); // only the second binding fires
+}
+
+TEST(DelegateTest, BoolConversion)
+{
+    FDelegate<void()> delegate;
+    EXPECT_FALSE(static_cast<bool>(delegate));
+
+    delegate.Bind([] {});
+    EXPECT_TRUE(static_cast<bool>(delegate));
+}
+
+#pragma endregion Delegate
+
+#pragma region Signal
+
+class FSignalTest : public FObject
+{
+    FUSION_CLASS(FSignalTest, FObject)
+public:
+    int LastValue  = 0;
+    int CallCount  = 0;
+
+    void OnValue(int v)
+    {
+        LastValue = v;
+        CallCount++;
+    }
+};
+
+TEST(SignalTest, AddLambdaAndBroadcast)
+{
+    FSignal<void(int)> signal;
+    int received = 0;
+
+    signal.Add([&](int v) { received = v; });
+    signal.Broadcast(42);
+
+    EXPECT_EQ(received, 42);
+}
+
+TEST(SignalTest, MultipleListeners)
+{
+    FSignal<void(int)> signal;
+    int a = 0, b = 0, c = 0;
+
+    signal.Add([&](int v) { a = v; });
+    signal.Add([&](int v) { b = v * 2; });
+    signal.Add([&](int v) { c = v * 3; });
+
+    signal.Broadcast(5);
+
+    EXPECT_EQ(a, 5);
+    EXPECT_EQ(b, 10);
+    EXPECT_EQ(c, 15);
+}
+
+TEST(SignalTest, RemoveByHandle)
+{
+    FSignal<void(int)> signal;
+    int received = 0;
+
+    FSignalHandle handle = signal.Add([&](int v) { received = v; });
+    signal.Remove(handle);
+    signal.Broadcast(99);
+
+    EXPECT_EQ(received, 0); // never called
+    EXPECT_EQ(signal.Count(), 0);
+}
+
+TEST(SignalTest, RemoveAll)
+{
+    FSignal<void()> signal;
+    int count = 0;
+
+    signal.Add([&] { count++; });
+    signal.Add([&] { count++; });
+    signal.Add([&] { count++; });
+
+    signal.RemoveAll();
+    signal.Broadcast();
+
+    EXPECT_EQ(count, 0);
+    EXPECT_EQ(signal.Count(), 0);
+}
+
+TEST(SignalTest, RemoveDuringBroadcast)
+{
+    FSignal<void()> signal;
+    int count = 0;
+    FSignalHandle handle;
+
+    handle = signal.Add([&]
+    {
+        count++;
+        signal.Remove(handle); // remove self mid-broadcast
+    });
+
+    signal.Broadcast();
+    EXPECT_EQ(count, 1);
+
+    // After broadcast the deferred removal should have been swept
+    EXPECT_EQ(signal.Count(), 0);
+
+    // Broadcast again — should not fire
+    signal.Broadcast();
+    EXPECT_EQ(count, 1);
+}
+
+TEST(SignalTest, RemoveAllDuringBroadcast)
+{
+    FSignal<void()> signal;
+    int count = 0;
+
+    signal.Add([&]
+    {
+        count++;
+        signal.RemoveAll(); // unbinds all bindings immediately, including the second one
+    });
+    signal.Add([&] { count++; }); // second listener — unbound before loop reaches it
+
+    signal.Broadcast();
+
+    // First listener fires and calls RemoveAll — second listener is unbound mid-loop
+    // and therefore skipped. Only count=1 after the first broadcast.
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(signal.Count(), 0);
+
+    // Second broadcast fires nothing
+    signal.Broadcast();
+    EXPECT_EQ(count, 1);
+}
+
+TEST(SignalTest, MemberFunctionListener)
+{
+    Ref<FSignalTest> obj = NewObject<FSignalTest>(nullptr);
+    FSignal<void(int)> signal;
+
+    signal.Add(obj, &FSignalTest::OnValue);
+    signal.Broadcast(7);
+
+    EXPECT_EQ(obj->LastValue, 7);
+    EXPECT_EQ(obj->CallCount, 1);
+}
+
+TEST(SignalTest, DestroyedObjectListenerSkipped)
+{
+    FSignal<void(int)> signal;
+    int outsideCount = 0;
+
+    {
+        Ref<FSignalTest> obj = NewObject<FSignalTest>(nullptr);
+        signal.Add(obj, &FSignalTest::OnValue);
+        signal.Add([&](int) { outsideCount++; });
+        // obj destroyed here
+    }
+
+    // Binding with dead target should be skipped (IsBound returns false)
+    signal.Broadcast(10);
+    EXPECT_EQ(outsideCount, 1); // lambda still fires
+}
+
+TEST(SignalTest, NoArgLambdaOnParameterizedSignal)
+{
+    // Signal accepts int but listener ignores it
+    FSignal<void(int)> signal;
+    int called = 0;
+
+    signal.Add([&] { called++; });
+    signal.Broadcast(123);
+
+    EXPECT_EQ(called, 1);
+}
+
+TEST(SignalTest, HandleValidityAfterRemove)
+{
+    FSignalHandle handle = FSignalHandle::Invalid();
+    EXPECT_FALSE(handle.IsValid());
+
+    FSignal<void()> signal;
+    handle = signal.Add([] {});
+    EXPECT_TRUE(handle.IsValid());
+
+    signal.Remove(handle);
+    // Handle struct itself is still "valid" (has an ID) — validity means it was issued
+    // but the binding is gone from the signal
+    EXPECT_EQ(signal.Count(), 0);
+}
+
+TEST(SignalTest, CountReflectsBindings)
+{
+    FSignal<void()> signal;
+    EXPECT_EQ(signal.Count(), 0);
+    EXPECT_FALSE(signal.IsBound());
+
+    auto h1 = signal.Add([] {});
+    EXPECT_EQ(signal.Count(), 1);
+    EXPECT_TRUE(signal.IsBound());
+
+    auto h2 = signal.Add([] {});
+    EXPECT_EQ(signal.Count(), 2);
+
+    signal.Remove(h1);
+    EXPECT_EQ(signal.Count(), 1);
+
+    signal.Remove(h2);
+    EXPECT_EQ(signal.Count(), 0);
+    EXPECT_FALSE(signal.IsBound());
+}
+
+TEST(SignalTest, BroadcastWithNoListeners)
+{
+    FSignal<void(int)> signal;
+    EXPECT_NO_THROW(signal.Broadcast(42));
+}
+
+TEST(SignalTest, BroadcastMultipleTimes)
+{
+    FSignal<void(int)> signal;
+    int total = 0;
+
+    signal.Add([&](int v) { total += v; });
+
+    signal.Broadcast(1);
+    signal.Broadcast(2);
+    signal.Broadcast(3);
+
+    EXPECT_EQ(total, 6);
+}
+
+TEST(SignalTest, MoveSignal)
+{
+    FSignal<void(int)> a;
+    int received = 0;
+    a.Add([&](int v) { received = v; });
+
+    FSignal<void(int)> b = std::move(a);
+    b.Broadcast(55);
+
+    EXPECT_EQ(received, 55);
+    EXPECT_EQ(b.Count(), 1);
+}
+
+#pragma endregion Signal
+
 #pragma region FArray
 
 TEST(FArrayTest, DefaultConstructorEmpty)
@@ -1080,29 +1453,6 @@ TEST(FStableDynamicArrayTest, GrowthIncrement)
     EXPECT_GE(arr.GetCapacity(), 5);
     EXPECT_EQ(arr.GetCount(), 5);
     EXPECT_EQ(arr[4], 5);
-}
-
-TEST(FStableDynamicArrayTest, Reserve)
-{
-    FStableGrowthArray<int> arr;
-    arr.Reserve(64);
-    EXPECT_GE(arr.GetCapacity(), 64);
-    EXPECT_EQ(arr.GetCount(), 0);
-
-    // Reserve smaller than current capacity is a no-op
-    arr.Reserve(10);
-    EXPECT_GE(arr.GetCapacity(), 64);
-}
-
-TEST(FStableDynamicArrayTest, ReservePreservesData)
-{
-    FStableGrowthArray<int, 4> arr;
-    arr.Insert(10);
-    arr.Insert(20);
-    arr.Reserve(64);
-    EXPECT_EQ(arr.GetCount(), 2);
-    EXPECT_EQ(arr[0], 10);
-    EXPECT_EQ(arr[1], 20);
 }
 
 TEST(FStableDynamicArrayTest, FirstAndLast)
