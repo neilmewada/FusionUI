@@ -164,6 +164,8 @@ namespace Fusion
         virtual void OnEnabled() {}
         virtual void OnDisabled() {}
 
+        virtual bool ShouldHitTestChildren(FVec2 localMousePose) { return true; }
+
         bool SelfHitTest(FVec2 localMousePos);
 
         // - Internal -

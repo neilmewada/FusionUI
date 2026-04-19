@@ -30,6 +30,8 @@ namespace Fusion
 
 	FWidget* FSurface::HitTestWidget(FVec2 pos, FWidget* widget)
 	{
+        ZoneScoped;
+
         if (widget == nullptr)
         {
             widget = m_RootWidget.Get();
@@ -40,9 +42,18 @@ namespace Fusion
         if (widget->Excluded() || widget->IsFaulted() || !widget->Visible())
             return nullptr;
 
-        // Broad-phase: pos is in widget's own layer space, cachedLayerSpaceAABB is too
+        // Broad-phase: pos is in widget's own layer space, cachedLayerSpaceAABB is too.
         if (!widget->m_CachedLayerSpaceAABB.Contains(pos))
             return nullptr;
+
+        // convert layer pos → widget local space
+        const FVec2 localPos = widget->m_CachedLayerSpaceTransform.Inverse().TransformPoint(pos);
+        const bool selfHit = widget->SelfHitTest(localPos);
+
+        if (selfHit && !widget->ShouldHitTestChildren(localPos))
+        {
+            return widget;
+        }
 
         // Walk children last-to-first (last = painted on top = check first)
         for (int i = (int)widget->GetChildCount() - 1; i >= 0; i--)
@@ -66,9 +77,8 @@ namespace Fusion
                 return hit;
         }
 
-        // Exact self hit test — convert layer pos → widget local space
-        FVec2 localPos = widget->m_CachedLayerSpaceTransform.Inverse().TransformPoint(pos);
-        if (widget->SelfHitTest(localPos))
+        // Exact self hit test
+        if (selfHit)
             return widget;
 
         return nullptr;
@@ -145,6 +155,10 @@ namespace Fusion
         Ref<FWidget> captured = m_CapturedWidget.Lock();
 
         Ref<FWidget> hitWidget = mouseInSurface ? HitTestWidget(surfaceMousePos) : nullptr;
+        if (hitWidget)
+        {
+            FUSION_LOG_INFO("Debug", "Hit: {} {}", hitWidget->GetClassName(), hitWidget->GetName());
+        }
 
         Ref<FWidget> hoveredWidget = captured.IsValid() ? captured : hitWidget;
 
