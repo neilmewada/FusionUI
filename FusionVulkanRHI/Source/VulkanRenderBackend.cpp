@@ -571,9 +571,9 @@ namespace Fusion::Vulkan
 			IPtr<FRenderTarget> renderTarget = m_RenderTargetsByHandle[views.RenderTarget];
 			IPtr<FRenderSnapshot> snapshot = renderTarget->Snapshot;
 
-			VkDescriptorSetLayout viewDataSetLayout = m_MainGraphicsPipeline->m_SetLayouts[kViewDataSetIndex];
-			VkDescriptorSetLayout layerTransformsSetLayout = m_MainGraphicsPipeline->m_SetLayouts[kLayerTransformsSetIndex];
-			VkDescriptorSetLayout drawDataSetLayout = m_MainGraphicsPipeline->m_SetLayouts[kDrawDataSetIndex];
+			VkDescriptorSetLayout viewDataSetLayout = m_MainPipeline->m_SetLayouts[kViewDataSetIndex];
+			VkDescriptorSetLayout layerTransformsSetLayout = m_MainPipeline->m_SetLayouts[kLayerTransformsSetIndex];
+			VkDescriptorSetLayout drawDataSetLayout = m_MainPipeline->m_SetLayouts[kDrawDataSetIndex];
 
 			views.ViewDataSet = pool->Allocate(viewDataSetLayout);
 
@@ -820,7 +820,7 @@ namespace Fusion::Vulkan
 			IPtr<FTextureAtlas> fontAtlas = it->second;
 			IPtr<FTextureAtlas> imageAtlas = it2->second;
 
-			instance->GlobalSet = m_PoolsPerFrame[m_FrameSlot]->Allocate(m_MainGraphicsPipeline->m_SetLayouts[kGlobalSetIndex]);
+			instance->GlobalSet = m_PoolsPerFrame[m_FrameSlot]->Allocate(m_MainPipeline->m_SetLayouts[kGlobalSetIndex]);
 
 			FStaticArray<VkDescriptorImageInfo, 2> imageInfos{};
 			FStaticArray<VkWriteDescriptorSet, 2> writeSets{};
@@ -1016,13 +1016,13 @@ namespace Fusion::Vulkan
 					};
 					vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
-					vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_Pipeline);
+					vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainPipeline->m_Pipeline);
 
-					vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_PipelineLayout,
+					vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainPipeline->m_PipelineLayout,
 						kGlobalSetIndex, 1, &instance->GlobalSet, 0, nullptr);
 
 					// View Data set
-					vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_PipelineLayout,
+					vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainPipeline->m_PipelineLayout,
 						kViewDataSetIndex, 1, &views.ViewDataSet, 0, nullptr);
 
 					// Vertex & Index Buffers
@@ -1036,11 +1036,11 @@ namespace Fusion::Vulkan
 						const SizeT drawCmdCount = snapshot->renderPassArray[i].DrawCmdCount;
 
 						// Draw Data set
-						vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_PipelineLayout,
+						vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainPipeline->m_PipelineLayout,
 							3, 1, &views.DrawDataSets[layerIndex], 0, nullptr);
 
 						// Layer Transform
-						vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_PipelineLayout, 
+						vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainPipeline->m_PipelineLayout, 
 							2, 1, &views.LayerTransformSets[layerIndex], 0, nullptr);
 
 						for (SizeT drawCmdIndex = drawCmdStartIndex; drawCmdIndex < drawCmdStartIndex + drawCmdCount; drawCmdIndex++)
@@ -1321,7 +1321,7 @@ namespace Fusion::Vulkan
 		deviceCI.ppEnabledExtensionNames = deviceExtensionNames.Empty() ? nullptr : deviceExtensionNames.Data();
 
 		VkPhysicalDeviceFeatures deviceFeaturesToUse{};
-		deviceFeaturesToUse.samplerAnisotropy = VK_FALSE;
+		deviceFeaturesToUse.samplerAnisotropy = VK_TRUE;
 
 		if (m_PhysicalDeviceFeatures.sparseBinding && m_PhysicalDeviceFeatures.sparseResidencyImage2D)
 		{
@@ -1463,14 +1463,14 @@ namespace Fusion::Vulkan
 			const FShaderModule* vertexShader = mainShader->FindModule(FShaderStage::Vertex);
 			const FShaderModule* fragmentShader = mainShader->FindModule(FShaderStage::Fragment);
 
-			m_MainGraphicsPipeline = new FGraphicsPipeline(m_Device);
+			m_MainPipeline = new FGraphicsPipeline(m_Device);
 
 			VkShaderModuleCreateInfo vertexModuleCI{};
 			vertexModuleCI.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 			vertexModuleCI.codeSize = vertexShader->m_SPIRVSize;
 			vertexModuleCI.pCode = (const uint32_t*)vertexShader->m_SPIRVData;
 			
-			result = vkCreateShaderModule(m_Device, &vertexModuleCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_VertexModule);
+			result = vkCreateShaderModule(m_Device, &vertexModuleCI, VULKAN_CPU_ALLOCATOR, &m_MainPipeline->m_VertexModule);
 			VULKAN_CHECK(result, "Failed to load Vertex Shader.");
 
 			VkShaderModuleCreateInfo fragmentModuleCI{};
@@ -1478,7 +1478,7 @@ namespace Fusion::Vulkan
 			fragmentModuleCI.codeSize = fragmentShader->m_SPIRVSize;
 			fragmentModuleCI.pCode = (const uint32_t*)fragmentShader->m_SPIRVData;
 
-			result = vkCreateShaderModule(m_Device, &fragmentModuleCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_FragmentModule);
+			result = vkCreateShaderModule(m_Device, &fragmentModuleCI, VULKAN_CPU_ALLOCATOR, &m_MainPipeline->m_FragmentModule);
 			VULKAN_CHECK(result, "Failed to load Fragment Shader.");
 
 			VkGraphicsPipelineCreateInfo graphicsPipelineCI{};
@@ -1491,14 +1491,14 @@ namespace Fusion::Vulkan
 			vertexStageCI.flags = 0;
 			vertexStageCI.pName = "main";
 			vertexStageCI.stage = VK_SHADER_STAGE_VERTEX_BIT;
-			vertexStageCI.module = m_MainGraphicsPipeline->m_VertexModule;
+			vertexStageCI.module = m_MainPipeline->m_VertexModule;
 
 			VkPipelineShaderStageCreateInfo& fragmentStageCI = stages[1];
 			fragmentStageCI.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			fragmentStageCI.flags = 0;
 			fragmentStageCI.pName = "main";
 			fragmentStageCI.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-			fragmentStageCI.module = m_MainGraphicsPipeline->m_FragmentModule;
+			fragmentStageCI.module = m_MainPipeline->m_FragmentModule;
 
 			graphicsPipelineCI.stageCount = 2;
 			graphicsPipelineCI.pStages = &stages[0];
@@ -1596,7 +1596,8 @@ namespace Fusion::Vulkan
 				fontSamplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 				fontSamplerCI.addressModeU = fontSamplerCI.addressModeV = fontSamplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
 				fontSamplerCI.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
-				fontSamplerCI.anisotropyEnable = VK_FALSE;
+				fontSamplerCI.anisotropyEnable = VK_TRUE;
+				fontSamplerCI.maxAnisotropy = 16;
 				fontSamplerCI.compareEnable = VK_FALSE;
 				fontSamplerCI.minLod = 0;
 				fontSamplerCI.minFilter = VK_FILTER_LINEAR;
@@ -1616,7 +1617,7 @@ namespace Fusion::Vulkan
 					.pImmutableSamplers = &sampler
 				});
 
-				m_MainGraphicsPipeline->m_ImmutableSamplers.Add(sampler);
+				m_MainPipeline->m_ImmutableSamplers.Add(sampler);
 
 				setLayoutCI.bindingCount = bindings.Size();
 				setLayoutCI.pBindings = bindings.Data();
@@ -1625,7 +1626,7 @@ namespace Fusion::Vulkan
 				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
 				VULKAN_CHECK(result, "Failed to create Set Layout.");
 				
-				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
+				m_MainPipeline->m_SetLayouts.Add(setLayout);
 			}
 			
 			// Set 1
@@ -1649,7 +1650,7 @@ namespace Fusion::Vulkan
 				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
 				VULKAN_CHECK(result, "Failed to create Set Layout.");
 
-				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
+				m_MainPipeline->m_SetLayouts.Add(setLayout);
 			}
 
 			// Set 2
@@ -1673,7 +1674,7 @@ namespace Fusion::Vulkan
 				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
 				VULKAN_CHECK(result, "Failed to create Set Layout.");
 
-				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
+				m_MainPipeline->m_SetLayouts.Add(setLayout);
 			}
 
 			// Set 3
@@ -1714,16 +1715,16 @@ namespace Fusion::Vulkan
 				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
 				VULKAN_CHECK(result, "Failed to create Set Layout.");
 
-				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
+				m_MainPipeline->m_SetLayouts.Add(setLayout);
 			}
 
-			pipelineLayoutCI.setLayoutCount = (uint32_t)m_MainGraphicsPipeline->m_SetLayouts.Size();
-			pipelineLayoutCI.pSetLayouts = m_MainGraphicsPipeline->m_SetLayouts.Data();
+			pipelineLayoutCI.setLayoutCount = (uint32_t)m_MainPipeline->m_SetLayouts.Size();
+			pipelineLayoutCI.pSetLayouts = m_MainPipeline->m_SetLayouts.Data();
 
-			result = vkCreatePipelineLayout(m_Device, &pipelineLayoutCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_PipelineLayout);
+			result = vkCreatePipelineLayout(m_Device, &pipelineLayoutCI, VULKAN_CPU_ALLOCATOR, &m_MainPipeline->m_PipelineLayout);
 			VULKAN_CHECK(result, "Failed to create Main Pipeline Layout.");
 
-			graphicsPipelineCI.layout = m_MainGraphicsPipeline->m_PipelineLayout;
+			graphicsPipelineCI.layout = m_MainPipeline->m_PipelineLayout;
 
 			VkPipelineColorBlendStateCreateInfo colorBlendState{};
 			colorBlendState.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -1769,8 +1770,59 @@ namespace Fusion::Vulkan
 
 			graphicsPipelineCI.pDepthStencilState = &depthStencilState;
 
-			result = vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &graphicsPipelineCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_Pipeline);
+			result = vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &graphicsPipelineCI, VULKAN_CPU_ALLOCATOR, &m_MainPipeline->m_Pipeline);
 			VULKAN_CHECK(result, "Failed to create Main Graphics Pipeline.");
+		}
+
+		// - Mip Map Graphics Pipeline -
+		{
+			const FShader* mainShader = Fusion::Shaders::FindShader("MipMap");
+			FUSION_ASSERT(mainShader != nullptr, "Failed to find the main MipMap.slang shader!");
+
+			const FShaderModule* vertexShader = mainShader->FindModule(FShaderStage::Vertex);
+			const FShaderModule* fragmentShader = mainShader->FindModule(FShaderStage::Fragment);
+
+			m_MipMapPipeline = new FGraphicsPipeline(m_Device);
+
+			VkShaderModuleCreateInfo vertexModuleCI{};
+			vertexModuleCI.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+			vertexModuleCI.codeSize = vertexShader->m_SPIRVSize;
+			vertexModuleCI.pCode = (const uint32_t*)vertexShader->m_SPIRVData;
+
+			result = vkCreateShaderModule(m_Device, &vertexModuleCI, VULKAN_CPU_ALLOCATOR, &m_MipMapPipeline->m_VertexModule);
+			VULKAN_CHECK(result, "Failed to load Vertex Shader.");
+
+			VkShaderModuleCreateInfo fragmentModuleCI{};
+			fragmentModuleCI.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+			fragmentModuleCI.codeSize = fragmentShader->m_SPIRVSize;
+			fragmentModuleCI.pCode = (const uint32_t*)fragmentShader->m_SPIRVData;
+
+			result = vkCreateShaderModule(m_Device, &fragmentModuleCI, VULKAN_CPU_ALLOCATOR, &m_MipMapPipeline->m_FragmentModule);
+			VULKAN_CHECK(result, "Failed to load Fragment Shader.");
+
+			VkGraphicsPipelineCreateInfo graphicsPipelineCI{};
+			graphicsPipelineCI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+
+			VkPipelineShaderStageCreateInfo stages[2] = {};
+
+			VkPipelineShaderStageCreateInfo& vertexStageCI = stages[0];
+			vertexStageCI.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			vertexStageCI.flags = 0;
+			vertexStageCI.pName = "main";
+			vertexStageCI.stage = VK_SHADER_STAGE_VERTEX_BIT;
+			vertexStageCI.module = m_MipMapPipeline->m_VertexModule;
+
+			VkPipelineShaderStageCreateInfo& fragmentStageCI = stages[1];
+			fragmentStageCI.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			fragmentStageCI.flags = 0;
+			fragmentStageCI.pName = "main";
+			fragmentStageCI.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+			fragmentStageCI.module = m_MipMapPipeline->m_FragmentModule;
+
+			graphicsPipelineCI.stageCount = 2;
+			graphicsPipelineCI.pStages = &stages[0];
+
+
 		}
 
 		// - Descriptors -
@@ -1859,7 +1911,14 @@ namespace Fusion::Vulkan
 			m_RenderPass = VK_NULL_HANDLE;
 		}
 
-		m_MainGraphicsPipeline = nullptr;
+		if (m_MipMapRenderPass)
+		{
+			vkDestroyRenderPass(m_Device, m_MipMapRenderPass, VULKAN_CPU_ALLOCATOR);
+			m_MipMapRenderPass = VK_NULL_HANDLE;
+		}
+
+		m_MipMapPipeline = nullptr;
+		m_MainPipeline = nullptr;
 
 		for (int i = 0; i < m_RenderFinishedFences.Size(); i++)
 		{

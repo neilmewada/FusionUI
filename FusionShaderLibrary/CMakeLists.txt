@@ -16,6 +16,8 @@ add_fusion_target(FusionShaderLibrary STATIC
 # Shaders
 # ---------------------------------------------------------------------------
 
+# Fusion.slang
+
 fusion_compile_shader(TARGET FusionShaderLibrary
     HLSL         Shaders/Fusion.slang
     GROUP        Fusion
@@ -28,6 +30,26 @@ fusion_compile_shader(TARGET FusionShaderLibrary
 fusion_compile_shader(TARGET FusionShaderLibrary
     HLSL         Shaders/Fusion.slang
     GROUP        Fusion
+    ENTRY        PSMain
+    STAGE        fragment
+    TARGETS      SPIRV
+    INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
+)
+
+# MipMap.slang
+
+fusion_compile_shader(TARGET FusionShaderLibrary
+    HLSL         Shaders/MipMap.slang
+    GROUP        MipMap
+    ENTRY        VSMain
+    STAGE        vertex
+    TARGETS      SPIRV
+    INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
+)
+
+fusion_compile_shader(TARGET FusionShaderLibrary
+    HLSL         Shaders/MipMap.slang
+    GROUP        MipMap
     ENTRY        PSMain
     STAGE        fragment
     TARGETS      SPIRV

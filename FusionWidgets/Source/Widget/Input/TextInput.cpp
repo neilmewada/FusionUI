@@ -361,8 +361,6 @@ namespace Fusion
         if (contentRect.GetWidth() <= 0 || contentRect.GetHeight() <= 0)
             return;
 
-        painter.PushClip(contentRect, FRectangle());
-
         // Baseline: vertically center the line (ascender from top of content)
         f32 textY = contentRect.top
                   + (contentRect.GetHeight() - metrics.LineHeight) * 0.5f
@@ -423,8 +421,6 @@ namespace Fusion
                 cursorHeight
             ));
         }
-
-        painter.PopClip();
     }
 
     // -----------------------------------------------------------------------

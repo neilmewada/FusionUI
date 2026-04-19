@@ -68,7 +68,7 @@ float4 PSMain(VSOutput input) : SV_Target
         if ((!tileX && (imgUV.x < 0 || imgUV.x > 1)) || (!tileY && (imgUV.y < 0 || imgUV.y > 1)))
             sampleColor = float4(0, 0, 0, 0);
         else
-            sampleColor = _TextureArray.SampleGrad(_FontAtlasSampler, float3(sampleUV, item.textureIndex), dx * uvScale, dy * uvScale);
+            sampleColor = _TextureArray.SampleGrad(_Sampler, float3(sampleUV, item.textureIndex), dx * uvScale, dy * uvScale);
 
         color *= sampleColor;
     }
@@ -114,7 +114,7 @@ float4 PSMain(VSOutput input) : SV_Target
         // Effective screen-pixel range of the SDF transition band
         float screenPxRange = max(0.5 * dot(unitRange, screenTexSize), 1.0);
 
-        float sd = _FontAtlas.Sample(_FontAtlasSampler, float3(uv, float(item.textureIndex)));
+        float sd = _FontAtlas.Sample(_Sampler, float3(uv, float(item.textureIndex)));
 
         float screenPxDistance = screenPxRange * (sd - 0.5);
         float alpha = clamp(screenPxDistance + 0.5, 0.0, 1.0);

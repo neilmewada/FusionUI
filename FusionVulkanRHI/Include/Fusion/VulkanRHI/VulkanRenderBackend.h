@@ -317,13 +317,15 @@ namespace Fusion::Vulkan
         FRenderTargetHandle::IndexType m_RenderTargetIndexAllocator = 0;
         FHashMap<FRenderTargetHandle, IPtr<FRenderTarget>> m_RenderTargetsByHandle;
 
-        // - Render Pass -
+        // - Render Passes -
 
         VkRenderPass m_RenderPass = VK_NULL_HANDLE;
+        VkRenderPass m_MipMapRenderPass = VK_NULL_HANDLE;
 
-        // - Pipeline -
+        // - Pipelines -
 
-        IPtr<FGraphicsPipeline> m_MainGraphicsPipeline;
+        IPtr<FGraphicsPipeline> m_MainPipeline;
+        IPtr<FGraphicsPipeline> m_MipMapPipeline;
 
         // - Per Frame Rendering Resources -
 
