@@ -45,6 +45,12 @@ namespace Fusion
 		u32 drawItemIndex = 0;
 	};
 
+	struct FUIQuadVertex
+	{
+		FVec2 pos;
+		FVec2 uv;
+	};
+
 	struct alignas(16) FUIClipRect
 	{
 		FMat4 clipInverseTransform;

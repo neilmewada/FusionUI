@@ -1535,7 +1535,7 @@ namespace Fusion::Vulkan
 			vertexAttributes[3].location = 3;
 			vertexAttributes[3].offset = offsetof(FUIVertex, drawItemIndex);
 
-			vertexInputState.vertexAttributeDescriptionCount = 4;
+			vertexInputState.vertexAttributeDescriptionCount = vertexAttributes.size();
 			vertexInputState.pVertexAttributeDescriptions = vertexAttributes.data();
 
 			graphicsPipelineCI.pVertexInputState = &vertexInputState;
@@ -1775,12 +1775,13 @@ namespace Fusion::Vulkan
 		}
 
 		// - Mip Map Graphics Pipeline -
+		if (false) // Disabled for now
 		{
-			const FShader* mainShader = Fusion::Shaders::FindShader("MipMap");
-			FUSION_ASSERT(mainShader != nullptr, "Failed to find the main MipMap.slang shader!");
+			const FShader* mipMapShader = Fusion::Shaders::FindShader("MipMap");
+			FUSION_ASSERT(mipMapShader != nullptr, "Failed to find the main MipMap.slang shader!");
 
-			const FShaderModule* vertexShader = mainShader->FindModule(FShaderStage::Vertex);
-			const FShaderModule* fragmentShader = mainShader->FindModule(FShaderStage::Fragment);
+			const FShaderModule* vertexShader = mipMapShader->FindModule(FShaderStage::Vertex);
+			const FShaderModule* fragmentShader = mipMapShader->FindModule(FShaderStage::Fragment);
 
 			m_MipMapPipeline = new FGraphicsPipeline(m_Device);
 
@@ -1822,7 +1823,119 @@ namespace Fusion::Vulkan
 			graphicsPipelineCI.stageCount = 2;
 			graphicsPipelineCI.pStages = &stages[0];
 
+			VkPipelineVertexInputStateCreateInfo vertexInputState{};
+			vertexInputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
+			VkVertexInputBindingDescription vertexInputBinding{};
+			vertexInputBinding.binding = 0;
+			vertexInputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			vertexInputBinding.stride = sizeof(FUIQuadVertex);
+
+			vertexInputState.vertexBindingDescriptionCount = 1;
+			vertexInputState.pVertexBindingDescriptions = &vertexInputBinding;
+
+			std::array<VkVertexInputAttributeDescription, 2> vertexAttributes{};
+			vertexAttributes[0].format = VK_FORMAT_R32G32_SFLOAT;
+			vertexAttributes[0].binding = 0;
+			vertexAttributes[0].location = 0;
+			vertexAttributes[0].offset = offsetof(FUIQuadVertex, pos);
+
+			vertexAttributes[1].format = VK_FORMAT_R32G32_SFLOAT;
+			vertexAttributes[1].binding = 0;
+			vertexAttributes[1].location = 1;
+			vertexAttributes[1].offset = offsetof(FUIQuadVertex, uv);
+
+			vertexInputState.vertexAttributeDescriptionCount = vertexAttributes.size();
+			vertexInputState.pVertexAttributeDescriptions = vertexAttributes.data();
+
+			graphicsPipelineCI.pVertexInputState = &vertexInputState;
+
+			VkPipelineInputAssemblyStateCreateInfo inputAssemblyState{};
+			inputAssemblyState.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+			inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+			graphicsPipelineCI.pInputAssemblyState = &inputAssemblyState;
+
+			graphicsPipelineCI.renderPass = m_RenderPass;
+			graphicsPipelineCI.subpass = 0;
+
+			VkPipelineViewportStateCreateInfo viewportState{};
+			viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+			viewportState.viewportCount = 1;
+			viewportState.scissorCount = 1;
+
+			graphicsPipelineCI.pViewportState = &viewportState;
+
+			std::array dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+
+			VkPipelineDynamicStateCreateInfo dynamicState{};
+			dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+			dynamicState.dynamicStateCount = (uint32_t)dynamicStates.size();
+			dynamicState.pDynamicStates = dynamicStates.data();
+
+			graphicsPipelineCI.pDynamicState = &dynamicState;
+
+			VkPipelineLayoutCreateInfo pipelineLayoutCI{};
+			pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+			pipelineLayoutCI.pushConstantRangeCount = 0;
+
+			// Set 0
+			{
+				VkDescriptorSetLayoutCreateInfo setLayoutCI{};
+				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+
+				FArray<VkDescriptorSetLayoutBinding> bindings{};
+
+				bindings.Add({ // _InputTexture
+					.binding = 0,
+					.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+					.descriptorCount = 1,
+					.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+					.pImmutableSamplers = nullptr
+				});
+
+				VkSamplerCreateInfo fontSamplerCI{};
+				fontSamplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+				fontSamplerCI.addressModeU = fontSamplerCI.addressModeV = fontSamplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+				fontSamplerCI.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+				fontSamplerCI.anisotropyEnable = VK_TRUE;
+				fontSamplerCI.maxAnisotropy = 16;
+				fontSamplerCI.compareEnable = VK_FALSE;
+				fontSamplerCI.minLod = 0;
+				fontSamplerCI.minFilter = VK_FILTER_LINEAR;
+				fontSamplerCI.magFilter = VK_FILTER_LINEAR;
+				fontSamplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+				fontSamplerCI.unnormalizedCoordinates = VK_FALSE;
+
+				VkSampler sampler = VK_NULL_HANDLE;
+				result = vkCreateSampler(m_Device, &fontSamplerCI, VULKAN_CPU_ALLOCATOR, &sampler);
+				VULKAN_CHECK(result, "Failed to create sampler.");
+
+				m_MipMapPipeline->m_ImmutableSamplers.Add(sampler);
+
+				bindings.Add({ // _InputTextureSampler
+					.binding = 1,
+					.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
+					.descriptorCount = 1,
+					.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+					.pImmutableSamplers = m_MipMapPipeline->m_ImmutableSamplers.Data()
+				});
+
+				setLayoutCI.bindingCount = bindings.Size();
+				setLayoutCI.pBindings = bindings.Data();
+
+				VkDescriptorSetLayout setLayout = nullptr;
+				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
+				VULKAN_CHECK(result, "Failed to create Set Layout.");
+
+				m_MipMapPipeline->m_SetLayouts.Add(setLayout);
+			}
+
+			pipelineLayoutCI.setLayoutCount = (uint32_t)m_MipMapPipeline->m_SetLayouts.Size();
+			pipelineLayoutCI.pSetLayouts = m_MipMapPipeline->m_SetLayouts.Data();
+
+			result = vkCreatePipelineLayout(m_Device, &pipelineLayoutCI, VULKAN_CPU_ALLOCATOR, &m_MipMapPipeline->m_PipelineLayout);
+			VULKAN_CHECK(result, "Failed to create Main Pipeline Layout.");
 		}
 
 		// - Descriptors -
