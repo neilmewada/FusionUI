@@ -25,9 +25,13 @@ namespace Fusion
 
         // - Layout -
 
-        
+        FVec2 MeasureContent(FVec2 availableSize) override;
+
+        void ArrangeContent(FVec2 finalSize) override;
 
         // - Paint -
+
+        void PaintOverContent(FPainter& painter) override;
 
         // - Hit Testing -
 
@@ -50,8 +54,9 @@ namespace Fusion
             (FBrush, ThumbHoverBackground,   Paint),
             (FBrush, ThumbPressedBackground, Paint),
             (FShape, ThumbShape,             Paint),
-            (f32,    ScrollbarThickness,     Layout),
-            (f32,    ScrollbarPadding,       Layout)
+            (f32,     ScrollbarThickness,     Layout),
+            (f32,     ScrollbarPadding,       Layout),
+            (FMargin, ContentPadding,         Layout)
         );
 
         FUSION_LAYOUT_PROPERTY(FVec2,               ScrollOffset);

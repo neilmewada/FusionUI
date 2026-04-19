@@ -1,6 +1,9 @@
 #include <Fusion/Core.h>
 #include <Fusion/Widgets.h>
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 using namespace Fusion;
 
 class SampleWindow : public FDecoratedBox
@@ -408,7 +411,7 @@ int main(int argc, char* argv[])
 			Background, Border, Shape,
 			TrackBackground, TrackShape,
 			ThumbBackground, ThumbHoverBackground, ThumbPressedBackground, ThumbShape,
-			ScrollbarThickness, ScrollbarPadding, Padding)
+			ScrollbarThickness, ScrollbarPadding, ContentPadding)
 		{
 			Background             = FColor(0.10f, 0.10f, 0.12f);
 			Border                 = FColor(0.22f, 0.22f, 0.26f);
@@ -422,9 +425,9 @@ int main(int argc, char* argv[])
 			ThumbPressedBackground = FColor(0.58f, 0.58f, 0.65f);
 			ThumbShape             = FRoundedRectangle(3.0f);
 
-			Padding			   = FMargin(1, 1, 1, 1) * 5;
-			ScrollbarThickness = 8.0f;
-			ScrollbarPadding   = 2.0f;
+			ContentPadding		   = FMargin(1, 1, 1, 1) * 10;
+			ScrollbarThickness	   = 15.0f;
+			ScrollbarPadding	   = 3.0f;
 		}
 
 		FUSION_STYLE(FTextInput, "TextInput/Base", Shape,
