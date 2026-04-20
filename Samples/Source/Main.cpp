@@ -188,7 +188,8 @@ public:
 					FNew(FDecoratedBox)
 					.Background(FColors::Yellow)
 					.Height(20)
-					.FillRatio(1.0f),
+					.FillRatio(1.0f)
+					.MinWidth(10),
 
 					FNew(FDecoratedBox)
 					.Background(FColors::Cyan)

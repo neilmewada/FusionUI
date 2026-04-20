@@ -39,9 +39,14 @@ namespace Fusion
 
         FArray<FRect, 4> m_HandleRects;
 
-        int  m_DraggedRect = -1;
-        bool m_bIsDragHovered = false;
-        bool m_bIsBeingResized = false;
+        int   m_DraggedRect        = -1;
+        bool  m_bIsDragHovered     = false;
+        bool  m_bIsBeingResized    = false;
+
+        FVec2 m_DragStartLocalPos   = FVec2(0, 0);
+        f32   m_DragStartLeftSize   = 0.0f;
+        f32   m_DragStartTotalSize  = 0.0f;
+        f32   m_DragStartTotalRatio = 0.0f;
 
         FUSION_STYLE_PROPERTIES(
             (FColor, SplitterHoverColor, Paint),

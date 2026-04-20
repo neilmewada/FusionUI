@@ -87,13 +87,33 @@ namespace Fusion
 			? ESystemCursor::SizeHorizontal
 			: ESystemCursor::SizeVertical;
 
-		for (const FRect& handle : m_HandleRects)
+		for (int i = 0; i < (int)m_HandleRects.Size(); i++)
 		{
-			if (handle.Contains(localPos))
+			if (!m_HandleRects[i].Contains(localPos))
+				continue;
+
+			Ref<FWidget> left  = GetChildAt(i);
+			Ref<FWidget> right = GetChildAt(i + 1);
+			if (!left || !right)
+				break;
+
+			m_bIsBeingResized    = true;
+			m_DraggedRect        = i;
+			m_DragStartLocalPos  = localPos;
+			m_DragStartTotalRatio = left->FillRatio() + right->FillRatio();
+
+			if (Direction() == EStackDirection::Horizontal)
 			{
-				m_bIsBeingResized = true;
-				return FEventReply::Handled().CaptureMouse(FCursor::System(resizeCursor));
+				m_DragStartLeftSize  = left->GetLayoutSize().x;
+				m_DragStartTotalSize = left->GetLayoutSize().x + right->GetLayoutSize().x;
 			}
+			else
+			{
+				m_DragStartLeftSize  = left->GetLayoutSize().y;
+				m_DragStartTotalSize = left->GetLayoutSize().y + right->GetLayoutSize().y;
+			}
+
+			return FEventReply::Handled().CaptureMouse(FCursor::System(resizeCursor));
 		}
 
 		return Super::OnMouseButtonDown(event);
@@ -159,7 +179,23 @@ namespace Fusion
 
 		if (m_bIsBeingResized)
 		{
-			
+			Ref<FWidget> left  = GetChildAt(m_DraggedRect);
+			Ref<FWidget> right = GetChildAt(m_DraggedRect + 1);
+
+			if (left && right && m_DragStartTotalSize > 0.0f)
+			{
+				f32 delta = Direction() == EStackDirection::Horizontal
+					? localPos.x - m_DragStartLocalPos.x
+					: localPos.y - m_DragStartLocalPos.y;
+
+				f32 fraction = FMath::Clamp(
+					(m_DragStartLeftSize + delta) / m_DragStartTotalSize, 0.0f, 1.0f);
+
+				left->FillRatio(m_DragStartTotalRatio * fraction);
+				right->FillRatio(m_DragStartTotalRatio * (1.0f - fraction));
+			}
+
+			return FEventReply::Handled();
 		}
 		else if (m_bIsDragHovered != hovered && !m_bIsBeingResized)
 		{
