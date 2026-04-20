@@ -354,6 +354,8 @@ int main(int argc, char* argv[])
 		FColor WindowBackgroundColor = FColor(0.13f, 0.13f, 0.15f);
 		FPen   FocusOutline			 = FPen::Solid(FColor(0.47f, 0.73f, 1.0f, 0.85f)).Thickness(2.0f);
 
+		FColor DisabledBtnTextColor = FColor(0.35f, 0.35f, 0.38f);
+
 		FUSION_STYLE(SampleWindow, "SampleWindow", Background, Padding)
 		{
 			Background = WindowBackgroundColor;
@@ -438,6 +440,26 @@ int main(int argc, char* argv[])
 				Background = FColor(0.58f, 0.09f, 0.09f);
 				Border     = FColor(0.45f, 0.06f, 0.06f);
 			}
+		}
+
+		FUSION_STYLE(FLabel, "Button/Primary/Label", Color)
+		{
+			Color = FColors::White;
+
+			FUSION_ON(Disabled)
+			{
+				Color = DisabledBtnTextColor;
+			}
+		}
+
+		FUSION_STYLE(FLabel, "Button/Secondary/Label", Color)
+		{
+			Extends("Button/Primary/Label");
+		}
+
+		FUSION_STYLE(FLabel, "Button/Destructive/Label", Color)
+		{
+			Extends("Button/Primary/Label");
 		}
 
 		FUSION_STYLE(FScrollBox, "ScrollBox/Base",

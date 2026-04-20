@@ -23,6 +23,7 @@ namespace Fusion
         Hidden = FUSION_BIT(7),
         Excluded = FUSION_BIT(8),
         Focusable = FUSION_BIT(9),
+        InheritParentStyleState = FUSION_BIT(10),
     };
     FUSION_ENUM_CLASS_FLAGS(EWidgetFlags);
     
@@ -83,9 +84,11 @@ namespace Fusion
 
         FAffineTransform GetChildTransform();
 
-        virtual u32 GetChildCount() { return 0; }
+        virtual int GetChildCount() { return 0; }
 
         virtual Ref<FWidget> GetChildAt(u32 index) { return nullptr; }
+
+        int GetIndexOfChild(Ref<FWidget> child);
 
         EStyleState GetStyleState();
 
@@ -120,6 +123,8 @@ namespace Fusion
         void ApplyStyle();
 
         void RefreshStyleRecursively();
+
+        FName ResolveStyleName();
 
         Ref<FStyle> ResolveStyle();
 
@@ -222,6 +227,7 @@ namespace Fusion
         FUSION_PROPERTY(bool, ClipContent);
 
         FUSION_PROPERTY(FName, Style);
+        FUSION_PROPERTY(FName, SubStyle);
 
         FUSION_LAYOUT_PROPERTY(EHAlign, HAlign);
         FUSION_LAYOUT_PROPERTY(EVAlign, VAlign);
@@ -258,6 +264,17 @@ namespace Fusion
         FUSION_PROPERTY_SET(bool, Enabled)
         {
             static_cast<FWidget&>(self).SetEnabledRecursive(value, self.GetParentWidget());
+            return self;
+        }
+
+        FUSION_PROPERTY_GET(bool, InheritParentStyleState)
+        {
+            return TestWidgetFlags(EWidgetFlags::InheritParentStyleState);
+        }
+
+        FUSION_PROPERTY_SET(bool, InheritParentStyleState)
+        {
+            static_cast<FWidget&>(self).SetWidgetFlag(EWidgetFlags::InheritParentStyleState, value);
             return self;
         }
 

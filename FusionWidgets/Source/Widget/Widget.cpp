@@ -119,14 +119,15 @@ namespace Fusion
 	void FWidget::OnPropertyModified(const FName& propertyName)
 	{
 		thread_local const FName styleProperty = "Style";
+		thread_local const FName subStyleProperty = "SubStyle";
 		thread_local const FName opacityProperty = "Opacity";
 		thread_local const FName pivotProperty = "Pivot";
 
-		if (propertyName == styleProperty)
+		if (propertyName == styleProperty || propertyName == subStyleProperty)
 		{
 			m_CachedStyle = nullptr;
 			m_StyleCached = false;
-			RefreshStyle();
+			RefreshStyleRecursively();
 		}
 		else if (propertyName == opacityProperty)
 		{
@@ -170,6 +171,17 @@ namespace Fusion
 			FAffineTransform::Translation(m_Pivot) *
 			m_Transform *
 			FAffineTransform::Translation(-m_Pivot);
+	}
+
+	int FWidget::GetIndexOfChild(Ref<FWidget> child)
+	{
+		for (int i = 0; i < GetChildCount(); i++)
+		{
+			if (GetChildAt(i) == child)
+				return i;
+		}
+
+		return -1;
 	}
 
 	EStyleState FWidget::GetStyleState()
@@ -274,9 +286,24 @@ namespace Fusion
 		}
 	}
 
+	FName FWidget::ResolveStyleName()
+	{
+		if (m_Style.IsValid())
+			return m_Style;
+		if (m_SubStyle.IsValid())
+		{
+			if (Ref<FWidget> parent = GetParentWidget())
+			{
+				return parent->ResolveStyleName().ToString() + "/" + m_SubStyle.ToString();
+			}
+		}
+		return GetClassName();
+	}
+
 	Ref<FStyle> FWidget::ResolveStyle()
 	{
-		FName styleName = m_Style.IsValid() ? m_Style : GetClassName();
+		FName styleName = ResolveStyleName();
+
 		if (Ref<FSurface> surface = GetParentSurface())
 		{
 			if (Ref<FTheme> theme = surface->GetTheme())
@@ -412,6 +439,17 @@ namespace Fusion
 			else
 			{
 				RefreshStyle();
+			}
+
+			for (int i = 0; i < GetChildCount(); i++)
+			{
+				if (Ref<FWidget> child = GetChildAt(i))
+				{
+					if (child->InheritParentStyleState())
+					{
+						child->SetStyleStateFlag(state, set);
+					}
+				}
 			}
 		}
 	}

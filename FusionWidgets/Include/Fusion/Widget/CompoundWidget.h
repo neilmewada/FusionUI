@@ -21,7 +21,7 @@ namespace Fusion
 
         Ref<FWidget> GetChild() const { return m_Child; }
 
-        u32 GetChildCount() override { return m_Child.IsValid() ? 1 : 0; }
+        int GetChildCount() override { return m_Child.IsValid() ? 1 : 0; }
 
         Ref<FWidget> GetChildAt(u32 index) override { return index == 0 ? m_Child : nullptr; }
 

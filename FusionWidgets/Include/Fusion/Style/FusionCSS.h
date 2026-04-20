@@ -92,7 +92,6 @@ namespace Fusion::CSS
         }; true)
 
 
-
 #define __FUSION_FOLD_STATES_1(a)                       EStyleState::a
 #define __FUSION_FOLD_STATES_2(a, b)                    EStyleState::a | EStyleState::b
 #define __FUSION_FOLD_STATES_3(a, b, c)                 EStyleState::a | EStyleState::b | EStyleState::c

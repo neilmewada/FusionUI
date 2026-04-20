@@ -23,7 +23,7 @@ namespace Fusion
 
         void DetachChild(Ref<FWidget> child) override;
 
-        u32 GetChildCount() override { return (u32)m_Children.Size(); }
+        int GetChildCount() override { return (u32)m_Children.Size(); }
 
         Ref<FWidget> GetChildAt(u32 index) override
         {

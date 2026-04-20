@@ -13,8 +13,9 @@ namespace Fusion
 
 		Child(
 			FAssignNew(FLabel, m_Label)
+			.InheritParentStyleState(true)
+			.SubStyle("Label")
 			.Text("Button")
-			.Color(FColors::White)
 			.HAlign(EHAlign::Center)
 			.VAlign(EVAlign::Center)
 		);
