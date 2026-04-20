@@ -180,10 +180,32 @@ public:
 				.Height(100)
 				.Transform(FAffineTransform::Rotation(FMath::Deg2Rad(0))),
 
+				FNew(FSplitBox)
+				.ContentHAlign(EHAlign::Center)
+				.ContentVAlign(EVAlign::Center)
+				.Direction(EStackDirection::Horizontal)
+				(
+					FNew(FDecoratedBox)
+					.Background(FColors::Yellow)
+					.Height(20)
+					.FillRatio(1.0f),
+
+					FNew(FDecoratedBox)
+					.Background(FColors::Cyan)
+					.Height(25)
+					.FillRatio(1.0f),
+
+					FNew(FDecoratedBox)
+					.Background(FColors::Green)
+					.Height(20)
+					.FillRatio(1.0f)
+				),
+
 				FNew(FScrollBox)
 				.Style("ScrollBox/Base")
 				.FillRatio(1.0f)
 				.CanScrollVertical(true)
+				//.Transform(FAffineTransform::Rotation(FMath::Deg2Rad(5)))
 				.Child(
 					FNew(FVerticalStack)
 					.ContentHAlign(EHAlign::Fill)
@@ -477,7 +499,7 @@ int main(int argc, char* argv[])
 #if FUSION_PLATFORM_MAC
 	app.SetInitialWindowSize(800, 600);
 #else
-	app.SetInitialWindowSize(1200, 900);
+	app.SetInitialWindowSize(1400, 1200);
 #endif
 
 	return app.Run();

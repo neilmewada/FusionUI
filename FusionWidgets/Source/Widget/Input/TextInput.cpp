@@ -87,6 +87,11 @@ namespace Fusion
         Super::ArrangeContent(finalSize);
     }
 
+    FCursor FTextInput::GetActiveCursorAt(FVec2 localPos)
+    {
+        return FCursor::System(ESystemCursor::IBeam);
+    }
+
     // -----------------------------------------------------------------------
     // Text helpers
     // -----------------------------------------------------------------------

@@ -100,7 +100,7 @@ namespace Fusion
             );
         }
 
-        FMat4 ToMatrix4x4() const
+        FMat4 ToMat4() const
         {
             FMat4 r{};
             r.rows[0] = FVec4(m00, m01, 0, tx);

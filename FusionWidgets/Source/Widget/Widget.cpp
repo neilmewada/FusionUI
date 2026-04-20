@@ -141,6 +141,8 @@ namespace Fusion
 
 	FAffineTransform FWidget::GetGlobalTransform() const
 	{
+		ZoneScoped;
+
 		// Walk up to the nearest paint boundary (which owns a layer)
 		const FWidget* boundary = this;
 		while (boundary != nullptr && !boundary->IsPaintBoundary())
@@ -158,7 +160,7 @@ namespace Fusion
 				return layer->GetGlobalTransform() * m_CachedLayerSpaceTransform;
 			}
 		}
-
+		
 		return m_CachedLayerSpaceTransform;
 	}
 
@@ -221,6 +223,11 @@ namespace Fusion
 	}
 
 	void FWidget::ArrangeContent(FVec2 finalSize)
+	{
+		ArrangeContentBase(finalSize);
+	}
+
+	void FWidget::ArrangeContentBase(FVec2 finalSize)
 	{
 		ZoneScoped;
 

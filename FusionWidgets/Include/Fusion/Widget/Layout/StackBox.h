@@ -69,7 +69,7 @@ namespace Fusion
 
     public: // - Fusion Properties - 
 
-        FUSION_LAYOUT_PROPERTY(EStackDirection, StackDirection);
+        FUSION_LAYOUT_PROPERTY(EStackDirection, Direction);
         FUSION_LAYOUT_PROPERTY(f32, Spacing);
         FUSION_LAYOUT_PROPERTY(EHAlign, ContentHAlign);
         FUSION_LAYOUT_PROPERTY(EVAlign, ContentVAlign);
@@ -83,7 +83,7 @@ namespace Fusion
 
         FVerticalStack()
         {
-            m_StackDirection = EStackDirection::Vertical;
+            m_Direction = EStackDirection::Vertical;
         }
 
         void OnPropertyModified(const FName& propertyName) override;
@@ -97,7 +97,7 @@ namespace Fusion
 
         FHorizontalStack()
         {
-            m_StackDirection = EStackDirection::Horizontal;
+            m_Direction = EStackDirection::Horizontal;
         }
 
         void OnPropertyModified(const FName& propertyName) override;

@@ -75,8 +75,10 @@ namespace Fusion
 
         Ref<FSurface> GetParentSurface() const { return m_ParentSurface.Lock(); }
 
+        //! @brief Returns the cached layer space transform, which can be used to transform local position to Layer space position.
         const FAffineTransform& GetCachedLayerSpaceTransform() const { return m_CachedLayerSpaceTransform; }
 
+        //! @brief Computes and returns the transform that can be used to transform local position to Global (i.e. surface space) position.
         FAffineTransform GetGlobalTransform() const;
 
         FAffineTransform GetChildTransform();
@@ -106,6 +108,8 @@ namespace Fusion
         virtual FVec2 MeasureContent(FVec2 availableSize);
 
         virtual void ArrangeContent(FVec2 finalSize);
+
+        void ArrangeContentBase(FVec2 finalSize);
 
         // - Style -
 
@@ -143,6 +147,10 @@ namespace Fusion
 
         void UpdateBoundaryFlags();
 
+        // - Cursor -
+
+        virtual FCursor GetActiveCursorAt(FVec2 localPos) { return FCursor::Inherit(); }
+
         // - Paint -
 
         virtual void Paint(FPainter& painter);
@@ -164,7 +172,7 @@ namespace Fusion
         virtual void OnEnabled() {}
         virtual void OnDisabled() {}
 
-        virtual bool ShouldHitTestChildren(FVec2 localMousePose) { return true; }
+        virtual bool ShouldHitTestChildren(FVec2 localMousePos) { return true; }
 
         bool SelfHitTest(FVec2 localMousePos);
 

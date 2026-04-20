@@ -57,6 +57,15 @@ namespace Fusion
 
 			SDL_AddEventWatch(SDLEventWatch, this);
 
+			for (int i = (int)ESystemCursor::Default; i < (int)ESystemCursor::COUNT; i++)
+			{
+				ESystemCursor cursor = (ESystemCursor)i;
+
+				SDL_Cursor* sdlCursor = SDL_CreateSystemCursor((SDL_SystemCursor)cursor);
+
+				m_SystemCursors[cursor] = sdlCursor;
+			}
+
 			m_IsInitialized = true;
 			m_UserRequestedExit = false;
 		}
@@ -91,6 +100,12 @@ namespace Fusion
 		if (m_Instances.IsEmpty())
 		{
 			m_IsInitialized = false;
+
+			for (auto [cursorType, cursor] : m_SystemCursors)
+			{
+				SDL_DestroyCursor(cursor);
+			}
+			m_SystemCursors.Clear();
 
 			SDL_RemoveEventWatch(SDLEventWatch, this);
 
@@ -402,6 +417,15 @@ namespace Fusion
 		}
 
 		return sdlWindow->GetDpiScale();
+	}
+
+	void FSDL3PlatformBackend::SetSystemCursor(ESystemCursor cursor)
+	{
+		auto it = m_SystemCursors.Find(cursor);
+		if (it == m_SystemCursors.End() || it->second == nullptr)
+			return;
+
+		SDL_SetCursor(it->second);
 	}
 
 	void FSDL3PlatformBackend::StartTextInput(FWindowHandle window)

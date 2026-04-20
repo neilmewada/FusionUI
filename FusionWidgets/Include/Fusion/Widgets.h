@@ -19,6 +19,7 @@
 #include "Macros.h"
 
 // Application
+#include "Application/Cursor.h"
 #include "Application/ApplicationInstance.h"
 #include "Application/Service.h"
 #include "Application/Application.h"
@@ -82,4 +83,5 @@
 
 // Layouts
 #include "Widget/Layout/ScrollBox.h"
+#include "Widget/Layout/SplitBox.h"
 

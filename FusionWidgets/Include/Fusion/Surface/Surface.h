@@ -100,6 +100,8 @@ namespace Fusion
 
     protected:
 
+        void UpdateCursor(Ref<FWidget> hoveredWidget, FVec2 surfaceMousePos);
+
         // Applies m_NextFocusWidget: fires FocusChanged events and updates m_CurFocusedWidget.
         void ApplyPendingFocus();
 
@@ -137,6 +139,7 @@ namespace Fusion
         WeakRef<FWidget> m_CurFocusedWidget, m_NextFocusWidget;
         bool             m_bNextFocusFromKeyboard = false;
         WeakRef<FWidget> m_CapturedWidget;
+        bool             m_CapturedWidgetCursorOverride = false;
 
         friend class FApplicationInstance;
     };

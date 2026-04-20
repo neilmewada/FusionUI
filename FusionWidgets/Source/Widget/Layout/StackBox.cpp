@@ -61,7 +61,7 @@ namespace Fusion
                 child->SetFaulted();
             }
 
-            if (m_StackDirection == EStackDirection::Horizontal)
+            if (m_Direction == EStackDirection::Horizontal)
             {
                 totalMainAxis += childDesired.x + childMargin.left + childMargin.right;
                 maxCrossAxis = FMath::Max(maxCrossAxis, childDesired.y + childMargin.top + childMargin.bottom);
@@ -81,7 +81,7 @@ namespace Fusion
         }
 
         FVec2 desired;
-        if (m_StackDirection == EStackDirection::Horizontal)
+        if (m_Direction == EStackDirection::Horizontal)
         {
             desired = FVec2(
                 totalMainAxis + m_Padding.left + m_Padding.right,
@@ -105,7 +105,7 @@ namespace Fusion
 
         Super::ArrangeContent(finalSize);
 
-        bool isHorizontal = (m_StackDirection == EStackDirection::Horizontal);
+        bool isHorizontal = (m_Direction == EStackDirection::Horizontal);
 
         f32 contentWidth = FMath::Max(0.0f, GetLayoutSize().x - m_Padding.left - m_Padding.right);
         f32 contentHeight = FMath::Max(0.0f, GetLayoutSize().y - m_Padding.top - m_Padding.bottom);
@@ -346,11 +346,11 @@ namespace Fusion
 	{
         Super::OnPropertyModified(propertyName);
 
-        thread_local const FName stackDirectionProperty = "StackDirection";
+        thread_local const FName stackDirectionProperty = "Direction";
 
         if (propertyName == stackDirectionProperty)
         {
-            m_StackDirection = EStackDirection::Vertical;
+            m_Direction = EStackDirection::Vertical;
         }
 	}
 
@@ -358,11 +358,11 @@ namespace Fusion
 	{
         Super::OnPropertyModified(propertyName);
 
-        thread_local const FName stackDirectionProperty = "StackDirection";
+        thread_local const FName stackDirectionProperty = "Direction";
 
         if (propertyName == stackDirectionProperty)
         {
-            m_StackDirection = EStackDirection::Horizontal;
+            m_Direction = EStackDirection::Horizontal;
         }
 	}
 } // namespace Fusion

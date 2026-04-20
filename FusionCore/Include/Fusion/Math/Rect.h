@@ -94,6 +94,12 @@ namespace Fusion
             return { left - amount, top - amount, right + amount, bottom + amount };
         }
 
+        // Expand (positive) or shrink (negative) uniformly on all sides
+        constexpr FRect Expand(FVec2 amount) const
+        {
+            return { left - amount.x, top - amount.y, right + amount.x, bottom + amount.y };
+        }
+
         constexpr FRect Encapsulate(FVec2 point) const
         {
             return { FVec2::Min(min, point), FVec2::Max(max, point) };

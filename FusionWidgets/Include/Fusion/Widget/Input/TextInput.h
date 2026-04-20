@@ -18,6 +18,10 @@ namespace Fusion
         FVec2 MeasureContent(FVec2 availableSize) override;
         void  ArrangeContent(FVec2 finalSize) override;
 
+        // - Cursor -
+
+        FCursor GetActiveCursorAt(FVec2 localPos) override;
+
     protected:
 
         // - Paint -

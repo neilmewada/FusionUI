@@ -118,6 +118,8 @@ namespace Fusion
 
         virtual f32 GetDpiScaleForWindow(FWindowHandle window) = 0;
 
+        virtual void SetSystemCursor(ESystemCursor cursor) = 0;
+
 	};
     
 } // namespace Fusion

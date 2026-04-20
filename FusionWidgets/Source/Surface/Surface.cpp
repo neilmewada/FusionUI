@@ -161,6 +161,8 @@ namespace Fusion
         FArray<Ref<FWidget>> newHoverStack;
         BuildHoverStack(hoveredWidget.Get(), newHoverStack);
 
+        UpdateCursor(hoveredWidget, surfaceMousePos);
+
         // Mouse Leave
         for (WeakRef<FWidget>& weakWidget : m_HoveredWidgetStack)
         {
@@ -171,13 +173,12 @@ namespace Fusion
             FMouseEvent event{};
             event.Type = EEventType::MouseLeave;
             event.Sender = widget;
+            event.Target = widget;
             event.MousePosition = surfaceMousePos;
             event.PrevMousePosition = prevSurfaceMousePos;
             event.WheelDelta = wheelDelta;
             event.bIsInside = false;
             event.KeyModifiers = keyModifiers;
-
-            FWidget* parent = widget->GetParentWidget().Get();
 
             FUSION_TRY
             {
@@ -202,6 +203,7 @@ namespace Fusion
             FMouseEvent event{};
             event.Type = EEventType::MouseEnter;
             event.Sender = widget;
+            event.Target = widget;
             event.MousePosition = surfaceMousePos;
             event.PrevMousePosition = prevSurfaceMousePos;
             event.bIsInside = true;
@@ -240,17 +242,26 @@ namespace Fusion
                 event.bIsInside = true;
                 event.KeyModifiers = keyModifiers;
 
-                FWidget* parent = hoveredWidget->GetParentWidget().Get();
+                for (WeakRef<FWidget>& weakWidget : m_HoveredWidgetStack)
+                {
+                    Ref<FWidget> widget = weakWidget.Lock();
+                    if (!widget) continue;
 
-                FUSION_TRY
-                {
-                    FEventReply reply = hoveredWidget->OnMouseMove(event);
-                    ProcessReply(hoveredWidget, reply);
-                }
-                FUSION_CATCH (const FException& e)
-                {
-                    hoveredWidget->SetFaulted();
-                    FUSION_LOG_ERROR("Widget", "FException in {}::OnMouseMove(): {}\n{}", hoveredWidget->GetClassName(), e.what(), e.GetStackTraceString(true));
+                    event.Sender = widget;
+                    event.Target = hoveredWidget;
+
+                    FUSION_TRY
+                    {
+                        FEventReply reply = widget->OnMouseMove(event);
+                        ProcessReply(widget, reply);
+                        if (reply.IsHandled())
+                            break;
+                    }
+                    FUSION_CATCH (const FException& e)
+                    {
+                        widget->SetFaulted();
+                        FUSION_LOG_ERROR("Widget", "FException in {}::OnMouseMove(): {}\n{}", widget->GetClassName(), e.what(), e.GetStackTraceString(true));
+                    }
                 }
             }
 
@@ -264,7 +275,8 @@ namespace Fusion
 
                     FMouseEvent event{};
                     event.Type = EEventType::MouseWheel;
-                    event.Sender = hoveredWidget;
+                    event.Sender = widget;
+                    event.Target = hoveredWidget;
                     event.MousePosition = surfaceMousePos;
                     event.PrevMousePosition = prevSurfaceMousePos;
                     event.WheelDelta = wheelDelta;
@@ -526,6 +538,10 @@ namespace Fusion
 
 	void FSurface::ProcessReply(Ref<FWidget> sender, const FEventReply& reply)
 	{
+        Ref<FApplicationInstance> application = m_Application.Lock();
+        if (!application)
+            return;
+
         switch (reply.GetFocusOp())
         {
         case FEventReply::FocusOp::Self:
@@ -548,10 +564,22 @@ namespace Fusion
         {
         case FEventReply::MouseCaptureOp::Capture:
         	m_CapturedWidget = sender;
+            m_CapturedWidgetCursorOverride = !reply.GetCursorOverride().IsInherited();
+            if (m_CapturedWidgetCursorOverride)
+            {
+	            application->PushCursorOverride(reply.GetCursorOverride());
+            }
         	break;
         case FEventReply::MouseCaptureOp::Release:
             if (m_CapturedWidget == sender)
-        		m_CapturedWidget = nullptr;
+            {
+                if (m_CapturedWidgetCursorOverride)
+                {
+                    application->PopCursorOverride();
+                    m_CapturedWidgetCursorOverride = false;
+                }
+	            m_CapturedWidget = nullptr;
+            }
         	break;
         default:
         	break;
@@ -853,7 +881,7 @@ namespace Fusion
 		SizeT cmdBase = snapshot->drawCmdSplits.Last().StartOffset / sizeof(FUIDrawCmd);
 		SizeT prevSplit = 0;
 
-		FMat4 layerGlobalMatrix = layer->GetGlobalTransform().ToMatrix4x4();
+		FMat4 layerGlobalMatrix = layer->GetGlobalTransform().ToMat4();
 		snapshot->transformMatricesPerLayer.Insert(layerGlobalMatrix);
 
 		for (u32 i = 0; i < drawCmdSplitCount; i++)
@@ -904,4 +932,25 @@ namespace Fusion
         widget->RefreshStyleRecursively();
 	}
 
+	void FSurface::UpdateCursor(Ref<FWidget> hoveredWidget, FVec2 surfaceMousePos)
+	{
+        FCursor resolved = FCursor::System(ESystemCursor::Arrow); // default fallback cursor
+
+        Ref<FWidget> current = hoveredWidget;
+
+        // Walk up from hovered widget until a non-Inherited cursor is found
+        while (current != nullptr)
+        {
+            FVec2 localPos = current->GetGlobalTransform().Inverse().TransformPoint(surfaceMousePos);
+            FCursor c = current->GetActiveCursorAt(localPos);
+            if (!c.IsInherited())
+            {
+                resolved = c;
+                break;
+            }
+            current = current->GetParentWidget();
+        }
+
+        GetApplication()->SetActiveCursor(resolved);
+	}
 } // namespace Fusion

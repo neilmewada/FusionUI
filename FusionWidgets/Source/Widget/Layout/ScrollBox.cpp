@@ -19,15 +19,18 @@ namespace Fusion
         m_ClipContent = true;
     }
 
-    // -------------------------------------------------
-    // Layout
-    // -------------------------------------------------
+    // - Layout -
+
+    bool FScrollBox::IsLayoutBoundary()
+    {
+	    return Super::IsLayoutBoundary();
+    }
 
     FVec2 FScrollBox::MeasureContent(FVec2 availableSize)
     {
+        ZoneScoped;
+
         // Reserve space for scrollbars on axes that may show them.
-        // For Auto visibility we conservatively reserve the strip so the viewport
-        // size is stable between measure and arrange.
         f32 vertStripW = (m_CanScrollVertical   && m_VerticalScrollVisibility   != EScrollbarVisibility::AlwaysHidden) ? m_ScrollbarThickness : 0.0f;
         f32 horzStripH = (m_CanScrollHorizontal && m_HorizontalScrollVisibility != EScrollbarVisibility::AlwaysHidden) ? m_ScrollbarThickness : 0.0f;
 
@@ -60,8 +63,10 @@ namespace Fusion
 
     void FScrollBox::ArrangeContent(FVec2 finalSize)
     {
+        ZoneScoped;
+
         // Set m_LayoutSize via FWidget — skip FCompoundWidget's child arrangement.
-        FWidget::ArrangeContent(finalSize);
+        ArrangeContentBase(finalSize);
 
         FVec2 layoutSize = GetLayoutSize();
 
@@ -83,12 +88,17 @@ namespace Fusion
         // Scrollbars are based on the content area size (not affected by ContentPadding).
         FVec2 viewportSize = contentAreaSize;
 
+        // ShouldShow* compares content against the effective viewport (viewport minus ContentPadding).
+        // This ensures the scrollbar appears whenever content overflows the padded interior,
+        // not just the raw content area. viewportSize is captured by ref so pass-2 re-checks
+        // automatically see the narrower viewport after the other bar was added.
         auto ShouldShowVert = [&]() -> bool
         {
             if (!m_CanScrollVertical) return false;
             if (m_VerticalScrollVisibility == EScrollbarVisibility::AlwaysVisible) return true;
             if (m_VerticalScrollVisibility == EScrollbarVisibility::AlwaysHidden)  return false;
-            return m_ContentSize.y > viewportSize.y;
+            const f32 effH = FMath::Max(0.0f, viewportSize.y - m_ContentPadding.top - m_ContentPadding.bottom);
+            return m_ContentSize.y > effH;
         };
 
         auto ShouldShowHorz = [&]() -> bool
@@ -96,7 +106,8 @@ namespace Fusion
             if (!m_CanScrollHorizontal) return false;
             if (m_HorizontalScrollVisibility == EScrollbarVisibility::AlwaysVisible) return true;
             if (m_HorizontalScrollVisibility == EScrollbarVisibility::AlwaysHidden)  return false;
-            return m_ContentSize.x > viewportSize.x;
+            const f32 effW = FMath::Max(0.0f, viewportSize.x - m_ContentPadding.left - m_ContentPadding.right);
+            return m_ContentSize.x > effW;
         };
 
         // Pass 1
@@ -127,10 +138,13 @@ namespace Fusion
             FMath::Max(0.0f, m_ViewportSize.y - contentPaddingSize.y)
         );
 
-        FVec2 maxScroll = FVec2(
+        m_MaxScroll = FVec2(
             FMath::Max(0.0f, m_ContentSize.x - effectiveViewport.x),
             FMath::Max(0.0f, m_ContentSize.y - effectiveViewport.y)
         );
+
+        // Keep a local alias for readability below.
+        const FVec2& maxScroll = m_MaxScroll;
 
         m_ScrollOffset = FVec2(
             m_CanScrollHorizontal ? FMath::Clamp(m_ScrollOffset.x, 0.0f, maxScroll.x) : 0.0f,
@@ -155,9 +169,7 @@ namespace Fusion
             GetChild()->ArrangeContent(childSize);
         }
 
-        // -------------------------------------------------------
         // Compute scrollbar rects (relative to content area origin)
-        // -------------------------------------------------------
         const f32 pad       = m_ScrollbarPadding;
         const f32 thickness = m_ScrollbarThickness;
 
@@ -212,12 +224,12 @@ namespace Fusion
         }
     }
 
-    // -------------------------------------------------
-    // Paint
-    // -------------------------------------------------
+    // - Paint -
 
     void FScrollBox::PaintOverContent(FPainter& painter)
     {
+        ZoneScoped;
+
         Super::PaintOverContent(painter); // handles outline from FDecoratedBox
 
         if (m_bShowVertScrollbar)
@@ -247,9 +259,7 @@ namespace Fusion
         }
     }
 
-    // -------------------------------------------------
-    // Hit Testing
-    // -------------------------------------------------
+    // - Hit Testing -
 
     bool FScrollBox::ShouldHitTestChildren(FVec2 localMousePos)
     {
@@ -261,9 +271,7 @@ namespace Fusion
         return true;
     }
 
-    // -------------------------------------------------
-    // Mouse Events
-    // -------------------------------------------------
+    // - Mouse Events -
 
     FEventReply FScrollBox::OnMouseButtonDown(FMouseEvent& event)
     {
@@ -288,11 +296,10 @@ namespace Fusion
                 f32 trackH  = m_VertTrackRect.GetHeight();
                 f32 thumbH  = m_VertThumbRect.GetHeight();
                 f32 t       = FMath::Clamp((localPos.y - m_VertTrackRect.top - thumbH * 0.5f) / FMath::Max(1.0f, trackH - thumbH), 0.0f, 1.0f);
-                f32 maxScrollY = FMath::Max(0.0f, m_ContentSize.y - m_ViewportSize.y);
 
-                m_ScrollOffset.y = t * maxScrollY;
+                m_ScrollOffset.y = t * m_MaxScroll.y;
                 MarkLayoutDirty();
-                m_OnScrollOffsetChanged.ExecuteIfBound(m_ScrollOffset);
+                m_OnScrollOffsetChanged.Broadcast(m_ScrollOffset);
             }
 
             MarkPaintDirty();
@@ -316,11 +323,10 @@ namespace Fusion
                 f32 trackW  = m_HorzTrackRect.GetWidth();
                 f32 thumbW  = m_HorzThumbRect.GetWidth();
                 f32 t       = FMath::Clamp((localPos.x - m_HorzTrackRect.left - thumbW * 0.5f) / FMath::Max(1.0f, trackW - thumbW), 0.0f, 1.0f);
-                f32 maxScrollX = FMath::Max(0.0f, m_ContentSize.x - m_ViewportSize.x);
 
-                m_ScrollOffset.x = t * maxScrollX;
+                m_ScrollOffset.x = t * m_MaxScroll.x;
                 MarkLayoutDirty();
-                m_OnScrollOffsetChanged.ExecuteIfBound(m_ScrollOffset);
+                m_OnScrollOffsetChanged.Broadcast(m_ScrollOffset);
             }
 
             MarkPaintDirty();
@@ -356,18 +362,17 @@ namespace Fusion
 
         if (m_bDraggingVert)
         {
-            f32 trackH     = m_VertTrackRect.GetHeight();
-            f32 thumbH     = m_VertThumbRect.GetHeight();
-            f32 maxScrollY = FMath::Max(0.0f, m_ContentSize.y - m_ViewportSize.y);
-            f32 usable     = trackH - thumbH;
+            f32 trackH = m_VertTrackRect.GetHeight();
+            f32 thumbH = m_VertThumbRect.GetHeight();
+            f32 usable = trackH - thumbH;
 
             if (usable > 0.0f)
             {
                 f32 delta = localPos.y - m_DragStartMousePos.y;
-                m_ScrollOffset.y = FMath::Clamp(m_DragStartOffset.y + (delta / usable) * maxScrollY, 0.0f, maxScrollY);
+                m_ScrollOffset.y = FMath::Clamp(m_DragStartOffset.y + (delta / usable) * m_MaxScroll.y, 0.0f, m_MaxScroll.y);
                 MarkLayoutDirty();
                 MarkPaintDirty();
-                m_OnScrollOffsetChanged.ExecuteIfBound(m_ScrollOffset);
+                m_OnScrollOffsetChanged.Broadcast(m_ScrollOffset);
             }
 
             return FEventReply::Handled();
@@ -375,18 +380,17 @@ namespace Fusion
 
         if (m_bDraggingHorz)
         {
-            f32 trackW     = m_HorzTrackRect.GetWidth();
-            f32 thumbW     = m_HorzThumbRect.GetWidth();
-            f32 maxScrollX = FMath::Max(0.0f, m_ContentSize.x - m_ViewportSize.x);
-            f32 usable     = trackW - thumbW;
+            f32 trackW = m_HorzTrackRect.GetWidth();
+            f32 thumbW = m_HorzThumbRect.GetWidth();
+            f32 usable = trackW - thumbW;
 
             if (usable > 0.0f)
             {
                 f32 delta = localPos.x - m_DragStartMousePos.x;
-                m_ScrollOffset.x = FMath::Clamp(m_DragStartOffset.x + (delta / usable) * maxScrollX, 0.0f, maxScrollX);
+                m_ScrollOffset.x = FMath::Clamp(m_DragStartOffset.x + (delta / usable) * m_MaxScroll.x, 0.0f, m_MaxScroll.x);
                 MarkLayoutDirty();
                 MarkPaintDirty();
-                m_OnScrollOffsetChanged.ExecuteIfBound(m_ScrollOffset);
+                m_OnScrollOffsetChanged.Broadcast(m_ScrollOffset);
             }
 
             return FEventReply::Handled();
@@ -423,10 +427,9 @@ namespace Fusion
 
     FEventReply FScrollBox::OnMouseWheel(FMouseEvent& event)
     {
-        FVec2 maxScroll = FVec2(
-            FMath::Max(0.0f, m_ContentSize.x - m_ViewportSize.x),
-            FMath::Max(0.0f, m_ContentSize.y - m_ViewportSize.y)
-        );
+        // Use m_MaxScroll which is correctly computed in ArrangeContent
+        // (accounts for ContentPadding on both axes).
+        const FVec2& maxScroll = m_MaxScroll;
 
         bool scrolled = false;
 
@@ -454,7 +457,7 @@ namespace Fusion
         {
             MarkLayoutDirty();
             MarkPaintDirty();
-            m_OnScrollOffsetChanged.ExecuteIfBound(m_ScrollOffset);
+            m_OnScrollOffsetChanged.Broadcast(m_ScrollOffset);
             return FEventReply::Handled();
         }
 

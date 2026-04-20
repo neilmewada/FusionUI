@@ -384,9 +384,8 @@ namespace Fusion
 
 		const FUIClipRect& clip = m_DrawList->clipRectArray[m_ClipStack.Last()];
 
-		// Compose: local space → layer space → clip-local space in one matrix
-		// This avoids the lossy intermediate layer-space AABB step
-		FMat4 localToClip = GetCurrentTransform().ToMatrix4x4() * clip.clipInverseTransform;
+		// local space → layer space → clip-local space in one matrix.
+		FMat4 localToClip = clip.clipInverseTransform * GetCurrentTransform().ToMat4();
 
 		FVec2 corners[4] = {
 			{ localRect.left,  localRect.top    },
@@ -434,7 +433,7 @@ namespace Fusion
 		FVec2 clipCenter = rect.min + halfSize;
 
 		m_DrawList->clipRectArray.Insert(FUIClipRect{
-			.clipInverseTransform = (GetCurrentTransform() * FAffineTransform::Translation(clipCenter)).ToMatrix4x4().GetInverse(),
+			.clipInverseTransform = (GetCurrentTransform() * FAffineTransform::Translation(clipCenter)).ToMat4().GetInverse(),
 			.cornerRadii = radii,
 			.clipHalfSize = halfSize
 		});
@@ -588,6 +587,14 @@ namespace Fusion
 			return true;
 
 		ZoneScoped;
+
+		FVec2 localRectSize = FVec2(
+			m_LocalPathMax.x - m_LocalPathMin.x,
+			m_LocalPathMax.y - m_LocalPathMin.y
+		);
+
+		if (IsRectClipped(FRect::FromSize(m_LocalPathMin, localRectSize)))
+			return false;
 
 		FRect minMax = FRect(m_PathMin, m_PathMax);
 		if (minMax.GetWidth() <= 0 || minMax.GetHeight() <= 0)
@@ -872,7 +879,7 @@ namespace Fusion
 
 				FImageAtlas::FAtlasItem resolvedImage = imageAtlas->FindImage(m_CurrentBrush.GetImagePath());
 				if (!resolvedImage.IsValid())
-					return false;
+					return true;
 
 				drawItem.textureIndex = resolvedImage.layerIndex;
 				drawItem.drawItemFlags = EUIDrawItemFlags::None;
@@ -1031,6 +1038,9 @@ namespace Fusion
 
 			f32 localX = cursorX + glyph.BearingX * scale;
 			f32 localY = cursorY - glyph.BearingY * scale;  // cursorY is the baseline
+
+			if (IsRectClipped(FRect::FromSize(localX, localY, quadW, quadH)))
+				continue;
 
 			f32 u0 = (f32)glyph.X / glyph.AtlasSize;
 			f32 v0 = (f32)glyph.Y / glyph.AtlasSize;

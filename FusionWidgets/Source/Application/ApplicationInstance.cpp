@@ -337,6 +337,43 @@ namespace Fusion
 		m_Timers.Remove(timer);
 	}
 
+	void FApplicationInstance::SetActiveCursor(FCursor cursor)
+	{
+		m_ActiveCursor = MoveTemp(cursor);
+		ApplyCursor();
+	}
+
+	void FApplicationInstance::PushCursorOverride(const FCursor& cursor)
+	{
+		m_CursorOverrideStack.Add(cursor);
+		ApplyCursor();
+	}
+
+	void FApplicationInstance::PopCursorOverride()
+	{
+		if (m_CursorOverrideStack.Empty())
+			return;
+
+		m_CursorOverrideStack.Pop();
+		ApplyCursor();
+	}
+
+	void FApplicationInstance::ApplyCursor()
+	{
+		FCursor toApply = m_CursorOverrideStack.Empty()
+			? m_ActiveCursor
+			: m_CursorOverrideStack.Last();
+
+		if (toApply.IsSystemCursor())
+		{
+			m_PlatformBackend->SetSystemCursor(toApply.GetSystemCursor());
+		}
+		else
+		{
+			m_PlatformBackend->SetSystemCursor(ESystemCursor::Default);
+		}
+	}
+
 	void FApplicationInstance::OnWindowDestroyed(FWindowHandle window)
 	{
 		if (!m_NativeSurfacesByWindow.KeyExists(window))

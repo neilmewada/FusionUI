@@ -23,7 +23,11 @@ namespace Fusion
 
     public:
 
+        FVec2 GetMaxScroll() const { return m_MaxScroll; }
+
         // - Layout -
+
+        bool IsLayoutBoundary() override;
 
         FVec2 MeasureContent(FVec2 availableSize) override;
 
@@ -66,13 +70,14 @@ namespace Fusion
         FUSION_LAYOUT_PROPERTY(EScrollbarVisibility, HorizontalScrollVisibility);
         FUSION_LAYOUT_PROPERTY(EScrollbarVisibility, VerticalScrollVisibility);
 
-        FUSION_PROPERTY(FDelegate<void(FVec2)>, OnScrollOffsetChanged);
+        FUSION_SIGNAL(FSignal<void(FVec2)>, OnScrollOffsetChanged);
 
     private:
 
         // Computed during layout
         FVec2 m_ContentSize  = FVec2(0, 0);
         FVec2 m_ViewportSize = FVec2(0, 0);
+        FVec2 m_MaxScroll    = FVec2(0, 0);
 
         // Scrollbar visibility (resolved during ArrangeContent)
         bool m_bShowVertScrollbar = false;

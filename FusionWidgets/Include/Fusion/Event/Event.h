@@ -32,7 +32,6 @@ namespace Fusion
 
         enum class MouseCaptureOp { None, Capture, Release };
         enum class InputLockOp    { None, Lock, Unlock };
-        enum class CursorOp       { None, Hide, Show };
         enum class FocusOp        { None, Self, Next, Prev };
 
         static FEventReply Handled()   { FEventReply r; r.m_Handled = true; return r; }
@@ -40,7 +39,13 @@ namespace Fusion
 
         // Soft mouse capture: mouse events keep routing here even when cursor leaves bounds.
         // Does NOT affect keyboard. Does NOT hide cursor.
-        FEventReply& CaptureMouse() { m_MouseCaptureOp = MouseCaptureOp::Capture; return *this; }
+        FEventReply& CaptureMouse(FCursor cursor = FCursor::Inherit())
+        {
+	        m_MouseCaptureOp = MouseCaptureOp::Capture; 
+        	m_CursorOverride = MoveTemp(cursor); 
+        	return *this;
+        }
+
         FEventReply& ReleaseMouse() { m_MouseCaptureOp = MouseCaptureOp::Release; return *this; }
 
         // Full input lock: ALL mouse + keyboard route here. Hides and locks cursor.
@@ -54,17 +59,17 @@ namespace Fusion
         FEventReply& FocusPrev() { m_FocusOp = FocusOp::Prev; return *this; }
 
         bool           IsHandled()         const { return m_Handled; }
-        FocusOp        GetFocusOp()           const { return m_FocusOp; }
+        FocusOp        GetFocusOp()        const { return m_FocusOp; }
         MouseCaptureOp GetMouseCaptureOp() const { return m_MouseCaptureOp; }
+        FCursor        GetCursorOverride() const { return m_CursorOverride; }
         InputLockOp    GetInputLockOp()    const { return m_InputLockOp; }
-        CursorOp       GetCursorOp()       const { return m_CursorOp; }
 
     private:
         bool           m_Handled        = false;
         FocusOp        m_FocusOp        = FocusOp::None;
         MouseCaptureOp m_MouseCaptureOp = MouseCaptureOp::None;
+        FCursor        m_CursorOverride = FCursor::Inherit();
         InputLockOp    m_InputLockOp    = InputLockOp::None;
-        CursorOp       m_CursorOp       = CursorOp::None;
     };
 
     // ---------------------------------------------------------------------------
@@ -76,7 +81,8 @@ namespace Fusion
         virtual ~FEvent() = default;
 
         EEventType   Type   = EEventType::None;
-        Ref<FWidget> Sender = nullptr;
+        Ref<FWidget> Sender = nullptr; // current handler — updated as event bubbles
+        Ref<FWidget> Target = nullptr; // original source - only used for specific events
 
         bool IsMouseEvent() const
         {

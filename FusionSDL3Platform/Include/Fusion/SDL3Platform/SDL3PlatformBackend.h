@@ -101,6 +101,8 @@ namespace Fusion
 
 		f32 GetDpiScaleForWindow(FWindowHandle window) override;
 
+        void SetSystemCursor(ESystemCursor cursor) override;
+
         void StartTextInput(FWindowHandle window) override;
         void StopTextInput(FWindowHandle window) override;
 
@@ -127,6 +129,8 @@ namespace Fusion
         FHashSet<IFPlatformEventSink*> m_RegisteredSinks{};
 
         FDelegate<void()> m_ContinuousResizeTick{};
+
+        FHashMap<ESystemCursor, SDL_Cursor*> m_SystemCursors;
 
         friend bool SDLEventWatch(void* userdata, SDL_Event* event);
 

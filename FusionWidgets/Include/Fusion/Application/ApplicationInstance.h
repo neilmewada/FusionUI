@@ -105,7 +105,16 @@ namespace Fusion
 		void RegisterTimer(Ref<FTimer> timer);
 		void DeregisterTimer(Ref<FTimer> timer);
 
+		// - Cursor -
+		
+		void SetActiveCursor(FCursor cursor);
+
+		void PushCursorOverride(const FCursor& cursor);
+		void PopCursorOverride();
+
 	protected:
+
+		void ApplyCursor();
 
 		void OnWindowDestroyed(FWindowHandle window) override;
 		void OnWindowResized(FWindowHandle window, u32 newWidth, u32 newHeight) override;
@@ -149,6 +158,11 @@ namespace Fusion
 		Ref<FImageAtlas> m_ImageAtlas;
 
 		FArray<WeakRef<FTimer>> m_Timers;
+
+		// - Cursor -
+
+		FCursor m_ActiveCursor;
+		FArray<FCursor> m_CursorOverrideStack;
 
 	private:
 
