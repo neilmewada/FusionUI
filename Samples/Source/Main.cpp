@@ -235,7 +235,6 @@ public:
 				.Style("ScrollBox/Base")
 				.FillRatio(1.0f)
 				.CanScrollVertical(true)
-				//.Transform(FAffineTransform::Rotation(FMath::Deg2Rad(5)))
 				.Child(
 					FNew(FVerticalStack)
 					.ContentHAlign(EHAlign::Fill)
