@@ -30,6 +30,17 @@ namespace Fusion
             (FColor,  Color, Paint)
         );
 
+        FUSION_PROPERTY_GET(f32, FontSize)
+        {
+            return Font().GetPointSize();
+        }
+
+        FUSION_PROPERTY_SET(f32, FontSize)
+        {
+            self.Font(self.Font().PointSize(value));
+            return self;
+        }
+
     };
 
 } // namespace Fusion

@@ -131,7 +131,7 @@ namespace Fusion
         template<typename TTo, typename TFrom> requires TFIsDerivedClass<FObject, TTo>::Value and TFIsDerivedClass<FObject, TFrom>::Value
         static Ref<TTo> CastTo(Ref<TFrom> object)
 		{
-			if (object->template IsOfStaticType<TTo>())
+			if (object && object->template IsOfStaticType<TTo>())
 			{
                 return (TTo*)object.Get();
 			}

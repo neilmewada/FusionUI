@@ -75,6 +75,7 @@ namespace Fusion
 		for (auto& [name, val] : other.m_FloatValues)  m_FloatValues[name] = val;
 		for (auto& [name, val] : other.m_Vec2Values)   m_Vec2Values[name]  = val;
 		for (auto& [name, val] : other.m_Vec4Values)   m_Vec4Values[name]  = val;
+		for (auto& [name, val] : other.m_TransformValues)   m_TransformValues[name] = val;
 		for (auto& [name, val] : other.m_PropertyTransitions)   m_PropertyTransitions[name]  = val;
 		return *this;
 	}

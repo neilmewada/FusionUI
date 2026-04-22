@@ -44,6 +44,11 @@ namespace Fusion
 			SetStyleStateFlag(EStyleState::Pressed, true);
 		}
 
+		if (event.IsLeftButton() && event.ClickCount == 2)
+		{
+			m_OnDoubleClick.Broadcast(this);
+		}
+
 		return FEventReply::Handled().FocusSelf();
 	}
 
@@ -60,7 +65,7 @@ namespace Fusion
 		{
 			SetStyleStateFlag(EStyleState::Pressed, false);
 
-			if (event.bIsInside)
+			if (event.bIsInside && event.IsLeftButton())
 			{
 				m_OnClick.Broadcast(this);
 			}

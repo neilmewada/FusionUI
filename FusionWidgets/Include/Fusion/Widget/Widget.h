@@ -150,6 +150,14 @@ namespace Fusion
 
         virtual void OnDetachedFromParent(Ref<FWidget> parent);
 
+        Ref<FWidget> FindSubWidgetTypeInHierarchy(FTypeID widgetClassId);
+
+        template<class TWidget>
+        Ref<FWidget> FindSubWidgetTypeInHierarchy()
+        {
+            return FindSubWidgetTypeInHierarchy(TWidget::StaticClassTypeID());
+        }
+
         // - Layer -
 
         bool IsBoundary() const { return IsCompositingBoundary() || IsPaintBoundary(); }
@@ -265,6 +273,12 @@ namespace Fusion
         FUSION_PROPERTY_GET(bool, Excluded)
         {
             return IsExcluded();
+        }
+
+        FUSION_PROPERTY_SET(bool, Excluded)
+        {
+            static_cast<FWidget&>(self).SetWidgetFlag(EWidgetFlags::Excluded, value);
+            return self;
         }
 
         FUSION_PROPERTY_GET(bool, Visible)

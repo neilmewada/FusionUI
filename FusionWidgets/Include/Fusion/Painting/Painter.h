@@ -45,7 +45,7 @@ namespace Fusion
         void PathBezierCubicCurveTo(const FVec2& p1, const FVec2& p2, const FVec2& p3, const FVec2& p4, int numSegments = 0);
         void PathQuadraticCubicCurveTo(const FVec2& p1, const FVec2& p2, const FVec2& p3, int numSegments = 0);
 
-        void PathRect(const FRect& rect, const FVec4& cornerRadius = FVec4());
+        void PathRect(FRect rect, FVec4 cornerRadius = FVec4());
 
         bool PathFill();
         bool PathStroke(bool closed);

@@ -37,6 +37,7 @@ namespace Fusion
     public:
 
         FUSION_SIGNAL(FButtonSignal, OnClick);
+        FUSION_SIGNAL(FButtonSignal, OnDoubleClick);
     };
     
 } // namespace Fusion

@@ -23,6 +23,8 @@ namespace Fusion
         void Paint(FPainter& painter) override;
 
     public:
+
+        static constexpr f32 kExpansionThreshold = 0.0001f;
         
         bool IsExpanded() const
         {
@@ -50,8 +52,6 @@ namespace Fusion
 			(FDecoratedBox, Content)
         )
 
-        FUSION_LAYOUT_PROPERTY(f32, ExpandedAmount);
-
         FUSION_PROPERTY_SET(FWidget&, Child)
         {
             if (self.m_Child == &value)
@@ -76,8 +76,11 @@ namespace Fusion
         FUSION_STYLE_PROPERTIES(
             (FBrush, Background, Paint),
             (FPen,   Border,     Paint),
-            (FShape, Shape,      Paint)
+            (FShape, Shape,      Paint),
+			(f32,    ExpandedAmount,   Layout)
         );
+
+        FUSION_PROPERTY_FORWARD(FString, Title, m_TitleLabel, Text);
         
     };
 

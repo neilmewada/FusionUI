@@ -213,9 +213,22 @@ public:
 				),
 
 				FNew(FExpanderBox)
+				.Title("Expander Box")
 				.Child(
-					FNew(FLabel)
-					.Text("This is the content")
+					FNew(FVerticalStack)
+					(
+						FNew(FLabel)
+						.Text("Header")
+						.FontSize(16),
+
+						FNew(FLabel)
+						.Text("Section Title")
+						.FontSize(12),
+
+						FNew(FLabel)
+						.Text("This is the content body.")
+						.FontSize(10)
+					)
 				),
 
 				FAssignNew(FScrollBox, scrollBox)
@@ -451,13 +464,9 @@ int main(int argc, char* argv[])
 
 		FUSION_STYLE(FLabel, "Button/Primary/Label", Color)
 		{
-			Color = FColors::White;
+			Color	  = FColors::White;
 
 			FUSION_ON(Disabled)
-			{
-				Color = DisabledBtnTextColor;
-			}
-			FUSION_ON(Hovered)
 			{
 				Color = DisabledBtnTextColor;
 			}
@@ -539,11 +548,19 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		FUSION_STYLE(FExpanderBox, "FExpanderBox", Background, Border, Shape, Padding)
+		FUSION_STYLE(FExpanderBox, "FExpanderBox", Background, Border, Shape, Padding, ExpandedAmount)
 		{
 			Background = FColor(0.10f, 0.10f, 0.12f);
 			Border = FColor(0.22f, 0.22f, 0.26f);
+			ExpandedAmount = 0.0f;
 			Shape = FRoundedRectangle(5.0f);
+
+			Transition(ExpandedAmount, FTransition::MakeTween(0.2f));
+
+			FUSION_ON(Expanded)
+			{
+				ExpandedAmount = 1.0f;
+			}
 		}
 
 		FUSION_STYLE(FButton, "FExpanderBox/Header", Background, Border, Shape, Padding)
@@ -557,7 +574,7 @@ int main(int argc, char* argv[])
 		{
 			Transform = FAffineTransform::RotationDegrees(-90);
 
-			Transition(Transform, FTransition::MakeTween(0.1f));
+			Transition(Transform, FTransition::MakeTween(0.2f));
 
 			FUSION_ON(Expanded)
 			{

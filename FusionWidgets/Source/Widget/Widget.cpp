@@ -110,6 +110,29 @@ namespace Fusion
 		RefreshStyle();
 	}
 
+	Ref<FWidget> FWidget::FindSubWidgetTypeInHierarchy(FTypeID widgetClassId)
+	{
+		if (IsOfType(widgetClassId))
+			return this;
+
+		int childCount = GetChildCount();
+		for (int i = 0; i < childCount; i++)
+		{
+			if (Ref<FWidget> child = GetChildAt(i))
+			{
+				if (child->IsOfType(widgetClassId))
+				{
+					return child;
+				}
+				if (auto result = child->FindSubWidgetTypeInHierarchy(widgetClassId))
+				{
+					return result;
+				}
+			}
+		}
+		return nullptr;
+	}
+
 	Ref<FApplicationInstance> FWidget::GetApplication() const
 	{
 		if (Ref<FSurface> surface = GetParentSurface())

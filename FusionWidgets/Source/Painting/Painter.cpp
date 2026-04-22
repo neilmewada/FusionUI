@@ -214,10 +214,16 @@ namespace Fusion
 		}
 	}
 
-	void FPainter::PathRect(const FRect& rect, const FVec4& cornerRadius)
+	void FPainter::PathRect(FRect rect, FVec4 cornerRadius)
 	{
-		const FVec2& min = rect.min;
-		const FVec2& max = rect.max;
+		const FVec2 min = rect.min;
+		const FVec2 max = rect.max;
+		const FVec2 rectSize = rect.GetSize();
+
+		cornerRadius.topLeft = FMath::Clamp(cornerRadius.topLeft, 0.0f, rectSize.GetMin());
+		cornerRadius.topRight = FMath::Clamp(cornerRadius.topRight, 0.0f, rectSize.GetMin());
+		cornerRadius.bottomRight = FMath::Clamp(cornerRadius.bottomRight, 0.0f, rectSize.GetMin());
+		cornerRadius.bottomLeft = FMath::Clamp(cornerRadius.bottomLeft, 0.0f, rectSize.GetMin());
 
 		if (cornerRadius.GetMax() < 0.5f)
 		{

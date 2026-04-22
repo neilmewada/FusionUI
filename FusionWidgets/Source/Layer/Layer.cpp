@@ -93,7 +93,7 @@ namespace Fusion
 
 	void FLayer::DoPaint(Ref<FWidget> widget, FPainter& painter)
 	{
-		if (widget == nullptr || widget->IsFaulted())
+		if (widget == nullptr || widget->IsFaulted() || widget->Excluded() || !widget->Visible())
 			return;
 
 		// If a widget in the children hierarchy is a paint boundary
