@@ -4,7 +4,7 @@ namespace Fusion
 {
 	FExpanderBox::FExpanderBox()
 	{
-		
+		m_ExpandedAmount = 1.0f;
 	}
 
 	void FExpanderBox::Construct()
@@ -59,36 +59,59 @@ namespace Fusion
         f32 totalHeight = 0.0f;
         f32 maxWidth = 0.0f;
 
-        for (u32 i = 0; i < GetChildCount(); i++)
-        {
-            Ref<FWidget> child = GetChildAt(i);
-            if (child->Excluded())
-                continue;
+		if (m_Header && !m_Header->Excluded())
+		{
+			FMargin margin = m_Header->Margin();
 
-            FMargin childMargin = child->Margin();
-
-            FVec2 childAvailable = FVec2(
-                FMath::Max(0.0f, contentAvailable.x - childMargin.left - childMargin.right),
-                FMath::Max(0.0f, contentAvailable.y - childMargin.top - childMargin.bottom)
+			FVec2 childAvailable = FVec2(
+                FMath::Max(0.0f, contentAvailable.x - margin.left - margin.right),
+                FMath::Max(0.0f, contentAvailable.y - margin.top - margin.bottom)
             );
 
-            FVec2 childDesired = FVec2();
+			FVec2 childDesired = FVec2();
 
-            FUSION_TRY
-            {
-                childDesired = child->MeasureContent(childAvailable);
-            }
-            FUSION_CATCH(const FException & exception)
-            {
-                FUSION_LOG_ERROR("Widget", "Exception: {}. Exception thrown by a Widget [{}] in FStackBox::MeasureContent.\n{}",
-                    exception.what(), child->GetClassName(), exception.GetStackTraceString(true));
+			FUSION_TRY
+			{
+				childDesired = m_Header->MeasureContent(childAvailable);
+			}
+			FUSION_CATCH(const FException & exception)
+			{
+				FUSION_LOG_ERROR("Widget", "Exception: {}. Exception thrown by a Widget [{}] in FExpanderBox::MeasureContent.\n{}",
+					exception.what(), m_Header->GetClassName(), exception.GetStackTraceString(true));
 
-                SetFaulted();
-            }
+				SetFaulted();
+			}
 
-            totalHeight += childDesired.y + childMargin.top + childMargin.bottom;
-            maxWidth = FMath::Max(maxWidth, childDesired.x + childMargin.left + childMargin.right);
-        }
+			totalHeight += childDesired.y + margin.top + margin.bottom;
+			maxWidth = FMath::Max(maxWidth, childDesired.x + margin.left + margin.right);
+		}
+
+		if (m_Content && !m_Content->Excluded() && m_ExpandedAmount > 0.0001f)
+		{
+			FMargin margin = m_Content->Margin();
+
+			FVec2 childAvailable = FVec2(
+				FMath::Max(0.0f, contentAvailable.x - margin.left - margin.right),
+				FMath::Max(0.0f, contentAvailable.y - margin.top - margin.bottom)
+			);
+
+			FVec2 childDesired = FVec2();
+
+			FUSION_TRY
+			{
+				childDesired = m_Content->MeasureContent(childAvailable);
+			}
+			FUSION_CATCH(const FException & exception)
+			{
+				FUSION_LOG_ERROR("Widget", "Exception: {}. Exception thrown by a Widget [{}] in FExpanderBox::MeasureContent.\n{}",
+					exception.what(), m_Content->GetClassName(), exception.GetStackTraceString(true));
+
+				SetFaulted();
+			}
+
+			totalHeight += childDesired.y + margin.top + margin.bottom;
+			maxWidth = FMath::Max(maxWidth, childDesired.x + margin.left + margin.right);
+		}
 
         FVec2 desired = FVec2(
             maxWidth + m_Padding.left + m_Padding.right,
@@ -106,6 +129,7 @@ namespace Fusion
 
         f32 contentWidth = FMath::Max(0.0f, GetLayoutSize().x - m_Padding.left - m_Padding.right);
         f32 contentHeight = FMath::Max(0.0f, GetLayoutSize().y - m_Padding.top - m_Padding.bottom);
+
         f32 contentMain = contentHeight;
         f32 contentCross = contentWidth;
 

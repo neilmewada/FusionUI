@@ -48,7 +48,9 @@ namespace Fusion
         FUSION_SLOTS(
 			(FButton, Header),
 			(FDecoratedBox, Content)
-        );
+        )
+
+        FUSION_LAYOUT_PROPERTY(f32, ExpandedAmount);
 
         FUSION_PROPERTY_SET(FWidget&, Child)
         {
