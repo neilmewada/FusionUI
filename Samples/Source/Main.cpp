@@ -568,6 +568,12 @@ int main(int argc, char* argv[])
 			Extends("Button/Secondary");
 
 			Padding = FMargin(1, 1, 1, 1) * 5.0f;
+			Shape = FRoundedRectangle(5.0f);
+
+			FUSION_ON(Expanded)
+			{
+				Shape = FRoundedRectangle(5.0f, 5.0f, 0, 0);
+			}
 		}
 
 		FUSION_STYLE(FDecoratedBox, "FExpanderBox/Header/Chevron", Transform)
