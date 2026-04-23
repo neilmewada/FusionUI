@@ -7,7 +7,7 @@ namespace Fusion
 {
 	FCompoundWidget::FCompoundWidget()
 	{
-		m_ClipShape = FRectangle();
+		
 	}
 
 	FVec2 FCompoundWidget::MeasureContent(FVec2 availableSize)

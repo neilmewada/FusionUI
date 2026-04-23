@@ -18,11 +18,13 @@ namespace Fusion
 
     public:
 
+        FShape GetClipShape() const override { return ClipContent() ? ClipShape() : EShapeType::None; }
+
         void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
 
-        virtual u32 GetSlotCount() = 0;
+        virtual u32 GetSlotCount() { return 0; }
 
-        virtual bool IsValidSlotWidget(u32 slot, Ref<FWidget> widget) = 0;
+        virtual bool IsValidSlotWidget(u32 slot, Ref<FWidget> widget) { return false; }
 
         bool SetSlotWidget(u32 slot, Ref<FWidget> widget);
 
@@ -34,7 +36,14 @@ namespace Fusion
 
     private:
 
-        FArray<Ref<FWidget>> m_Slots;
+        FArray<Ref<FWidget>, 2> m_Slots;
+
+    public:
+
+        // - Fusion Properties -
+
+        FUSION_PROPERTY(FShape, ClipShape);
+        FUSION_PROPERTY(bool, ClipContent);
     };
     
 } // namespace Fusion

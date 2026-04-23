@@ -6,31 +6,34 @@
 namespace Fusion
 {
     
-    class FUSIONWIDGETS_API FDecoratedBox : public FCompoundWidget
+    class FUSIONWIDGETS_API FDecoratedBox : public FDecoratedWidget
     {
-        FUSION_CLASS(FDecoratedBox, FCompoundWidget)
-    public:
+        FUSION_CLASS(FDecoratedBox, FDecoratedWidget)
+    protected:
 
         FDecoratedBox();
 
-    protected:
+    public:
 
-        void Paint(FPainter& painter) override;
+        Ref<FWidget> GetChild() const { return m_Child; }
 
-        void PaintOverContent(FPainter& painter) override;
+        // - Layout -
+
+        FVec2 MeasureContent(FVec2 availableSize) override;
+
+        void ArrangeContent(FVec2 finalSize) override;
 
     public:
 
         // - Fusion Properties -
 
-        FUSION_STYLE_PROPERTIES(
-            (FBrush, Background,      Paint),
-            (FPen,   Border,          Paint),
-            (FPen,   Outline,         Paint),
-            (f32,    OutlineOffset,   Paint),
-            (FShape, Shape,           Paint)
+        FUSION_SLOTS(
+            (FWidget, Child)
         );
 
+    private:
+
+        FVec4 m_InternalPadding;
     };
 
 } // namespace Fusion

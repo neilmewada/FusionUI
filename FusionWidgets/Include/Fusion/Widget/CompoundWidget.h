@@ -17,8 +17,6 @@ namespace Fusion
 
         Ref<FWidget> GetChild() const { return m_Child; }
 
-        FShape GetClipShape() const override { return ClipContent() ? ClipShape() : EShapeType::None; }
-
         void SetInternalPadding(FMargin padding)
         {
             if (m_InternalPadding == padding)
@@ -57,9 +55,6 @@ namespace Fusion
             self.UpdateBoundaryFlags();
             return self;
         }
-        
-        FUSION_PROPERTY(FShape, ClipShape);
-        FUSION_PROPERTY(bool, ClipContent);
     };
     
 } // namespace Fusion

@@ -4,7 +4,7 @@ namespace Fusion
 {
 	FSlottedWidget::FSlottedWidget()
 	{
-		
+		m_ClipShape = FRectangle();
 	}
 
 	void FSlottedWidget::OnBeforeDestroy()

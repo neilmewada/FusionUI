@@ -19,6 +19,7 @@
 
 #define FUSION_CLASS(SelfClass, SuperClass) typedef SuperClass Super; \
     FUSION_CLASS_BODY(SelfClass)\
+    static FTypeID StaticSuperClassTypeID() { thread_local const FTypeID typeId = ::Fusion::GetTypeID<Super>(); return typeId; }\
     template<FObjectType TObject, typename... TArgs>\
 	friend Ref<TObject> NewObject(FObject* outer, TArgs&&... args);\
     bool IsOfType(FTypeID typeId) const override\

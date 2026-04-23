@@ -11,39 +11,97 @@ namespace Fusion
 		m_OutlineOffset = 2.0f;
 	}
 
-	void FDecoratedBox::Paint(FPainter& painter)
+	FVec2 FDecoratedBox::MeasureContent(FVec2 availableSize)
 	{
-		Super::Paint(painter);
+		FVec2 baseSize = GetMinimumContentSize();
 
-		FVec2 layoutSize = GetLayoutSize();
-		FRect widgetRect(0, 0, layoutSize.width, layoutSize.height);
+		if (!m_Child || m_Child->IsExcluded())
+		{
+			return m_DesiredSize = ApplyLayoutConstraints(baseSize);
+		}
 
-		painter.SetBrush(Background());
-		painter.SetPen(Border());
-		painter.FillAndStrokeShape(widgetRect, Shape());
+		FMargin childMargin = m_Child->Margin();
+
+		FVec2 childAvailableSize = FVec2(
+			FMath::Max(0.0f, availableSize.x - (childMargin.left + childMargin.right + Padding().left + Padding().right + m_InternalPadding.left + m_InternalPadding.right)),
+			FMath::Max(0.0f, availableSize.y - (childMargin.top + childMargin.bottom + Padding().top + Padding().bottom + m_InternalPadding.top + m_InternalPadding.bottom))
+		);
+
+		FVec2 childSize;
+
+		FUSION_TRY
+		{
+			childSize = m_Child->MeasureContent(childAvailableSize);
+		}
+			FUSION_CATCH(const FException& exception)
+		{
+			FUSION_LOG_ERROR("Widget", "Exception: {}. Exception thrown by a Widget [{}] in FCompoundWidget::MeasureContent.\n{}",
+				exception.what(), m_Child->GetClassName(), exception.GetStackTraceString(true));
+
+			m_Child->SetFaulted();
+		}
+
+		return m_DesiredSize = ApplyLayoutConstraints(FVec2(
+			childSize.x + childMargin.left + childMargin.right + Padding().left + Padding().right + m_InternalPadding.left + m_InternalPadding.right,
+			childSize.y + childMargin.top + childMargin.bottom + Padding().top + Padding().bottom + m_InternalPadding.top + m_InternalPadding.bottom
+		));
 	}
 
-	void FDecoratedBox::PaintOverContent(FPainter& painter)
+	void FDecoratedBox::ArrangeContent(FVec2 finalSize)
 	{
-		Super::PaintOverContent(painter);
+		Super::ArrangeContent(finalSize);
+		// Always use layoutSize from base class, as it has the layout constraints applied.
 
-		if (!Enabled())
+		if (!m_Child || m_Child->IsExcluded())
 			return;
 
-		FVec2 layoutSize = GetLayoutSize();
-		FRect widgetRect(0, 0, layoutSize.width, layoutSize.height);
+		FMargin childMargin = m_Child->Margin();
 
-		FPen outline = Outline();
-		if (Outline().IsValid())
+		f32 childAreaWidth = FMath::Max(0.0f, GetLayoutSize().x - Padding().left - Padding().right - childMargin.left - childMargin.right - m_InternalPadding.left - m_InternalPadding.right);
+		f32 childAreaHeight = FMath::Max(0.0f, GetLayoutSize().y - Padding().top - Padding().bottom - childMargin.top - childMargin.bottom - m_InternalPadding.top - m_InternalPadding.bottom);
+
+		FVec2 childPos = FVec2(Padding().left + childMargin.left + m_InternalPadding.left, Padding().top + childMargin.top + m_InternalPadding.top);
+		FVec2 childSize;
+
+		switch (m_Child->HAlign())
 		{
-			painter.SetClipEnabled(false);
-
-			FRect outlineRect = widgetRect.Expand(outline.GetThickness() * 0.5f + OutlineOffset());
-			painter.SetBrush(FBrush());
-			painter.SetPen(outline);
-			painter.StrokeShape(outlineRect, Shape());
-
-			painter.SetClipEnabled(true);
+		case EHAlign::Auto:
+		case EHAlign::Fill:
+			childSize.x = childAreaWidth;
+			break;
+		case EHAlign::Left:
+			childSize.x = FMath::Min(m_Child->GetDesiredSize().x, childAreaWidth);
+			break;
+		case EHAlign::Center:
+			childSize.x = FMath::Min(m_Child->GetDesiredSize().x, childAreaWidth);
+			childPos.x += (childAreaWidth - childSize.x) / 2.0f;
+			break;
+		case EHAlign::Right:
+			childSize.x = FMath::Min(m_Child->GetDesiredSize().x, childAreaWidth);
+			childPos.x += childAreaWidth - childSize.x;
+			break;
 		}
+
+		switch (m_Child->VAlign())
+		{
+		case EVAlign::Auto:
+		case EVAlign::Fill:
+			childSize.y = childAreaHeight;
+			break;
+		case EVAlign::Top:
+			childSize.y = FMath::Min(m_Child->GetDesiredSize().y, childAreaHeight);
+			break;
+		case EVAlign::Center:
+			childSize.y = FMath::Min(m_Child->GetDesiredSize().y, childAreaHeight);
+			childPos.y += (childAreaHeight - childSize.y) / 2.0f;
+			break;
+		case EVAlign::Bottom:
+			childSize.y = FMath::Min(m_Child->GetDesiredSize().y, childAreaHeight);
+			childPos.y += childAreaHeight - childSize.y;
+			break;
+		}
+
+		m_Child->SetLayoutPosition(childPos);
+		m_Child->ArrangeContent(childSize);
 	}
 } // namespace Fusion

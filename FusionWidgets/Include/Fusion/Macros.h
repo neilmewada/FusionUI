@@ -280,15 +280,19 @@
 #define __FUSION_SLOT_CHECK_2(i, ...) FUSION_MACRO_EXPAND(__FUSION_SLOT_CHECK_I(i, __VA_ARGS__))
 #define __FUSION_SLOT_CHECK_I(i, Type, Name) if (slot == i && widget->IsOfStaticType<Type>()) return true;
 
+#define __FUSION_SLOT_DETACH(Tuple)         __FUSION_SLOT_DETACH_I Tuple
+#define __FUSION_SLOT_DETACH_I(Type, Name)  if (m_##Name == child) m_##Name = nullptr;
+
 #define FUSION_SLOTS(...)\
 	FUSION_MACRO_EXPAND(FUSION_FOR_EACH_I(__FUSION_SLOT_DECL, __VA_ARGS__))\
 	public:\
-		u32 GetSlotCount() final { return FUSION_ARG_COUNT(__VA_ARGS__); }\
-		bool IsValidSlotWidget(u32 slot, Ref<FWidget> widget) final {\
+		u32 GetSlotCount() override { return FUSION_ARG_COUNT(__VA_ARGS__); }\
+		bool IsValidSlotWidget(u32 slot, Ref<FWidget> widget) override {\
 			if (slot >= GetSlotCount() || !widget.IsValid()) return false;\
 			FUSION_MACRO_EXPAND(FUSION_FOR_EACH_I(__FUSION_SLOT_CHECK, __VA_ARGS__))\
-			return true;\
+			return false;\
 		}\
+		
 
 #define __FAnimate_Tween(widgetPtr, PropertyName, setterPrefix)\
     FAnimate::Tween<TPtrType<decltype(widgetPtr)>::Type>(\
