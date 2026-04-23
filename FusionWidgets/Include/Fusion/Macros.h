@@ -270,7 +270,7 @@
 	    {\
 			if (self.m_##Name == &widget) return self;\
 	        self.m_##Name = &widget;\
-			self.SetSlotWidget(i, self.m_##Name);\
+			self.SetSlotWidget(static_cast<Self&>(self).Super::GetSlotCount() + i, self.m_##Name);\
 			thread_local const FName slotName = #Name;\
 			static_cast<Self&>(self).OnSlotSet(slotName);\
 	        return self;\
@@ -278,21 +278,26 @@
 
 #define __FUSION_SLOT_CHECK(i, Tuple) __FUSION_SLOT_CHECK_2(i, FUSION_UNPACK Tuple)
 #define __FUSION_SLOT_CHECK_2(i, ...) FUSION_MACRO_EXPAND(__FUSION_SLOT_CHECK_I(i, __VA_ARGS__))
-#define __FUSION_SLOT_CHECK_I(i, Type, Name) if (slot == i && widget->IsOfStaticType<Type>()) return true;
+#define __FUSION_SLOT_CHECK_I(i, Type, Name) if (slot - startSlot == i && widget->IsOfStaticType<Type>()) return true;
 
 #define __FUSION_SLOT_DETACH(Tuple)         __FUSION_SLOT_DETACH_I Tuple
-#define __FUSION_SLOT_DETACH_I(Type, Name)  if (m_##Name == child) m_##Name = nullptr;
+#define __FUSION_SLOT_DETACH_I(Type, Name)  if (m_##Name.Get() == child.Get()) m_##Name = nullptr;
 
 #define FUSION_SLOTS(...)\
 	FUSION_MACRO_EXPAND(FUSION_FOR_EACH_I(__FUSION_SLOT_DECL, __VA_ARGS__))\
 	public:\
-		u32 GetSlotCount() override { return FUSION_ARG_COUNT(__VA_ARGS__); }\
+		u32 GetSlotCount() override { return FUSION_ARG_COUNT(__VA_ARGS__) + Super::GetSlotCount(); }\
 		bool IsValidSlotWidget(u32 slot, Ref<FWidget> widget) override {\
 			if (slot >= GetSlotCount() || !widget.IsValid()) return false;\
+			if (slot < Super::GetSlotCount()) return Super::IsValidSlotWidget(slot, widget);\
+			u32 startSlot = Super::GetSlotCount();\
 			FUSION_MACRO_EXPAND(FUSION_FOR_EACH_I(__FUSION_SLOT_CHECK, __VA_ARGS__))\
 			return false;\
 		}\
-		
+		void DetachChild(Ref<FWidget> child) override {\
+	        FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SLOT_DETACH, __VA_ARGS__))\
+	        Super::DetachChild(child);\
+		}
 
 #define __FAnimate_Tween(widgetPtr, PropertyName, setterPrefix)\
     FAnimate::Tween<TPtrType<decltype(widgetPtr)>::Type>(\
