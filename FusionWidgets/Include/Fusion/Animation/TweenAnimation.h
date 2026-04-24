@@ -57,7 +57,7 @@ namespace Fusion
 
     private:
 
-        UniquePtr<IFInterpolator> m_Interpolator;
+        TUniquePtr<IFInterpolator> m_Interpolator;
     };
     
 } // namespace Fusion

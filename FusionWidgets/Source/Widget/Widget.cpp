@@ -8,8 +8,8 @@ namespace Fusion
 
 	FWidget::FWidget() : Super("Widget")
 	{
-		m_MaxHeight = FNumericLimits<f32>::Infinity();
-		m_MaxWidth = FNumericLimits<f32>::Infinity();
+		m_MaxHeight = TNumericLimits<f32>::Infinity();
+		m_MaxWidth = TNumericLimits<f32>::Infinity();
 		m_Pivot = FVec2(0.5f, 0.5f);
 		m_Opacity = 1.0f;
 	}

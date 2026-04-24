@@ -156,7 +156,7 @@ namespace Fusion
     }
 
     template <SizeT Bits>
-    FString FBitSet<Bits>::ToString() const
+    FString TBitSet<Bits>::ToString() const
     {
         return impl.to_string();
     }

@@ -8,9 +8,9 @@ namespace Fusion
     class FString;
 
     template<typename T>
-    struct FNumericLimits final
+    struct TNumericLimits final
     {
-        FNumericLimits() = delete;
+        TNumericLimits() = delete;
 
         constexpr static T Min() noexcept
         {
@@ -29,11 +29,11 @@ namespace Fusion
     };
 
     template<SizeT Bits = 32>
-    class FBitSet
+    class TBitSet
     {
     public:
 
-        FBitSet(SizeT value = 0) : impl(value)
+        TBitSet(SizeT value = 0) : impl(value)
         {}
 
         inline void Set(SizeT pos, bool value = true)
@@ -96,41 +96,41 @@ namespace Fusion
 
         constexpr SizeT GetSize() const { return impl.size(); }
 
-        inline bool operator==(const FBitSet& rhs) const
+        inline bool operator==(const TBitSet& rhs) const
         {
             return impl == rhs.impl;
         }
 
-        inline bool operator!=(const FBitSet& rhs) const
+        inline bool operator!=(const TBitSet& rhs) const
         {
             return impl != rhs.impl;
         }
 
-        FBitSet& operator|=(const FBitSet& rhs)
+        TBitSet& operator|=(const TBitSet& rhs)
         {
             impl |= rhs.impl;
             return *this;
         }
 
-        FBitSet& operator&=(const FBitSet& rhs)
+        TBitSet& operator&=(const TBitSet& rhs)
         {
             impl &= rhs.impl;
             return *this;
         }
 
-        FBitSet& operator^=(const FBitSet& rhs)
+        TBitSet& operator^=(const TBitSet& rhs)
         {
             impl ^= rhs.impl;
             return *this;
         }
 
-        FBitSet& operator<<=(const FBitSet& rhs)
+        TBitSet& operator<<=(const TBitSet& rhs)
         {
             impl <<= rhs.impl;
             return *this;
         }
 
-        FBitSet& operator>>=(const FBitSet& rhs)
+        TBitSet& operator>>=(const TBitSet& rhs)
         {
             impl >>= rhs.impl;
             return *this;
@@ -152,16 +152,16 @@ namespace Fusion
     }
 
     template<typename T>
-    class UniquePtr
+    class TUniquePtr
     {
     public:
 
-        UniquePtr(T* ptr = nullptr) : impl(ptr)
+        TUniquePtr(T* ptr = nullptr) : impl(ptr)
         {
 
         }
 
-        UniquePtr(std::unique_ptr<T>&& move) : impl(std::move(move))
+        TUniquePtr(std::unique_ptr<T>&& move) : impl(std::move(move))
         {
 
         }
@@ -196,9 +196,9 @@ namespace Fusion
     };
 
     template<typename T, typename... TArgs>
-    UniquePtr<T> MakeUnique(TArgs&&... args)
+    TUniquePtr<T> MakeUnique(TArgs&&... args)
     {
-        return UniquePtr<T>(new T(args...));
+        return TUniquePtr<T>(new T(args...));
     }
 
 } // namespace Fusion

@@ -35,7 +35,7 @@ namespace Fusion
             u32 pixels[16];
             for (int i = 0; i < FUSION_COUNT(pixels); ++i)
             {
-                pixels[i] = FNumericLimits<u32>::Max();
+                pixels[i] = TNumericLimits<u32>::Max();
             }
             IPtr<FImage> image = FImage::CreateExternal("__WhitePixel", EImageFormat::RGBA8, 4, 4, (u8*)pixels);
             m_WhitePixel = AddImage("__WhitePixel", *image);

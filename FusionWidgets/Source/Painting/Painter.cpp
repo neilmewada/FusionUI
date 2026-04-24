@@ -128,8 +128,8 @@ namespace Fusion
 
 		m_Path.RemoveAll();
 
-		m_LocalPathMin = m_PathMin = FVec2(FNumericLimits<f32>::Max(), FNumericLimits<f32>::Max());
-		m_LocalPathMax = m_PathMax = FVec2(FNumericLimits<f32>::Min(), FNumericLimits<f32>::Min());
+		m_LocalPathMin = m_PathMin = FVec2(TNumericLimits<f32>::Max(), TNumericLimits<f32>::Max());
+		m_LocalPathMax = m_PathMax = FVec2(TNumericLimits<f32>::Min(), TNumericLimits<f32>::Min());
 	}
 
 	void FPainter::PathInsert(FVec2 point)

@@ -101,7 +101,7 @@ namespace Fusion
 
     private:
 
-        UniquePtr<IFSpringState> springState; // Runtime-only — holds current, velocity, target, setter
+        TUniquePtr<IFSpringState> springState; // Runtime-only — holds current, velocity, target, setter
 
         template<typename T>
         friend class FSpringBuilder;

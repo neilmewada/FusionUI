@@ -34,7 +34,7 @@ namespace Fusion
         Expanded = FUSION_BIT(12), // tree nodes, expanders, dropdowns (collapsed = !Expanded)
 
         // Mask of all states
-        All = FNumericLimits<u32>::Max()
+        All = TNumericLimits<u32>::Max()
     };
     FUSION_ENUM_CLASS_FLAGS(EStyleState);
     
