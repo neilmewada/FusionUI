@@ -143,6 +143,99 @@ namespace Fusion
         return { Data(), m_Size };
     }
 
+    FString& FString::InsertBytes(size_t byteOffset, const char* str, size_t length)
+    {
+        if (!str || length == 0)
+            return *this;
+
+        byteOffset = std::min(byteOffset, m_Size);
+
+        size_t newSize   = m_Size + length;
+        size_t suffixLen = m_Size - byteOffset;
+
+        if (newSize <= SSO_CAPACITY)
+        {
+            // Stays in SSO — shift suffix right, copy new bytes in
+            std::memmove(m_SSO + byteOffset + length, m_SSO + byteOffset, suffixLen);
+            std::memcpy (m_SSO + byteOffset, str, length);
+            m_SSO[newSize] = '\0';
+        }
+        else if (IsHeap())
+        {
+            if (newSize > m_Heap.Capacity)
+            {
+                // Heap realloc — allocate, copy prefix / new bytes / suffix, free old
+                size_t newCap = std::max(newSize, m_Heap.Capacity * 2);
+                char*  newPtr = new char[newCap + 1];
+                std::memcpy(newPtr,                       m_Heap.Ptr,             byteOffset);
+                std::memcpy(newPtr + byteOffset,          str,                    length);
+                std::memcpy(newPtr + byteOffset + length, m_Heap.Ptr + byteOffset, suffixLen);
+                newPtr[newSize] = '\0';
+                delete[] m_Heap.Ptr;
+                m_Heap.Ptr      = newPtr;
+                m_Heap.Capacity = newCap;
+            }
+            else
+            {
+                // Fits in existing heap allocation — shift suffix in-place
+                std::memmove(m_Heap.Ptr + byteOffset + length, m_Heap.Ptr + byteOffset, suffixLen);
+                std::memcpy (m_Heap.Ptr + byteOffset, str, length);
+                m_Heap.Ptr[newSize] = '\0';
+            }
+        }
+        else
+        {
+            // SSO → heap transition
+            size_t newCap = std::max(newSize, SSO_CAPACITY * 2);
+            char*  newPtr = new char[newCap + 1];
+            std::memcpy(newPtr,                       m_SSO,             byteOffset);
+            std::memcpy(newPtr + byteOffset,          str,               length);
+            std::memcpy(newPtr + byteOffset + length, m_SSO + byteOffset, suffixLen);
+            newPtr[newSize] = '\0';
+            m_Heap.Ptr      = newPtr;
+            m_Heap.Capacity = newCap;
+        }
+
+        m_Size = newSize;
+        return *this;
+    }
+
+    FString& FString::InsertBytes(size_t byteOffset, FStringView text)
+    {
+        return InsertBytes(byteOffset, text.Data(), text.ByteLength());
+    }
+
+    FString& FString::EraseBytes(size_t byteOffset, size_t length)
+    {
+        if (length == 0 || byteOffset >= m_Size)
+            return *this;
+
+        length = std::min(length, m_Size - byteOffset);
+
+        size_t newSize   = m_Size - length;
+        size_t suffixLen = m_Size - byteOffset - length;
+
+        if (IsHeap() && newSize <= SSO_CAPACITY)
+        {
+            // Heap → SSO transition
+            char* ptr = m_Heap.Ptr;
+            std::memcpy(m_SSO,             ptr,                       byteOffset);
+            std::memcpy(m_SSO + byteOffset, ptr + byteOffset + length, suffixLen);
+            m_SSO[newSize] = '\0';
+            delete[] ptr;
+        }
+        else
+        {
+            // In-place (SSO or heap) — shift suffix left over the erased region
+            char* d = Data();
+            std::memmove(d + byteOffset, d + byteOffset + length, suffixLen);
+            d[newSize] = '\0';
+        }
+
+        m_Size = newSize;
+        return *this;
+    }
+
     FString& FString::operator+=(const FString& other)
     {
         AppendBytes(other.Data(), other.m_Size);

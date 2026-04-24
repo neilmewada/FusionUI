@@ -7,6 +7,7 @@
 
 namespace Fusion
 {
+    class FStringView;
 
     // UTF-8 string with small string optimization (SSO up to 15 bytes inline).
     // ByteLength() — number of bytes.
@@ -84,6 +85,15 @@ namespace Fusion
         size_t         ByteLength() const { return m_Size; }
         CodepointRange Codepoints() const { return { Data(), Data() + m_Size }; }
         bool                Empty() const { return m_Size == 0; }
+
+        // Insert `length` bytes from `str` at `byteOffset`. Byte-level; no UTF-8 validation.
+        // byteOffset is clamped to [0, ByteLength()].
+        FString& InsertBytes(size_t byteOffset, const char* str, size_t length);
+        FString& InsertBytes(size_t byteOffset, FStringView text);
+
+        // Erase `length` bytes starting at `byteOffset`. Byte-level; no UTF-8 validation.
+        // length is clamped so the erase never goes past the end.
+        FString& EraseBytes(size_t byteOffset, size_t length);
 
         FString& operator+=(const FString& other);
         FString& operator+=(const std::string& str);

@@ -2,5 +2,10 @@
 
 namespace Fusion
 {
-    
+	FTextEditor::FTextEditor()
+	{
+		
+	}
+
+
 } // namespace Fusion

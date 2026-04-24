@@ -67,7 +67,7 @@
 #include "Painting/Painter.h"
 
 // Text
-#include "Text/TextBuffer.h"
+#include "Text/LineBuffer.h"
 #include "Text/TextDocument.h"
 #include "Text/TextLayout.h"
 #include "Text/TextRenderer.h"
@@ -89,6 +89,7 @@
 #include "Widget/Input/Button.h"
 #include "Widget/Input/TextButton.h"
 #include "Widget/Input/TextInput.h"
+#include "Widget/Input/TextEditor.h"
 
 // Layouts
 #include "Widget/Layout/ScrollBox.h"
