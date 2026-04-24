@@ -15,7 +15,7 @@
 
 namespace Fusion
 {
-    template<typename T = u8, size_t InlineCapacity = 8>
+    template<typename T = u8, size_t InlineCapacity = 4>
     class TArray
     {
     public:
