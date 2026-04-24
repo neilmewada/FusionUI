@@ -5,7 +5,7 @@
 
 namespace Fusion
 {
-	using FResourceHandle = FHandle<u32>;
+	using FResourceHandle = THandle<u32>;
 
 	FUSION_DEFINE_HANDLE_TYPE(FAtlasHandle, u32);
 

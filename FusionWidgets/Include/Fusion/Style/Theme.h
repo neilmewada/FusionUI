@@ -36,7 +36,7 @@ namespace Fusion
 
         WeakRef<FTheme> m_Parent;
 
-        FHashMap<FName, Ref<FStyle>> m_Styles;
+        THashMap<FName, Ref<FStyle>> m_Styles;
     };
 
 } // namespace Fusion

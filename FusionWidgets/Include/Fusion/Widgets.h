@@ -66,6 +66,13 @@
 // Painting
 #include "Painting/Painter.h"
 
+// Text
+#include "Text/TextBuffer.h"
+#include "Text/TextDocument.h"
+#include "Text/TextLayout.h"
+#include "Text/TextRenderer.h"
+#include "Text/TextEditController.h"
+
 // Surface
 #include "Surface/Surface.h"
 #include "Surface/NativeSurface.h"

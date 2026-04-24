@@ -14,7 +14,7 @@ namespace Fusion
     private:
 	    
         T m_Default = T();
-        TArray<FPair<EStyleState, T>, 1> m_Overrides;
+        TArray<TPair<EStyleState, T>, 1> m_Overrides;
 
     public:
 
@@ -121,16 +121,16 @@ namespace Fusion
 
         WeakRef<FTheme> m_Theme;
 
-        FHashMap<FName, FStyleValue<FBrush>> m_BrushValues;
-        FHashMap<FName, FStyleValue<FPen>>   m_PenValues;
-        FHashMap<FName, FStyleValue<FColor>> m_ColorValues;
-        FHashMap<FName, FStyleValue<FShape>> m_ShapeValues;
-        FHashMap<FName, FStyleValue<f32>>    m_FloatValues;
-        FHashMap<FName, FStyleValue<FVec2>>  m_Vec2Values;
-        FHashMap<FName, FStyleValue<FVec4>>  m_Vec4Values;
-        FHashMap<FName, FStyleValue<FFont>>  m_FontValues;
-        FHashMap<FName, FStyleValue<FAffineTransform>>  m_TransformValues;
-        FHashMap<FName, FTransition>         m_PropertyTransitions;
+        THashMap<FName, FStyleValue<FBrush>> m_BrushValues;
+        THashMap<FName, FStyleValue<FPen>>   m_PenValues;
+        THashMap<FName, FStyleValue<FColor>> m_ColorValues;
+        THashMap<FName, FStyleValue<FShape>> m_ShapeValues;
+        THashMap<FName, FStyleValue<f32>>    m_FloatValues;
+        THashMap<FName, FStyleValue<FVec2>>  m_Vec2Values;
+        THashMap<FName, FStyleValue<FVec4>>  m_Vec4Values;
+        THashMap<FName, FStyleValue<FFont>>  m_FontValues;
+        THashMap<FName, FStyleValue<FAffineTransform>>  m_TransformValues;
+        THashMap<FName, FTransition>         m_PropertyTransitions;
 
         friend class FTheme;
     };

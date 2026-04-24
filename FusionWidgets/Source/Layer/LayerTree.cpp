@@ -22,10 +22,10 @@ namespace Fusion
 
 		ZoneScoped;
 
-		FHashSet<FUuid> visited;
+		THashSet<FUuid> visited;
 		SyncWidget(rootWidget, nullptr, visited);
 
-		FHashSet<FUuid> widgetsToRemove;
+		THashSet<FUuid> widgetsToRemove;
 
 		for (const auto& [widgetUuid, layer] : m_WidgetUuidToLayerMap)
 		{
@@ -62,7 +62,7 @@ namespace Fusion
 		return nullptr;
 	}
 
-	void FLayerTree::SyncWidget(Ref<FWidget> widget, Ref<FLayer> parentLayer, FHashSet<FUuid>& visited)
+	void FLayerTree::SyncWidget(Ref<FWidget> widget, Ref<FLayer> parentLayer, THashSet<FUuid>& visited)
 	{
 		if (!widget)
 			return;

@@ -4,10 +4,10 @@
     class HandleTypeName\
     {\
     public:\
-		using IndexType = FHandle<__VA_ARGS__>::IndexType;\
-		static constexpr FHandle<__VA_ARGS__> NullValue = FHandle<__VA_ARGS__>::NullValue;\
+		using IndexType = THandle<__VA_ARGS__>::IndexType;\
+		static constexpr THandle<__VA_ARGS__> NullValue = THandle<__VA_ARGS__>::NullValue;\
         HandleTypeName() = default;\
-        explicit HandleTypeName(FHandle<__VA_ARGS__> value) : m_Value(value) {}\
+        explicit HandleTypeName(THandle<__VA_ARGS__> value) : m_Value(value) {}\
         bool IsNull() const { return m_Value.IsNull(); }\
         bool IsValid() const { return m_Value.IsNull(); }\
         SizeT GetHash() const { return m_Value.GetHash(); }\
@@ -15,26 +15,26 @@
         bool operator==(const HandleTypeName& rhs) const { return m_Value == rhs.m_Value; }\
         bool operator!=(const HandleTypeName& rhs) const { return m_Value != rhs.m_Value; }\
     private:\
-        FHandle<__VA_ARGS__> m_Value = FHandle<__VA_ARGS__>::NullValue;\
+        THandle<__VA_ARGS__> m_Value = THandle<__VA_ARGS__>::NullValue;\
     };
 
 namespace Fusion
 {
 
     template<typename T = u32> requires TFIsIntegralType<T>::Value
-    class FHandle
+    class THandle
     {
     public:
         using IndexType = T;
 
         static constexpr T NullValue = T(-1);
 
-        constexpr FHandle() : value(NullValue)
+        constexpr THandle() : value(NullValue)
         {
 
         }
 
-        constexpr FHandle(T value) : value(value)
+        constexpr THandle(T value) : value(value)
         {
 
         }

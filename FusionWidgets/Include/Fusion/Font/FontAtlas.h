@@ -134,12 +134,12 @@ namespace Fusion
 
         FFontFace m_DefaultFace{};
 
-        FHashMap<FFontFaceKey, FFontFace> m_FontFaces;
+        THashMap<FFontFaceKey, FFontFace> m_FontFaces;
 
         TArray<IPtr<FAtlasImageLayer>> m_AtlasImageLayers;
         int m_CurLayerIndex = -1;
 
-        FHashMap<FFontGlyphKey, FGlyph> m_Glyphs;
+        THashMap<FFontGlyphKey, FGlyph> m_Glyphs;
 
         FAtlasHandle m_AtlasHandle;
     };

@@ -22,14 +22,14 @@ namespace Fusion
         FVec2 wheelDelta{};
         u64 curTime = 0;
 
-        FHashMap<EKeyCode, bool> keyStates{};
+        THashMap<EKeyCode, bool> keyStates{};
         //HashMap<FKeyCode, Internal::FKeyStateDelayed> keyStatesDelayed{};
-        FHashMap<EMouseButton, int> mouseButtonStates{};
+        THashMap<EMouseButton, int> mouseButtonStates{};
 
         // Per-Tick changes
-        FHashMap<EKeyCode, bool> stateChangesThisTick{};
+        THashMap<EKeyCode, bool> stateChangesThisTick{};
         TArray<EKeyCode> keyRepeatThisTick{};
-        FHashMap<EMouseButton, int> mouseButtonStateChanges{};
+        THashMap<EMouseButton, int> mouseButtonStateChanges{};
 
         EKeyModifier modifierStates{};
         FString textInput{};
@@ -114,11 +114,11 @@ namespace Fusion
 
         void ProcessWindowResizeEvent(FWindowHandle windowHandle);
 
-        FHashMap<FInstanceHandle, FSDL3InstanceData> m_Instances;
+        THashMap<FInstanceHandle, FSDL3InstanceData> m_Instances;
 
-		FHashMap<FWindowHandle, FSDL3PlatformWindow*> m_WindowsByHandle;
+		THashMap<FWindowHandle, FSDL3PlatformWindow*> m_WindowsByHandle;
 
-		FHashMap<FUuid, bool> m_Displays;
+		THashMap<FUuid, bool> m_Displays;
 
 		bool m_IsInitialized = false;
         bool m_InitFailed = false;
@@ -126,11 +126,11 @@ namespace Fusion
 
         FInstanceHandle m_InstanceCounter = FInstanceHandle::NullValue;
 
-        FHashSet<IFPlatformEventSink*> m_RegisteredSinks{};
+        THashSet<IFPlatformEventSink*> m_RegisteredSinks{};
 
         FDelegate<void()> m_ContinuousResizeTick{};
 
-        FHashMap<ESystemCursor, SDL_Cursor*> m_SystemCursors;
+        THashMap<ESystemCursor, SDL_Cursor*> m_SystemCursors;
 
         friend bool SDLEventWatch(void* userdata, SDL_Event* event);
 
@@ -150,14 +150,14 @@ namespace Fusion
         TArray<u64> m_FocusGainedWindows{};
         TArray<u64> m_FocusLostWindows{};
 
-        FHashMap<EKeyCode, bool> m_KeyStates{};
+        THashMap<EKeyCode, bool> m_KeyStates{};
         //HashMap<FKeyCode, Internal::KeyStateDelayed> keyStatesDelayed{};
-        FHashMap<EMouseButton, int> m_MouseButtonStates{};
+        THashMap<EMouseButton, int> m_MouseButtonStates{};
 
         // Per-Tick changes
-        FHashMap<EKeyCode, bool> m_StateChangesThisTick{};
+        THashMap<EKeyCode, bool> m_StateChangesThisTick{};
         TArray<EKeyCode> m_KeyRepeatThisTick{};
-        FHashMap<EMouseButton, int> m_MouseButtonStateChanges{};
+        THashMap<EMouseButton, int> m_MouseButtonStateChanges{};
 
         EKeyModifier m_ModifierStates{};
 

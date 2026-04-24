@@ -262,7 +262,7 @@ namespace Fusion::Vulkan
         using FArena = FStableGrowthArray<u8, kUploadArenaGrowSize>;
         using FBufferImageCopyArray = FStableGrowthArray<VkBufferImageCopy, 128>;
 
-        FHashMap<FInstanceHandle, IntrusivePtr<FRenderInstance>> m_Instances;
+        THashMap<FInstanceHandle, IntrusivePtr<FRenderInstance>> m_Instances;
 
         // - Vulkan Data -
 		
@@ -310,12 +310,12 @@ namespace Fusion::Vulkan
 
         // - SwapChain -
 
-        FHashMap<FWindowHandle, IPtr<FSwapChain>> m_SwapChainsByWindowHandle;
+        THashMap<FWindowHandle, IPtr<FSwapChain>> m_SwapChainsByWindowHandle;
 
         // - Render Targets -
 
         FRenderTargetHandle::IndexType m_RenderTargetIndexAllocator = 0;
-        FHashMap<FRenderTargetHandle, IPtr<FRenderTarget>> m_RenderTargetsByHandle;
+        THashMap<FRenderTargetHandle, IPtr<FRenderTarget>> m_RenderTargetsByHandle;
 
         // - Render Passes -
 
@@ -371,8 +371,8 @@ namespace Fusion::Vulkan
         };
 
         FAtlasHandle::IndexType m_AtlasIndexAllocator = 0;
-        FHashMap<FAtlasHandle, IPtr<FTextureAtlas>> m_AtlasesByHandle;
-        FHashMap<FAtlasHandle, TArray<FAtlasUploadRegion>> m_PendingAtlasUploads;
+        THashMap<FAtlasHandle, IPtr<FTextureAtlas>> m_AtlasesByHandle;
+        THashMap<FAtlasHandle, TArray<FAtlasUploadRegion>> m_PendingAtlasUploads;
     };
 
 } // namespace Fusion

@@ -19,7 +19,7 @@ namespace Fusion::Vulkan
 
         ~FVulkanWindowsPlatform() = delete;
 
-        static FArray<const char*> GetRequiredVulkanInstanceExtensions()
+        static TArray<const char*> GetRequiredVulkanInstanceExtensions()
         {
             return {
 	            VK_KHR_SURFACE_EXTENSION_NAME,
@@ -30,7 +30,7 @@ namespace Fusion::Vulkan
             };
         }
 
-        static FArray<const char*> GetRequiredInstanceLayers()
+        static TArray<const char*> GetRequiredInstanceLayers()
         {
             return {
 #if FUSION_VULKAN_VALIDATION

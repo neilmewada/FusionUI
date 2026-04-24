@@ -6,16 +6,16 @@ namespace Fusion
 {
 
     template<typename KeyType, typename ValueType>
-    class FPair
+    class TPair
     {
     public:
 
-        constexpr FPair() : first({}), second({})
+        constexpr TPair() : first({}), second({})
         {
 
         }
 
-        constexpr FPair(KeyType key, ValueType value) : first(key), second(value)
+        constexpr TPair(KeyType key, ValueType value) : first(key), second(value)
         {
 
         }
@@ -30,32 +30,32 @@ namespace Fusion
             return hash;
         }
 
-        bool operator==(const FPair& rhs) const
+        bool operator==(const TPair& rhs) const
         {
             return GetHash() == rhs.GetHash();
         }
 
-        bool operator!=(const FPair& rhs) const
+        bool operator!=(const TPair& rhs) const
         {
             return !operator==(rhs);
         }
     };
 
     template<typename KeyType, typename ValueType>
-    class FHashMap
+    class THashMap
     {
     public:
-        FHashMap() : Impl({})
+        THashMap() : Impl({})
         {
 
         }
 
-        FHashMap(std::initializer_list<std::pair<KeyType, ValueType>> list) : Impl(list)
+        THashMap(std::initializer_list<std::pair<KeyType, ValueType>> list) : Impl(list)
         {
 
         }
 
-        ~FHashMap()
+        ~THashMap()
         {
 
         }
@@ -140,12 +140,12 @@ namespace Fusion
             Impl.insert({ key, value });
         }
 
-        inline void Add(const FPair<KeyType, ValueType>& pair)
+        inline void Add(const TPair<KeyType, ValueType>& pair)
         {
             Impl.insert({ pair.first, pair.second });
         }
 
-        inline void AddRange(const FHashMap<KeyType, ValueType>& from)
+        inline void AddRange(const THashMap<KeyType, ValueType>& from)
         {
             for (const auto& [key, value] : from)
             {
@@ -185,14 +185,14 @@ namespace Fusion
     };
 
     template<typename T>
-    class FHashSet
+    class THashSet
     {
     public:
-        FHashSet() : impl({})
+        THashSet() : impl({})
         {
         }
 
-        FHashSet(std::initializer_list<T> elements) : impl(elements)
+        THashSet(std::initializer_list<T> elements) : impl(elements)
         {
         }
 

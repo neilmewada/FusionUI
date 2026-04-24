@@ -714,7 +714,7 @@ namespace Fusion
 
 		// - Layout
 
-		FHashSet<FWidget*> pendingSet;
+		THashSet<FWidget*> pendingSet;
 		for (auto& root : m_PendingLayoutRoots)
 			pendingSet.Add(root.Get());
 

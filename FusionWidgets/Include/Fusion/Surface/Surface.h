@@ -107,7 +107,7 @@ namespace Fusion
 
         Ref<FLayerTree> m_LayerTree;
 
-        FHashSet<FUuid> m_PendingLayoutRootIds;
+        THashSet<FUuid> m_PendingLayoutRootIds;
         TArray<Ref<FWidget>> m_PendingLayoutRoots;
 
         TArray<Ref<FSurface>> m_ChildSurfaces;

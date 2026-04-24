@@ -29,14 +29,14 @@ namespace Fusion
 
     protected:
 
-        void SyncWidget(Ref<FWidget> widget, Ref<FLayer> parentLayer, FHashSet<FUuid>& visited);
+        void SyncWidget(Ref<FWidget> widget, Ref<FLayer> parentLayer, THashSet<FUuid>& visited);
 
         Ref<FLayer> m_RootLayer;
         Ref<FLayer> m_OverlayLayer;
 
         FAffineTransform m_RootLayerTransform;
 
-        FHashMap<FUuid, Ref<FLayer>> m_WidgetUuidToLayerMap;
+        THashMap<FUuid, Ref<FLayer>> m_WidgetUuidToLayerMap;
 
         bool m_NeedsSync = true;
     };

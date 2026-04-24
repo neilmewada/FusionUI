@@ -132,7 +132,7 @@ namespace Fusion
 		FInstanceHandle m_InstanceHandle = FInstanceHandle::NullValue;
 
 		TArray<Ref<FSurface>>                        m_Surfaces;
-		FHashMap<FWindowHandle, Ref<FNativeSurface>> m_NativeSurfacesByWindow;
+		THashMap<FWindowHandle, Ref<FNativeSurface>> m_NativeSurfacesByWindow;
 
 		WeakRef<FSurface> m_CurFocusSurface;
 		WeakRef<FSurface> m_FocusSurface;
@@ -147,10 +147,10 @@ namespace Fusion
 		f32 m_DeltaTime = 0.0f;
 		std::chrono::steady_clock::time_point m_PreviousTime = std::chrono::steady_clock::now();
 
-		FHashMap<FUuid, FHashMap<FName, Ref<FAnimation>>> m_AnimationSlotsByWidget;
+		THashMap<FUuid, THashMap<FName, Ref<FAnimation>>> m_AnimationSlotsByWidget;
 
 		// Flat list of (ownerUuid, slot) pairs queued for removal this tick
-		TArray<FPair<FUuid, FName>> m_AnimationsToDestroy;
+		TArray<TPair<FUuid, FName>> m_AnimationsToDestroy;
 
 		// - Atlases
 

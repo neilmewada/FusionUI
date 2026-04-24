@@ -141,7 +141,7 @@ namespace Fusion
             int LayerIndex = 0;
 
             IPtr<FBinaryNode> Root = nullptr;
-            FHashMap<FName, IPtr<FBinaryNode>> NodesByImageName;
+            THashMap<FName, IPtr<FBinaryNode>> NodesByImageName;
         };
 
         TArray<IPtr<FAtlasLayer>> m_Layers;
@@ -152,7 +152,7 @@ namespace Fusion
 
         // - Cache -
 
-        FHashMap<FName, FAtlasItem> m_ImagesByName;
+        THashMap<FName, FAtlasItem> m_ImagesByName;
         FAtlasItem m_WhitePixel{};
         FAtlasItem m_TransparentPixel{};
     };
