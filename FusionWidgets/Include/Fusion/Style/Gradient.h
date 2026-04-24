@@ -68,7 +68,7 @@ namespace Fusion
 
     private:
 
-        FArray<FGradientStop, 2> m_Stops;
+        TArray<FGradientStop, 2> m_Stops;
 
         f32   m_Angle      = 0.0f;
         f32   m_StartPoint = 0.0f;

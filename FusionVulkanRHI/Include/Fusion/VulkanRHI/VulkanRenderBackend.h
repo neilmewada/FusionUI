@@ -30,7 +30,7 @@ namespace Fusion::Vulkan
         VkDevice m_Device = VK_NULL_HANDLE;
         
         int m_CurPoolIndex = 0;
-        FArray<VkDescriptorPool> m_Pools{};
+        TArray<VkDescriptorPool> m_Pools{};
     };
 
     // - Shader -
@@ -49,12 +49,12 @@ namespace Fusion::Vulkan
         VkShaderModule m_VertexModule = VK_NULL_HANDLE;
         VkShaderModule m_FragmentModule = VK_NULL_HANDLE;
 
-        FArray<VkDescriptorSetLayout> m_SetLayouts{};
+        TArray<VkDescriptorSetLayout> m_SetLayouts{};
         VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
         
         VkPipeline m_Pipeline = VK_NULL_HANDLE;
 
-        FArray<VkSampler> m_ImmutableSamplers{};
+        TArray<VkSampler> m_ImmutableSamplers{};
     };
 
     struct FUSIONVULKANRHI_API FSwapChain : FIntrusiveBase
@@ -73,12 +73,12 @@ namespace Fusion::Vulkan
         VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
         VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 
-        FArray<IPtr<FTexture>> m_Images{};
-        FArray<VkFramebuffer> m_FrameBuffers{};
+        TArray<IPtr<FTexture>> m_Images{};
+        TArray<VkFramebuffer> m_FrameBuffers{};
 
         u32 m_Width = 0, m_Height = 0;
 
-        FArray<VkSemaphore> m_ImageAcquiredSemaphores{};
+        TArray<VkSemaphore> m_ImageAcquiredSemaphores{};
 
         uint32_t m_CurrentImageIndex = -1;
     };
@@ -276,7 +276,7 @@ namespace Fusion::Vulkan
         VkPhysicalDeviceFeatures m_PhysicalDeviceFeatures{};
 		VkPhysicalDeviceMemoryProperties m_PhysicalDeviceMemoryProperties{};
 
-        FArray<VkQueueFamilyProperties> m_QueueFamilyProperties;
+        TArray<VkQueueFamilyProperties> m_QueueFamilyProperties;
 
         // - Properties -
 
@@ -286,8 +286,8 @@ namespace Fusion::Vulkan
         // - Surface -
 
         VkSurfaceCapabilitiesKHR m_SurfaceCapabilities{};   // TestSurface properties: image size, extent, etc
-        FArray<VkSurfaceFormatKHR> m_SurfaceFormats;  // TestSurface image supported formats
-        FArray<VkPresentModeKHR> m_PresentationModes; // How images should be presented to the screen
+        TArray<VkSurfaceFormatKHR> m_SurfaceFormats;  // TestSurface image supported formats
+        TArray<VkPresentModeKHR> m_PresentationModes; // How images should be presented to the screen
 
         // - Device -
 
@@ -331,18 +331,18 @@ namespace Fusion::Vulkan
 
         u32 m_FrameSlot = 0;
         
-        FArray<FDescriptorPool*, kImageCount> m_PoolsPerFrame;
+        TArray<FDescriptorPool*, kImageCount> m_PoolsPerFrame;
         FStaticArray<IPtr<FMappedBuffer>, kImageCount> m_UIDrawDataBuffers;
 
-        FArray<VkCommandBuffer, kImageCount> m_CommandBuffers;
-        FArray<VkSemaphore, kImageCount> m_RenderFinishedSemaphores;
-        FArray<VkFence, kImageCount> m_RenderFinishedFences;
+        TArray<VkCommandBuffer, kImageCount> m_CommandBuffers;
+        TArray<VkSemaphore, kImageCount> m_RenderFinishedSemaphores;
+        TArray<VkFence, kImageCount> m_RenderFinishedFences;
 
-        FArray<FDeferredDestruction> m_DeferredDestruction;
+        TArray<FDeferredDestruction> m_DeferredDestruction;
 
         // - Transient Resources -
 
-        FArray<FDrawDataBufferViews> m_OffsetDataPerSnapshot;
+        TArray<FDrawDataBufferViews> m_OffsetDataPerSnapshot;
         FStaticArray<IPtr<FMappedBuffer>, kImageCount> m_StagingBuffers;
 
         FBufferImageCopyArray m_BufferImageCopies;
@@ -372,7 +372,7 @@ namespace Fusion::Vulkan
 
         FAtlasHandle::IndexType m_AtlasIndexAllocator = 0;
         FHashMap<FAtlasHandle, IPtr<FTextureAtlas>> m_AtlasesByHandle;
-        FHashMap<FAtlasHandle, FArray<FAtlasUploadRegion>> m_PendingAtlasUploads;
+        FHashMap<FAtlasHandle, TArray<FAtlasUploadRegion>> m_PendingAtlasUploads;
     };
 
 } // namespace Fusion

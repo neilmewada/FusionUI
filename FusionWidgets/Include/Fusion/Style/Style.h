@@ -14,7 +14,7 @@ namespace Fusion
     private:
 	    
         T m_Default = T();
-        FArray<FPair<EStyleState, T>, 1> m_Overrides;
+        TArray<FPair<EStyleState, T>, 1> m_Overrides;
 
     public:
 

@@ -42,8 +42,8 @@ namespace Fusion::Vulkan
 
         VkFormat m_Format = VK_FORMAT_R8G8B8A8_UNORM;
 
-        FArray<VmaAllocation> m_Allocations;
-        FArray<VmaAllocationInfo> m_AllocationInfos;
+        TArray<VmaAllocation> m_Allocations;
+        TArray<VmaAllocationInfo> m_AllocationInfos;
     };
 
     // - Atlas -

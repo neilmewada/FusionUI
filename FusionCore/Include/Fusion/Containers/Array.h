@@ -16,7 +16,7 @@
 namespace Fusion
 {
     template<typename T = u8, size_t InlineCapacity = 8>
-    class FArray
+    class TArray
     {
     public:
         static constexpr i64 npos = -1;
@@ -25,12 +25,12 @@ namespace Fusion
         // Construction / Destruction
         // ----------------------------------------------------------------
 
-        FArray()
+        TArray()
         {
             InitInline();
         }
 
-        FArray(std::initializer_list<T> list)
+        TArray(std::initializer_list<T> list)
         {
             InitInline();
             Reserve(list.size());
@@ -38,7 +38,7 @@ namespace Fusion
                 Add(value);
         }
 
-        FArray(const FArray& other)
+        TArray(const TArray& other)
         {
             InitInline();
             Reserve(other.m_Size);
@@ -47,13 +47,13 @@ namespace Fusion
             m_Size = other.m_Size;
         }
 
-        FArray(FArray&& other) noexcept
+        TArray(TArray&& other) noexcept
         {
             InitInline();
             MoveFrom(std::move(other));
         }
 
-        explicit FArray(SizeT count)
+        explicit TArray(SizeT count)
         {
 			InitInline();
             Reserve(count);
@@ -62,7 +62,7 @@ namespace Fusion
 			m_Size = count;
         }
 
-        ~FArray()
+        ~TArray()
         {
             DestroyElements(0, m_Size);
             FreeHeap();
@@ -72,7 +72,7 @@ namespace Fusion
         // Assignment
         // ----------------------------------------------------------------
 
-        FArray& operator=(const FArray& other)
+        TArray& operator=(const TArray& other)
         {
             if (this != &other)
             {
@@ -85,7 +85,7 @@ namespace Fusion
             return *this;
         }
 
-        FArray& operator=(FArray&& other) noexcept
+        TArray& operator=(TArray&& other) noexcept
         {
             if (this != &other)
             {
@@ -456,7 +456,7 @@ namespace Fusion
                 m_Data[i].~T();
         }
 
-        void MoveFrom(FArray&& other)
+        void MoveFrom(TArray&& other)
         {
             if (other.IsInline())
             {

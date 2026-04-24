@@ -55,13 +55,13 @@ namespace Fusion
 
         WeakRef<FWidget> m_OwningWidget;
 
-        FArray<Ref<FLayer>> m_Children;
+        TArray<Ref<FLayer>> m_Children;
 
         FAffineTransform m_CachedTransformInParentLayerSpace;
 
         bool m_NeedsCompositing = false;
         FUIDrawList m_DrawList;
-        FArray<SizeT> m_SplitPoints;
+        TArray<SizeT> m_SplitPoints;
 
         friend class FLayerTree;
         friend class FPainter;

@@ -94,7 +94,7 @@ namespace Fusion
 
 	}
 
-    static void BuildHoverStack(FWidget* leaf, FArray<Ref<FWidget>>& outStack)
+    static void BuildHoverStack(FWidget* leaf, TArray<Ref<FWidget>>& outStack)
     {
         FWidget* w = leaf;
         while (w)
@@ -158,7 +158,7 @@ namespace Fusion
 
         Ref<FWidget> hoveredWidget = captured.IsValid() ? captured : hitWidget;
 
-        FArray<Ref<FWidget>> newHoverStack;
+        TArray<Ref<FWidget>> newHoverStack;
         BuildHoverStack(hoveredWidget.Get(), newHoverStack);
 
         UpdateCursor(hoveredWidget, surfaceMousePos);
@@ -588,7 +588,7 @@ namespace Fusion
 
 	Ref<FWidget> FSurface::FindNextFocusable(Ref<FWidget> current, bool reverse)
 	{
-        FArray<Ref<FWidget>> focusable;
+        TArray<Ref<FWidget>> focusable;
 
         std::function<void(Ref<FWidget>)> collect = [&](Ref<FWidget> widget)
         {

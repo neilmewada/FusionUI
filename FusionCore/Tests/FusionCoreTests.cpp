@@ -650,7 +650,7 @@ TEST(SignalTest, MoveSignal)
 
 TEST(FArrayTest, DefaultConstructorEmpty)
 {
-    FArray<int> arr;
+    TArray<int> arr;
     EXPECT_EQ(arr.Size(), 0);
     EXPECT_TRUE(arr.Empty());
     EXPECT_EQ(arr.Capacity(), 8); // default InlineCapacity
@@ -658,7 +658,7 @@ TEST(FArrayTest, DefaultConstructorEmpty)
 
 TEST(FArrayTest, InitializerList)
 {
-    FArray<int> arr = { 1, 2, 3 };
+    TArray<int> arr = { 1, 2, 3 };
     EXPECT_EQ(arr.Size(), 3);
     EXPECT_EQ(arr[0], 1);
     EXPECT_EQ(arr[1], 2);
@@ -667,7 +667,7 @@ TEST(FArrayTest, InitializerList)
 
 TEST(FArrayTest, AddAndAccess)
 {
-    FArray<int> arr;
+    TArray<int> arr;
     arr.Add(10);
     arr.Add(20);
     arr.Add(30);
@@ -678,7 +678,7 @@ TEST(FArrayTest, AddAndAccess)
 
 TEST(FArrayTest, EmplaceReturnsRef)
 {
-    FArray<std::string> arr;
+    TArray<std::string> arr;
     std::string& ref = arr.Emplace("hello");
     EXPECT_EQ(ref, "hello");
     EXPECT_EQ(arr.Size(), 1);
@@ -686,7 +686,7 @@ TEST(FArrayTest, EmplaceReturnsRef)
 
 TEST(FArrayTest, Pop)
 {
-    FArray<int> arr = { 1, 2, 3 };
+    TArray<int> arr = { 1, 2, 3 };
     arr.Pop();
     EXPECT_EQ(arr.Size(), 2);
     EXPECT_EQ(arr.Last(), 2);
@@ -694,13 +694,13 @@ TEST(FArrayTest, Pop)
 
 TEST(FArrayTest, PopEmpty)
 {
-    FArray<int> arr;
+    TArray<int> arr;
     EXPECT_THROW(arr.Pop(), FException);
 }
 
 TEST(FArrayTest, RemoveAtOrdered)
 {
-    FArray<int> arr = { 10, 20, 30, 40 };
+    TArray<int> arr = { 10, 20, 30, 40 };
     arr.RemoveAt(1); // remove 20
     EXPECT_EQ(arr.Size(), 3);
     EXPECT_EQ(arr[0], 10);
@@ -710,7 +710,7 @@ TEST(FArrayTest, RemoveAtOrdered)
 
 TEST(FArrayTest, RemoveAtSwapUnordered)
 {
-    FArray<int> arr = { 10, 20, 30, 40 };
+    TArray<int> arr = { 10, 20, 30, 40 };
     arr.RemoveAtSwapLast(1); // swaps 20 with 40
     EXPECT_EQ(arr.Size(), 3);
     EXPECT_EQ(arr[0], 10);
@@ -720,7 +720,7 @@ TEST(FArrayTest, RemoveAtSwapUnordered)
 
 TEST(FArrayTest, RemoveAtSwapLastElement)
 {
-    FArray<int> arr = { 10, 20, 30 };
+    TArray<int> arr = { 10, 20, 30 };
     arr.RemoveAtSwapLast(2); // removing last — no swap needed
     EXPECT_EQ(arr.Size(), 2);
     EXPECT_EQ(arr[0], 10);
@@ -729,7 +729,7 @@ TEST(FArrayTest, RemoveAtSwapLastElement)
 
 TEST(FArrayTest, Clear)
 {
-    FArray<int> arr = { 1, 2, 3 };
+    TArray<int> arr = { 1, 2, 3 };
     arr.Clear();
     EXPECT_EQ(arr.Size(), 0);
     EXPECT_TRUE(arr.Empty());
@@ -737,7 +737,7 @@ TEST(FArrayTest, Clear)
 
 TEST(FArrayTest, ReserveDoesNotShrink)
 {
-    FArray<int> arr;
+    TArray<int> arr;
     arr.Reserve(20);
     EXPECT_GE(arr.Capacity(), 20);
     arr.Reserve(5);
@@ -746,7 +746,7 @@ TEST(FArrayTest, ReserveDoesNotShrink)
 
 TEST(FArrayTest, ResizeDefaultValue)
 {
-    FArray<int> arr;
+    TArray<int> arr;
     arr.Resize(5);
     EXPECT_EQ(arr.Size(), 5);
     for (size_t i = 0; i < arr.Size(); ++i)
@@ -755,7 +755,7 @@ TEST(FArrayTest, ResizeDefaultValue)
 
 TEST(FArrayTest, ResizeWithValue)
 {
-    FArray<int> arr;
+    TArray<int> arr;
     arr.Resize(4, 42);
     EXPECT_EQ(arr.Size(), 4);
     for (size_t i = 0; i < arr.Size(); ++i)
@@ -764,7 +764,7 @@ TEST(FArrayTest, ResizeWithValue)
 
 TEST(FArrayTest, ResizeShrink)
 {
-    FArray<int> arr = { 1, 2, 3, 4, 5 };
+    TArray<int> arr = { 1, 2, 3, 4, 5 };
     arr.Resize(3);
     EXPECT_EQ(arr.Size(), 3);
     EXPECT_EQ(arr[2], 3);
@@ -772,22 +772,22 @@ TEST(FArrayTest, ResizeShrink)
 
 TEST(FArrayTest, Contains)
 {
-    FArray<int> arr = { 10, 20, 30 };
+    TArray<int> arr = { 10, 20, 30 };
     EXPECT_TRUE(arr.Contains(20));
     EXPECT_FALSE(arr.Contains(99));
 }
 
 TEST(FArrayTest, IndexOf)
 {
-    FArray<int> arr = { 10, 20, 30 };
+    TArray<int> arr = { 10, 20, 30 };
     EXPECT_EQ(arr.IndexOf(20), 1);
-    EXPECT_EQ(arr.IndexOf(99), FArray<int>::npos);
+    EXPECT_EQ(arr.IndexOf(99), TArray<int>::npos);
 }
 
 // SBO boundary: inline capacity is 8, adding a 9th element triggers heap growth
 TEST(FArrayTest, SBOInlineBoundary)
 {
-    FArray<int> arr;
+    TArray<int> arr;
     for (int i = 0; i < 8; ++i)
         arr.Add(i);
     EXPECT_EQ(arr.Size(), 8);
@@ -803,8 +803,8 @@ TEST(FArrayTest, SBOInlineBoundary)
 
 TEST(FArrayTest, CopyConstructor)
 {
-    FArray<int> a = { 1, 2, 3 };
-    FArray<int> b(a);
+    TArray<int> a = { 1, 2, 3 };
+    TArray<int> b(a);
     EXPECT_EQ(b.Size(), 3);
     EXPECT_EQ(b[0], 1);
     b[0] = 99;
@@ -813,8 +813,8 @@ TEST(FArrayTest, CopyConstructor)
 
 TEST(FArrayTest, MoveConstructorInline)
 {
-    FArray<int> a = { 1, 2, 3 };
-    FArray<int> b(std::move(a));
+    TArray<int> a = { 1, 2, 3 };
+    TArray<int> b(std::move(a));
     EXPECT_EQ(b.Size(), 3);
     EXPECT_EQ(b[0], 1);
     EXPECT_EQ(a.Size(), 0); // a emptied
@@ -822,11 +822,11 @@ TEST(FArrayTest, MoveConstructorInline)
 
 TEST(FArrayTest, MoveConstructorHeap)
 {
-    FArray<int> a;
+    TArray<int> a;
     for (int i = 0; i < 16; ++i) // force heap
         a.Add(i);
 
-    FArray<int> b(std::move(a));
+    TArray<int> b(std::move(a));
     EXPECT_EQ(b.Size(), 16);
     EXPECT_EQ(b[0], 0);
     EXPECT_EQ(b[15], 15);
@@ -835,8 +835,8 @@ TEST(FArrayTest, MoveConstructorHeap)
 
 TEST(FArrayTest, CopyAssignment)
 {
-    FArray<int> a = { 1, 2, 3 };
-    FArray<int> b;
+    TArray<int> a = { 1, 2, 3 };
+    TArray<int> b;
     b = a;
     EXPECT_EQ(b.Size(), 3);
     EXPECT_EQ(a.Size(), 3); // a unchanged
@@ -844,8 +844,8 @@ TEST(FArrayTest, CopyAssignment)
 
 TEST(FArrayTest, MoveAssignment)
 {
-    FArray<int> a = { 1, 2, 3 };
-    FArray<int> b;
+    TArray<int> a = { 1, 2, 3 };
+    TArray<int> b;
     b = std::move(a);
     EXPECT_EQ(b.Size(), 3);
     EXPECT_EQ(a.Size(), 0);
@@ -853,7 +853,7 @@ TEST(FArrayTest, MoveAssignment)
 
 TEST(FArrayTest, RangeFor)
 {
-    FArray<int> arr = { 1, 2, 3, 4 };
+    TArray<int> arr = { 1, 2, 3, 4 };
     int sum = 0;
     for (int v : arr)
         sum += v;
@@ -862,7 +862,7 @@ TEST(FArrayTest, RangeFor)
 
 TEST(FArrayTest, CustomInlineCapacity)
 {
-    FArray<int, 2> arr;
+    TArray<int, 2> arr;
     EXPECT_EQ(arr.Capacity(), 2);
     arr.Add(1);
     arr.Add(2);
@@ -874,7 +874,7 @@ TEST(FArrayTest, CustomInlineCapacity)
 
 TEST(FArrayTest, ZeroInlineCapacity)
 {
-    FArray<int, 0> arr;
+    TArray<int, 0> arr;
     EXPECT_EQ(arr.Capacity(), 0);
     arr.Add(1);
     EXPECT_EQ(arr.Size(), 1);
@@ -883,7 +883,7 @@ TEST(FArrayTest, ZeroInlineCapacity)
 
 TEST(FArrayTest, NonTrivialType)
 {
-    FArray<FString> arr;
+    TArray<FString> arr;
     arr.Add(FString("hello"));
     arr.Add(FString("world"));
     EXPECT_EQ(arr.Size(), 2);

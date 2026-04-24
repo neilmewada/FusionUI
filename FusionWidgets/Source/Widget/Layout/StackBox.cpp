@@ -125,7 +125,7 @@ namespace Fusion
         };
 
         // Collect fill children in iteration order (indices into children array)
-        FArray<FillEntry> fillEntries;
+        TArray<FillEntry> fillEntries;
         fillEntries.Reserve(GetChildCount());
 
         for (int i = 0; i < (int)GetChildCount(); i++)

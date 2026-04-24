@@ -144,7 +144,7 @@ namespace Fusion
             FHashMap<FName, IPtr<FBinaryNode>> NodesByImageName;
         };
 
-        FArray<IPtr<FAtlasLayer>> m_Layers;
+        TArray<IPtr<FAtlasLayer>> m_Layers;
 
         WeakRef<FApplicationInstance> m_ApplicationInstance;
 

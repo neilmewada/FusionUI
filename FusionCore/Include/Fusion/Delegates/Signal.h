@@ -173,7 +173,7 @@ namespace Fusion
             FDelegate<TReturn(TArgs...)> Delegate;
         };
 
-        FArray<FBinding, 1> m_Bindings;
+        TArray<FBinding, 1> m_Bindings;
         u32                 m_NextID      = 0;
         bool                m_Broadcasting = false;
     };

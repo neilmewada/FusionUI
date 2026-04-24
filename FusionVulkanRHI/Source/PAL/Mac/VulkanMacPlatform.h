@@ -18,8 +18,8 @@ namespace Fusion::Vulkan
         FVulkanMacPlatform() = delete;
         ~FVulkanMacPlatform() = delete;
 
-        static FArray<const char*> GetRequiredVulkanInstanceExtensions();
-        static FArray<const char*> GetRequiredInstanceLayers();
+        static TArray<const char*> GetRequiredVulkanInstanceExtensions();
+        static TArray<const char*> GetRequiredInstanceLayers();
         static VkInstanceCreateFlags GetRequiredInstanceFlags();
         static bool IsValidationEnabled();
 

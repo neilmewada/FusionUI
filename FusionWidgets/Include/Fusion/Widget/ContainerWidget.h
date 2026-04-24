@@ -47,7 +47,7 @@ namespace Fusion
 
         void SetWidgetFlagInternal(EWidgetFlags flag, bool set);
 
-        FArray<Ref<FWidget>> m_Children;
+        TArray<Ref<FWidget>> m_Children;
 
     public: // - Fusion Properties -
 

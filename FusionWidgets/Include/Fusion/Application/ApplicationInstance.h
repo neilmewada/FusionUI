@@ -131,7 +131,7 @@ namespace Fusion
 
 		FInstanceHandle m_InstanceHandle = FInstanceHandle::NullValue;
 
-		FArray<Ref<FSurface>>                        m_Surfaces;
+		TArray<Ref<FSurface>>                        m_Surfaces;
 		FHashMap<FWindowHandle, Ref<FNativeSurface>> m_NativeSurfacesByWindow;
 
 		WeakRef<FSurface> m_CurFocusSurface;
@@ -150,19 +150,19 @@ namespace Fusion
 		FHashMap<FUuid, FHashMap<FName, Ref<FAnimation>>> m_AnimationSlotsByWidget;
 
 		// Flat list of (ownerUuid, slot) pairs queued for removal this tick
-		FArray<FPair<FUuid, FName>> m_AnimationsToDestroy;
+		TArray<FPair<FUuid, FName>> m_AnimationsToDestroy;
 
 		// - Atlases
 
 		Ref<FFontAtlas> m_FontAtlas;
 		Ref<FImageAtlas> m_ImageAtlas;
 
-		FArray<WeakRef<FTimer>> m_Timers;
+		TArray<WeakRef<FTimer>> m_Timers;
 
 		// - Cursor -
 
 		FCursor m_ActiveCursor;
-		FArray<FCursor> m_CursorOverrideStack;
+		TArray<FCursor> m_CursorOverrideStack;
 
 	private:
 

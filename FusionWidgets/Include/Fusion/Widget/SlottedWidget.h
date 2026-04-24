@@ -36,7 +36,7 @@ namespace Fusion
 
     private:
 
-        FArray<Ref<FWidget>, 2> m_Slots;
+        TArray<Ref<FWidget>, 2> m_Slots;
 
     public:
 

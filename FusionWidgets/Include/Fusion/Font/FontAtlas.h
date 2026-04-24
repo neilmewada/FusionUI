@@ -122,7 +122,7 @@ namespace Fusion
         struct FAtlasImageLayer : FIntrusiveBase
         {
             //u8* Ptr = nullptr;
-            FArray<FRowSegment> Rows;
+            TArray<FRowSegment> Rows;
 
             bool TryInsertGlyph(FVec2i glyphSize, int& outX, int& outY);
         };
@@ -136,7 +136,7 @@ namespace Fusion
 
         FHashMap<FFontFaceKey, FFontFace> m_FontFaces;
 
-        FArray<IPtr<FAtlasImageLayer>> m_AtlasImageLayers;
+        TArray<IPtr<FAtlasImageLayer>> m_AtlasImageLayers;
         int m_CurLayerIndex = -1;
 
         FHashMap<FFontGlyphKey, FGlyph> m_Glyphs;

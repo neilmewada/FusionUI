@@ -28,7 +28,7 @@ namespace Fusion
 
         // Per-Tick changes
         FHashMap<EKeyCode, bool> stateChangesThisTick{};
-        FArray<EKeyCode> keyRepeatThisTick{};
+        TArray<EKeyCode> keyRepeatThisTick{};
         FHashMap<EMouseButton, int> mouseButtonStateChanges{};
 
         EKeyModifier modifierStates{};
@@ -75,8 +75,8 @@ namespace Fusion
         bool IsKeyUp(EKeyCode key) override;
         bool IsKeyHeld(EKeyCode key) override;
 
-        FArray<EKeyCode> GetKeysDownThisTick() override;
-        FArray<EKeyCode> GetKeysUpThisTick()   override;
+        TArray<EKeyCode> GetKeysDownThisTick() override;
+        TArray<EKeyCode> GetKeysUpThisTick()   override;
         FString          GetTextInputThisTick() override;
 
         bool IsMouseButtonDown(EMouseButton mouseButton) override;
@@ -147,8 +147,8 @@ namespace Fusion
         FVec2 m_WheelDelta{};
         FString m_TextInput{};
 
-        FArray<u64> m_FocusGainedWindows{};
-        FArray<u64> m_FocusLostWindows{};
+        TArray<u64> m_FocusGainedWindows{};
+        TArray<u64> m_FocusLostWindows{};
 
         FHashMap<EKeyCode, bool> m_KeyStates{};
         //HashMap<FKeyCode, Internal::KeyStateDelayed> keyStatesDelayed{};
@@ -156,7 +156,7 @@ namespace Fusion
 
         // Per-Tick changes
         FHashMap<EKeyCode, bool> m_StateChangesThisTick{};
-        FArray<EKeyCode> m_KeyRepeatThisTick{};
+        TArray<EKeyCode> m_KeyRepeatThisTick{};
         FHashMap<EMouseButton, int> m_MouseButtonStateChanges{};
 
         EKeyModifier m_ModifierStates{};

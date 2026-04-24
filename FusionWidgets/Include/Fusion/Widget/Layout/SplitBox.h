@@ -40,7 +40,7 @@ namespace Fusion
 
     protected:
 
-        FArray<FRect, 4> m_HandleRects;
+        TArray<FRect, 4> m_HandleRects;
 
         int   m_DraggedRect        = -1;
         bool  m_bIsDragHovered     = false;

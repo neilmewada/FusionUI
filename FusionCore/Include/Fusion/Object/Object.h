@@ -168,7 +168,7 @@ namespace Fusion
 
     private:
 
-		FArray<Ref<FObject>, 4> m_Subobjects;
+		TArray<Ref<FObject>, 4> m_Subobjects;
 
         FName m_Name;
 		WeakRef<FObject> m_Outer;

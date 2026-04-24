@@ -449,9 +449,9 @@ namespace Fusion
 			SDL_StopTextInput(sdlWindow->GetSdlHandle());
 	}
 
-	FArray<EKeyCode> FSDL3PlatformBackend::GetKeysDownThisTick()
+	TArray<EKeyCode> FSDL3PlatformBackend::GetKeysDownThisTick()
 	{
-		FArray<EKeyCode> result;
+		TArray<EKeyCode> result;
 		for (const auto& [key, isDown] : m_InputState.stateChangesThisTick)
 		{
 			if (isDown)
@@ -464,9 +464,9 @@ namespace Fusion
 		return result;
 	}
 
-	FArray<EKeyCode> FSDL3PlatformBackend::GetKeysUpThisTick()
+	TArray<EKeyCode> FSDL3PlatformBackend::GetKeysUpThisTick()
 	{
-		FArray<EKeyCode> result;
+		TArray<EKeyCode> result;
 		for (const auto& [key, isDown] : m_InputState.stateChangesThisTick)
 		{
 			if (!isDown)

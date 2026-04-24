@@ -54,13 +54,13 @@ namespace Fusion
     }
 
     template<typename T, size_t InlineCapacity>
-    class FArray;
+    class TArray;
 
     template<typename T>
 	struct TFIsArray : TFFalseType {};
 
     template<typename T, size_t InlineCapacity>
-    struct TFIsArray<FArray<T, InlineCapacity>> : TFTrueType {};
+    struct TFIsArray<TArray<T, InlineCapacity>> : TFTrueType {};
 
     template<typename T>
     class Ref;

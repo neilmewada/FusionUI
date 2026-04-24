@@ -83,7 +83,7 @@ namespace Fusion::Vulkan
 
 	void FDescriptorPool::Grow()
 	{
-		FArray<VkDescriptorPoolSize, 10> poolSizes = {
+		TArray<VkDescriptorPoolSize, 10> poolSizes = {
 			{.type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = 32 },
 			{.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = 32 },
 			{.type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 4 },
@@ -455,11 +455,11 @@ namespace Fusion::Vulkan
 		constexpr uint64_t kSwapChainTimeOut = UINT64_MAX;
 		constexpr uint64_t kFenceTimeOut = UINT64_MAX;
 
-		FArray<VkSemaphore> waitSemaphores;
-		FArray<VkPipelineStageFlags> waitSemaphoreStages;
+		TArray<VkSemaphore> waitSemaphores;
+		TArray<VkPipelineStageFlags> waitSemaphoreStages;
 
-		FArray<VkSwapchainKHR> presentSwapChains{};
-		FArray<uint32_t> presentImageIndices{};
+		TArray<VkSwapchainKHR> presentSwapChains{};
+		TArray<uint32_t> presentImageIndices{};
 
 		// - Wait for GPU -
 
@@ -624,8 +624,8 @@ namespace Fusion::Vulkan
 			{
 				views.DrawDataSets.Resize(views.DrawItemBuffers.Size());
 
-				FArray<VkDescriptorBufferInfo> bufferInfos(views.DrawItemBuffers.Size() * 3);
-				FArray<VkWriteDescriptorSet> setWrites(views.DrawItemBuffers.Size() * 3);
+				TArray<VkDescriptorBufferInfo> bufferInfos(views.DrawItemBuffers.Size() * 3);
+				TArray<VkWriteDescriptorSet> setWrites(views.DrawItemBuffers.Size() * 3);
 
 				for (SizeT layerIdx = 0; layerIdx < views.DrawItemBuffers.Size(); layerIdx++)
 				{
@@ -726,8 +726,8 @@ namespace Fusion::Vulkan
 			{
 				views.LayerTransformSets.Resize(views.LayerTransformBuffers.Size());
 
-				FArray<VkDescriptorBufferInfo> bufferInfos(views.LayerTransformBuffers.Size());
-				FArray<VkWriteDescriptorSet> setWrites(views.LayerTransformBuffers.Size());
+				TArray<VkDescriptorBufferInfo> bufferInfos(views.LayerTransformBuffers.Size());
+				TArray<VkWriteDescriptorSet> setWrites(views.LayerTransformBuffers.Size());
 
 				for (SizeT j = 0; j < views.LayerTransformBuffers.Size(); j++)
 				{
@@ -1119,8 +1119,8 @@ namespace Fusion::Vulkan
 		appInfo.apiVersion = VK_API_VERSION_1_0;
 		appInfo.pNext = nullptr;
 
-		FArray<const char*> requiredExtensions = FVulkanPlatform::GetRequiredVulkanInstanceExtensions();
-		FArray<const char*> requiredLayers = FVulkanPlatform::GetRequiredInstanceLayers();
+		TArray<const char*> requiredExtensions = FVulkanPlatform::GetRequiredVulkanInstanceExtensions();
+		TArray<const char*> requiredLayers = FVulkanPlatform::GetRequiredInstanceLayers();
 
 		VkInstanceCreateInfo instanceCI{};
 		instanceCI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -1161,7 +1161,7 @@ namespace Fusion::Vulkan
 		// Fetch all available physical devices
 		u32 physicalDeviceCount = 0;
 		vkEnumeratePhysicalDevices(m_VulkanInstance, &physicalDeviceCount, nullptr);
-		FArray<VkPhysicalDevice> physicalDevices{ physicalDeviceCount };
+		TArray<VkPhysicalDevice> physicalDevices{ physicalDeviceCount };
 		vkEnumeratePhysicalDevices(m_VulkanInstance, &physicalDeviceCount, physicalDevices.Data());
 
 		if (physicalDeviceCount == 0)
@@ -1278,11 +1278,11 @@ namespace Fusion::Vulkan
 
 		// - Device -
 
-		FArray<const char*> deviceExtensionNames{};
+		TArray<const char*> deviceExtensionNames{};
 
 		uint32_t deviceExtensionCount = 0;
 		vkEnumerateDeviceExtensionProperties(m_PhysicalDevice, nullptr, &deviceExtensionCount, nullptr);
-		FArray<VkExtensionProperties> deviceExtensionProperties(deviceExtensionCount);
+		TArray<VkExtensionProperties> deviceExtensionProperties(deviceExtensionCount);
 		vkEnumerateDeviceExtensionProperties(m_PhysicalDevice, nullptr, &deviceExtensionCount, deviceExtensionProperties.Data());
 
 		deviceExtensionNames.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
@@ -1574,7 +1574,7 @@ namespace Fusion::Vulkan
 				VkDescriptorSetLayoutCreateInfo setLayoutCI{};
 				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 				
-				FArray<VkDescriptorSetLayoutBinding> bindings{};
+				TArray<VkDescriptorSetLayoutBinding> bindings{};
 
 				bindings.Add({ // _TextureArray
 					.binding = 1,
@@ -1634,7 +1634,7 @@ namespace Fusion::Vulkan
 				VkDescriptorSetLayoutCreateInfo setLayoutCI{};
 				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 				
-				FArray<VkDescriptorSetLayoutBinding> bindings{};
+				TArray<VkDescriptorSetLayoutBinding> bindings{};
 				bindings.Add({ // _ViewData
 					.binding = 0,
 					.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -1658,7 +1658,7 @@ namespace Fusion::Vulkan
 				VkDescriptorSetLayoutCreateInfo setLayoutCI{};
 				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
-				FArray<VkDescriptorSetLayoutBinding> bindings{};
+				TArray<VkDescriptorSetLayoutBinding> bindings{};
 				bindings.Add({ // _LayerTransform
 					.binding = 0,
 					.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -1682,7 +1682,7 @@ namespace Fusion::Vulkan
 				VkDescriptorSetLayoutCreateInfo setLayoutCI{};
 				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
-				FArray<VkDescriptorSetLayoutBinding> bindings{};
+				TArray<VkDescriptorSetLayoutBinding> bindings{};
 
 				bindings.Add({ // _DrawItems
 					.binding = 0,
@@ -1884,7 +1884,7 @@ namespace Fusion::Vulkan
 				VkDescriptorSetLayoutCreateInfo setLayoutCI{};
 				setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
-				FArray<VkDescriptorSetLayoutBinding> bindings{};
+				TArray<VkDescriptorSetLayoutBinding> bindings{};
 
 				bindings.Add({ // _InputTexture
 					.binding = 0,
@@ -2228,7 +2228,7 @@ namespace Fusion::Vulkan
 		uint32_t presentModesCount = 0;
 		vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, swapChain->m_Surface, &presentModesCount, nullptr);
 
-		FArray<VkPresentModeKHR> presentModes(presentModesCount);
+		TArray<VkPresentModeKHR> presentModes(presentModesCount);
 		vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, swapChain->m_Surface, &presentModesCount, presentModes.Data());
 
 		VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
@@ -2254,7 +2254,7 @@ namespace Fusion::Vulkan
 		uint32_t swapChainImageCount = 0;
 		vkGetSwapchainImagesKHR(m_Device, swapChain->m_SwapChain, &swapChainImageCount, nullptr);
 
-		FArray<VkImage> swapChainImages(swapChainImageCount);
+		TArray<VkImage> swapChainImages(swapChainImageCount);
 		vkGetSwapchainImagesKHR(m_Device, swapChain->m_SwapChain, &swapChainImageCount, swapChainImages.Data());
 
 		for (uint32_t i = 0; i < swapChainImageCount; i++)

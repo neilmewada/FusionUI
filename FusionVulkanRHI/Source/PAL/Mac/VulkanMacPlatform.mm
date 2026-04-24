@@ -9,7 +9,7 @@
 
 namespace Fusion::Vulkan
 {
-    FArray<const char*> FVulkanMacPlatform::GetRequiredVulkanInstanceExtensions()
+    TArray<const char*> FVulkanMacPlatform::GetRequiredVulkanInstanceExtensions()
     {
         return {
             VK_KHR_SURFACE_EXTENSION_NAME,
@@ -21,7 +21,7 @@ namespace Fusion::Vulkan
         };
     }
 
-    FArray<const char*> FVulkanMacPlatform::GetRequiredInstanceLayers()
+    TArray<const char*> FVulkanMacPlatform::GetRequiredInstanceLayers()
     {
         return {
 #if FUSION_VULKAN_VALIDATION

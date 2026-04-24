@@ -108,9 +108,9 @@ namespace Fusion
         Ref<FLayerTree> m_LayerTree;
 
         FHashSet<FUuid> m_PendingLayoutRootIds;
-        FArray<Ref<FWidget>> m_PendingLayoutRoots;
+        TArray<Ref<FWidget>> m_PendingLayoutRoots;
 
-        FArray<Ref<FSurface>> m_ChildSurfaces;
+        TArray<Ref<FSurface>> m_ChildSurfaces;
 
         WeakRef<FSurface> m_ParentSurface;
 
@@ -134,7 +134,7 @@ namespace Fusion
 
         // - Event -
 
-        FArray<WeakRef<FWidget>> m_HoveredWidgetStack;
+        TArray<WeakRef<FWidget>> m_HoveredWidgetStack;
         std::array<WeakRef<FWidget>, 5> m_PressedWidgetPerButton;
         WeakRef<FWidget> m_CurFocusedWidget, m_NextFocusWidget;
         bool             m_bNextFocusFromKeyboard = false;

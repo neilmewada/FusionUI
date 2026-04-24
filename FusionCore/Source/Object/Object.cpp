@@ -36,7 +36,7 @@ namespace Fusion
 
 		i64 index = m_Subobjects.IndexOf(subobject);
 
-		if (index != FArray<>::npos)
+		if (index != TArray<>::npos)
 		{
 			subobject->OnDetachFromOuter();
 			OnSubobjectDetached(subobject);
