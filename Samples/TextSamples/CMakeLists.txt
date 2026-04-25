@@ -5,7 +5,7 @@ file(GLOB_RECURSE SAMPLES_SOURCES CONFIGURE_DEPENDS
 )
 
 add_executable(TextSamples ${SAMPLES_SOURCES})
-add_executable(Fusion::TextSamples ALIAS TextSamples)
+add_executable(FusionSamples::TextSamples ALIAS TextSamples)
 
 target_link_libraries(TextSamples
     PUBLIC

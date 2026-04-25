@@ -5,7 +5,7 @@ file(GLOB_RECURSE SAMPLES_SOURCES CONFIGURE_DEPENDS
 )
 
 add_executable(Sandbox ${SAMPLES_SOURCES})
-add_executable(Fusion::Sandbox ALIAS Sandbox)
+add_executable(FusionSamples::Sandbox ALIAS Sandbox)
 
 target_link_libraries(Sandbox
     PUBLIC

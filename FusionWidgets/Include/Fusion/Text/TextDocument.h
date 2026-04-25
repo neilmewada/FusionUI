@@ -3,7 +3,7 @@
 namespace Fusion
 {
 
-    class FUSIONWIDGETS_API FTextDocument : public FIntrusiveBase
+    class FUSIONWIDGETS_API FTextDocument
     {
     public:
 

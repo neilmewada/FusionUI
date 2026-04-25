@@ -5,8 +5,8 @@
 
 namespace Fusion
 {
-    FTextEditor::FTextEditor()
+    FTreeViewHeader::FTreeViewHeader()
     {
 
     }
-}
+} // namespace Fusion

@@ -5,8 +5,9 @@
 
 namespace Fusion
 {
-    FTextEditor::FTextEditor()
+    FItemView::FItemView()
     {
-
+        m_ClipContent = true;
+        m_ClipShape = FRectangle();
     }
 }

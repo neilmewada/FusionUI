@@ -51,3 +51,5 @@
 #include "Fusion/Delegates/Delegate.h"
 #include "Fusion/Delegates/Signal.h"
 
+#include "Fusion/Object/Variant.h"
+

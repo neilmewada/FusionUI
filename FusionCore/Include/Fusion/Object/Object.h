@@ -22,7 +22,7 @@
     FUSION_CLASS_BODY(SelfClass)\
     static FTypeID StaticSuperClassTypeID() { thread_local const FTypeID typeId = ::Fusion::GetTypeID<Super>(); return typeId; }\
     template<FObjectType TObject, typename... TArgs>\
-	friend Ref<TObject> NewObject(FObject* outer, TArgs&&... args);\
+	friend Ref<TObject> Fusion::NewObject(FObject* outer, TArgs&&... args);\
     bool IsOfType(FTypeID typeId) const override\
 	{\
 		static_assert(std::is_base_of_v<SuperClass, SelfClass>, "The base class mentioned in FUSION_WIDGET/FUSION_CLASS does not match with actual base class in " #SelfClass);\
@@ -31,6 +31,8 @@
 
 namespace Fusion
 {
+    class FObject;
+
     template<FObjectType TObject, typename... TArgs>
     Ref<TObject> NewObject(FObject* outer, TArgs&&... args);
 

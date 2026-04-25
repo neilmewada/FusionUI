@@ -6,20 +6,16 @@
 namespace Fusion
 {
 
-    class FUSIONWIDGETS_API FTextEditor : public FDecoratedWidget
+    class FUSIONWIDGETS_API FTreeViewHeader : public FDecoratedBox
     {
-        FUSION_WIDGET(FTextEditor, FDecoratedWidget)
+        FUSION_WIDGET(FTreeViewHeader, FDecoratedBox)
     protected:
 
-        FTextEditor();
+        FTreeViewHeader();
 
     public:
 
-
     protected:
-
-        FTextDocument m_Document;
-
     };
     
 } // namespace Fusion

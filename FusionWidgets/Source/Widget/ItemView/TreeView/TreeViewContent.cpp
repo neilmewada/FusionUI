@@ -5,5 +5,16 @@
 
 namespace Fusion
 {
-    
+    FTreeViewContent::FTreeViewContent()
+    {
+
+    }
+
+    void FTreeViewContent::Construct()
+    {
+        Super::Construct();
+
+
+    }
+
 } // namespace Fusion
