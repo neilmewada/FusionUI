@@ -1084,10 +1084,14 @@ namespace Fusion
 		FFontAtlas* atlas = m_Application->GetFontAtlas().Get();
 		FUSION_ASSERT(atlas != nullptr, "Font Atlas not found!");
 
-		const f32 scale      = m_CurrentFont.GetPointSize() / (f32)FFontAtlas::kSdfRenderSize;
-		const f32 lineHeight = m_CurrentFont.GetPointSize() * 1.2f;
-		const f32 ascender   = m_CurrentFont.GetPointSize() * 0.8f;
-		const f32 rectWidth  = rect.GetSize().x;
+		const f32 scale    = m_CurrentFont.GetPointSize() / (f32)FFontAtlas::kSdfRenderSize;
+		const f32 rectWidth = rect.GetSize().x;
+
+		const FFontMetrics fontMetrics = atlas->GetScaledMetrics(m_CurrentFont);
+		const f32 ascender   = fontMetrics.Ascender;
+		const f32 lineHeight = fontMetrics.LineHeight > 0.001f
+		                           ? fontMetrics.LineHeight
+		                           : m_CurrentFont.GetPointSize() * 1.2f;  // fallback if face not found
 
 		// --- Pass 1: collect codepoints and build lines ---
 

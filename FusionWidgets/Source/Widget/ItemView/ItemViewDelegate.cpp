@@ -6,7 +6,7 @@ namespace Fusion
     {
         constexpr f32 kIconSpacing = 1.0f;
 
-        const bool expandable = info.View->IsExpandable();
+        const bool expandable = index.Column() == 0 && info.View->IsExpandable();
         const u32 childrenCount = info.Model->GetRowCount(index);
         const bool showExpander = expandable && childrenCount > 0;
         const f32 iconWidth = info.View->IconWidth();
@@ -20,9 +20,6 @@ namespace Fusion
         painter.PushClip(info.Rect, FRectangle());
 
         thread_local const FName caretRight = "embed:/Icons/CaretRight.png";
-
-        painter.SetBrush(FColors::Black);
-        painter.FillRect(info.Rect);
 
         if (showExpander)
         {
