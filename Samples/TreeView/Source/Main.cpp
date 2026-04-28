@@ -473,6 +473,7 @@ int main(int argc, char* argv[])
 
 		    Shape = FRoundedRectangle(0, 0, 5.0f, 5.0f);
 		}
+
 	});
 
 	app.CreateMainWindow<SampleWindow>();

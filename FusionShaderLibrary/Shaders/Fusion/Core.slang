@@ -1,4 +1,6 @@
 
+static constexpr uint MAX_CLIP_RECT_DEPTH = 8;
+
 // = Data Structures =
 
 enum class FUIShaderType : uint
@@ -42,7 +44,8 @@ struct FUIClipRect
     float4x4 clipInverseTransform; // clip-owner layer-local → clip-local
     float4 cornerRadii;            // topLeft, topRight, bottomRight, bottomLeft
     float2 clipHalfSize;
-    int _pad[2];
+    int parentClipIndex;           // -1 = no parent (root clip)
+    int _pad;
 };
 
 struct FUIGradientStop

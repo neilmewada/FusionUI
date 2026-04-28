@@ -56,7 +56,8 @@ namespace Fusion
 		FMat4 clipInverseTransform;
 		FVec4 cornerRadii;
 		FVec2 clipHalfSize;
-		int _pad[2];
+		int   parentClipIndex = -1;  // -1 = no parent (root clip)
+		int   _pad;
 	};
 
 	struct FUIGradientStop

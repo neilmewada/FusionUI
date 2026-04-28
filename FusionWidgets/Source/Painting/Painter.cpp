@@ -418,7 +418,9 @@ namespace Fusion
 
 	void FPainter::PushClip(const FRect& rect, const FShape& shape)
 	{
-		int index = (int)m_DrawList->clipRectArray.GetCount();
+		// Capture parent before pushing so the new clip knows its ancestor
+		const int parentClipIndex = m_ClipStack.IsEmpty() ? -1 : m_ClipStack.Last();
+		const int index = (int)m_DrawList->clipRectArray.GetCount();
 
 		m_ClipStack.Insert(index);
 
@@ -440,8 +442,9 @@ namespace Fusion
 
 		m_DrawList->clipRectArray.Insert(FUIClipRect{
 			.clipInverseTransform = (GetCurrentTransform() * FAffineTransform::Translation(clipCenter)).ToMat4().GetInverse(),
-			.cornerRadii = radii,
-			.clipHalfSize = halfSize
+			.cornerRadii          = radii,
+			.clipHalfSize         = halfSize,
+			.parentClipIndex      = parentClipIndex,
 		});
 	}
 

@@ -30,13 +30,20 @@ float4 PSMain(VSOutput input) : SV_Target
     const FUIDrawItemFlags flags = item.flags;
 
     // - Clipping -
+    // Walk the clip chain from innermost to outermost, multiplying alpha at
+    // each level. Unrolled to 8 iterations — the break turns into a GPU
+    // conditional move, adding no branch overhead.
 
-    if (item.clipRectIndex >= 0)
+    int clipIdx = item.clipRectIndex;
+    [unroll]
+    for (int clipDepth = 0; clipDepth < MAX_CLIP_RECT_DEPTH; clipDepth++)
     {
-        FUIClipRect clip = _ClipRects[item.clipRectIndex];
+        if (clipIdx < 0) break;
+        FUIClipRect clip = _ClipRects[clipIdx];
         float2 clipLocalPos = mul(float4(input.layerPos, 0.0, 1.0), clip.clipInverseTransform).xy;
         float dist = SDFRoundedRect(clipLocalPos, clip.clipHalfSize, clip.cornerRadii);
         color.a *= saturate(0.5 - dist);
+        clipIdx = clip.parentClipIndex;
     }
 
     // - Shading -
