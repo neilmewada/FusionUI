@@ -43,20 +43,17 @@ namespace Fusion
             childWidths     = header->GetChildrenWidths();
             splitterSpacing = header->GetSplitterSpacing();
 
-            // childWidths are in header space. Scale them to fit the row's
-            // actual width — the scrollbar and any content padding make the
-            // row narrower than the header, so we preserve proportions.
+            // The row is narrower than the header by a constant amount
+            // (scrollbar width + content padding). Keep all column boundaries
+            // at exactly the same pixel positions as the header splitters —
+            // just absorb the difference into the last column's right edge.
             f32 totalHeaderWidth = splitterSpacing * (f32)childWidths.Size();
             for (f32 w : childWidths)
                 totalHeaderWidth += w;
 
-            if (totalHeaderWidth > 0.001f)
-            {
-                const f32 scale = layoutSize.width / totalHeaderWidth;
-                for (f32& w : childWidths)
-                    w *= scale;
-                splitterSpacing *= scale;
-            }
+            const f32 widthDiff = totalHeaderWidth - layoutSize.width;
+            if (!childWidths.Empty() && widthDiff > 0.001f)
+                childWidths.Last() -= widthDiff;
         }
         else
         {
