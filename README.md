@@ -12,6 +12,8 @@ A cross-platform C++23 retained-mode UI library with declarative widgets, a type
 
 ### ⭐ Feel free to star the project to show your support!
 
+Join discord server here: https://discord.gg/TXGWUrFarx
+
 [Quick Start](#quick-start) | [Building](#building) | [Features](#features)
 
 ![](./Screenshots/Sample2.png)
