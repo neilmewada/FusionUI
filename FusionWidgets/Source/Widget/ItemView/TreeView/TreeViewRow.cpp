@@ -103,6 +103,7 @@ namespace Fusion
 
             paintInfo.Rect = FRect::FromSize(FVec2(colX, colY), FVec2(colW, colH));
             paintInfo.Model = model;
+            paintInfo.View = treeView;
 
             delegate->Paint(painter, index, paintInfo);
 

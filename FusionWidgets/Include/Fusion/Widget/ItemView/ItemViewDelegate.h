@@ -9,6 +9,7 @@ namespace Fusion
 
     struct FItemViewPaintInfo
     {
+        Ref<FItemView> View;
         Ref<FItemModel> Model;
         FRect Rect;
     };

@@ -14,6 +14,8 @@ namespace Fusion
 
     public:
 
+        virtual bool IsExpandable() const { return false; }
+
     protected:
 
         virtual void OnModelChanged() {}
@@ -42,5 +44,8 @@ namespace Fusion
 
         FUSION_STATE_PROPERTY(Ref<FItemViewDelegate>, ItemDelegate);
 
+        FUSION_STYLE_PROPERTIES(
+            (f32, IconWidth, Layout)
+        );
     };
 }

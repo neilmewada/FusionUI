@@ -20,6 +20,8 @@ namespace Fusion
 
     public:
 
+        bool IsExpandable() const override { return true; }
+
         Ref<FTreeViewHeader> GetHeader() const { return m_Header; }
 
     protected:
