@@ -15,6 +15,7 @@ namespace Fusion
         const bool  hasIcons      = iconWidth > 0.001f && info.Model->HasIcons(index.Column());
         const FVec2 rectSize      = info.Rect.GetSize();
         const f32   centerY       = info.Rect.min.y + rectSize.height * 0.5f;
+        const bool  isExpanded    = info.View->IsExpanded(index);
 
         painter.PushClip(info.Rect, FRectangle());
 
@@ -29,8 +30,9 @@ namespace Fusion
             if (showExpander)
             {
                 thread_local const FName caretRight = "embed:/Icons/CaretRight.png";
+                thread_local const FName caretDown = "embed:/Icons/CaretDown.png";
 
-                FBrush chevronBrush = FBrush::Image(caretRight)
+                FBrush chevronBrush = FBrush::Image(isExpanded ? caretDown : caretRight)
                     .BrushSize(FVec2(chevronSize, chevronSize));
 
                 painter.SetBrush(chevronBrush);

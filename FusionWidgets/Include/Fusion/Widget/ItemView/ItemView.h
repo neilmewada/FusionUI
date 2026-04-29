@@ -16,6 +16,8 @@ namespace Fusion
 
         virtual bool IsExpandable() const { return false; }
 
+        virtual bool IsExpanded(FModelIndex index) { return false; }
+
     protected:
 
         virtual void OnModelChanged() {}

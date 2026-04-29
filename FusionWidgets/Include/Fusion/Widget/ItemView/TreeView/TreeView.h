@@ -24,6 +24,10 @@ namespace Fusion
 
         Ref<FTreeViewHeader> GetHeader() const { return m_Header; }
 
+        Ref<FTreeViewContent> GetContent() const { return m_Content; }
+
+        bool IsExpanded(FModelIndex index) override;
+
     protected:
 
         void OnModelChanged() override;

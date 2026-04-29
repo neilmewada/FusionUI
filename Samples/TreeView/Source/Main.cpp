@@ -34,40 +34,132 @@ public:
     {
         rootNode.Name = "Project";
 
+        // Source/
         auto* src = rootNode.AddChild("Source", false);
-        src->AddChild("Main.cpp", true);
-        src->AddChild("App.cpp",  true);
-        src->AddChild("App.h",    true);
-        auto* core = src->AddChild("Core", false);
-            core->AddChild("Engine.cpp", true);
-            core->AddChild("Engine.h",   true);
-            core->AddChild("Types.h",    true);
-        auto* renderer = src->AddChild("Renderer", false);
-            renderer->AddChild("Renderer.cpp",   true);
-            renderer->AddChild("Renderer.h",     true);
-            renderer->AddChild("RenderPass.cpp", true);
-            renderer->AddChild("RenderPass.h",   true);
+        src->AddChild("Main.cpp",    true);
+        src->AddChild("App.cpp",     true);
+        src->AddChild("App.h",       true);
+        src->AddChild("AppConfig.h", true);
 
+        auto* core = src->AddChild("Core", false);
+            core->AddChild("Engine.cpp",    true);
+            core->AddChild("Engine.h",      true);
+            core->AddChild("Types.h",       true);
+            core->AddChild("Defines.h",     true);
+            core->AddChild("Assert.h",      true);
+            auto* math = core->AddChild("Math", false);
+                math->AddChild("Vec2.h",    true);
+                math->AddChild("Vec3.h",    true);
+                math->AddChild("Vec4.h",    true);
+                math->AddChild("Mat4.h",    true);
+                math->AddChild("MathUtil.h",true);
+
+        auto* renderer = src->AddChild("Renderer", false);
+            renderer->AddChild("Renderer.cpp",      true);
+            renderer->AddChild("Renderer.h",        true);
+            renderer->AddChild("RenderPass.cpp",    true);
+            renderer->AddChild("RenderPass.h",      true);
+            renderer->AddChild("RenderGraph.cpp",   true);
+            renderer->AddChild("RenderGraph.h",     true);
+            auto* rhi = renderer->AddChild("RHI", false);
+                rhi->AddChild("Buffer.h",       true);
+                rhi->AddChild("Texture.h",      true);
+                rhi->AddChild("Pipeline.h",     true);
+                rhi->AddChild("CommandList.h",  true);
+                rhi->AddChild("VulkanRHI.cpp",  true);
+                rhi->AddChild("VulkanRHI.h",    true);
+
+        auto* ui = src->AddChild("UI", false);
+            ui->AddChild("Widget.h",        true);
+            ui->AddChild("Button.cpp",      true);
+            ui->AddChild("Button.h",        true);
+            ui->AddChild("Panel.cpp",       true);
+            ui->AddChild("Panel.h",         true);
+            auto* uiLayouts = ui->AddChild("Layouts", false);
+                uiLayouts->AddChild("StackLayout.h",  true);
+                uiLayouts->AddChild("GridLayout.h",   true);
+                uiLayouts->AddChild("FlexLayout.h",   true);
+
+        auto* platform = src->AddChild("Platform", false);
+            platform->AddChild("Platform.h",         true);
+            auto* win = platform->AddChild("Windows", false);
+                win->AddChild("WinPlatform.cpp", true);
+                win->AddChild("WinPlatform.h",   true);
+                win->AddChild("WinWindow.cpp",   true);
+            auto* mac = platform->AddChild("Mac", false);
+                mac->AddChild("MacPlatform.mm",  true);
+                mac->AddChild("MacPlatform.h",   true);
+                mac->AddChild("MacWindow.mm",    true);
+
+        // Assets/
         auto* assets = rootNode.AddChild("Assets", false);
         auto* textures = assets->AddChild("Textures", false);
-            textures->AddChild("logo.png",       true);
-            textures->AddChild("background.jpg", true);
-            textures->AddChild("icons.png",      true);
-        auto* shaders = assets->AddChild("Shaders", false);
-            shaders->AddChild("vertex.glsl",   true);
-            shaders->AddChild("fragment.glsl", true);
-            shaders->AddChild("compute.glsl",  true);
-        auto* fonts = assets->AddChild("Fonts", false);
-            fonts->AddChild("Inter-Regular.ttf", true);
-            fonts->AddChild("Inter-Bold.ttf",    true);
+            textures->AddChild("logo.png",          true);
+            textures->AddChild("background.jpg",    true);
+            textures->AddChild("icons.png",         true);
+            textures->AddChild("splash.png",        true);
+            auto* ui_tex = textures->AddChild("UI", false);
+                ui_tex->AddChild("button_normal.png",  true);
+                ui_tex->AddChild("button_hover.png",   true);
+                ui_tex->AddChild("button_pressed.png", true);
+                ui_tex->AddChild("panel_bg.png",       true);
 
+        auto* shaders = assets->AddChild("Shaders", false);
+            shaders->AddChild("vertex.glsl",      true);
+            shaders->AddChild("fragment.glsl",    true);
+            shaders->AddChild("compute.glsl",     true);
+            shaders->AddChild("shadow.glsl",      true);
+            shaders->AddChild("post_process.glsl",true);
+            auto* includes = shaders->AddChild("Include", false);
+                includes->AddChild("common.glsl",   true);
+                includes->AddChild("lighting.glsl", true);
+                includes->AddChild("pbr.glsl",      true);
+
+        auto* fonts = assets->AddChild("Fonts", false);
+            fonts->AddChild("Inter-Regular.ttf",    true);
+            fonts->AddChild("Inter-Bold.ttf",       true);
+            fonts->AddChild("Inter-Italic.ttf",     true);
+            fonts->AddChild("Mono-Regular.ttf",     true);
+
+        auto* audio = assets->AddChild("Audio", false);
+            audio->AddChild("click.wav",     true);
+            audio->AddChild("hover.wav",     true);
+            audio->AddChild("ambient.ogg",   true);
+
+        // Config/
+        auto* config = rootNode.AddChild("Config", false);
+            config->AddChild("engine.ini",   true);
+            config->AddChild("editor.ini",   true);
+            config->AddChild("input.ini",    true);
+            config->AddChild("render.ini",   true);
+
+        // Docs/
         auto* docs = rootNode.AddChild("Docs", false);
-        docs->AddChild("README.md",    true);
-        docs->AddChild("CHANGELOG.md", true);
-        docs->AddChild("API.md",       true);
+        docs->AddChild("README.md",         true);
+        docs->AddChild("CHANGELOG.md",      true);
+        docs->AddChild("API.md",            true);
+        docs->AddChild("CONTRIBUTING.md",   true);
+        docs->AddChild("ARCHITECTURE.md",   true);
+        auto* guides = docs->AddChild("Guides", false);
+            guides->AddChild("GettingStarted.md", true);
+            guides->AddChild("Rendering.md",      true);
+            guides->AddChild("UISystem.md",       true);
+
+        // Tests/
+        auto* tests = rootNode.AddChild("Tests", false);
+            auto* unit = tests->AddChild("Unit", false);
+                unit->AddChild("MathTests.cpp",     true);
+                unit->AddChild("RenderTests.cpp",   true);
+                unit->AddChild("UITests.cpp",       true);
+            auto* integration = tests->AddChild("Integration", false);
+                integration->AddChild("SceneTests.cpp",    true);
+                integration->AddChild("PlatformTests.cpp", true);
 
         rootNode.AddChild("CMakeLists.txt", true);
+        rootNode.AddChild("CMakePresets.json", true);
         rootNode.AddChild(".gitignore",     true);
+        rootNode.AddChild(".clang-format",  true);
+        rootNode.AddChild("vcpkg.json",     true);
     }
 
     u32 GetColumnCount(const FModelIndex& parent) override

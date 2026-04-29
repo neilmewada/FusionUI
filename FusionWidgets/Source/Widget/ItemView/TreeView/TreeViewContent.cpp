@@ -233,8 +233,9 @@ namespace Fusion
             Ref<FTreeViewRow> row = m_Rows[i - firstRow];
             row->Excluded(false);
             row->m_FlatRowIndex = i;
-            row->SubStyle(i % 2 == 0 ? "RowAlternate" : "Row");
             FModelIndex index = m_FlatRows[i].index;
+            row->m_RowIndex = index;
+            row->SubStyle(i % 2 == 0 ? "RowAlternate" : "Row");
             if (index.IsValid())
             {
                 const FModelIndex& parentIndex = m_FlatRows[i].parentIndex;

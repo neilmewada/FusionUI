@@ -25,6 +25,11 @@ namespace Fusion
 
         void OnScrollOffsetChanged(FVec2 offset);
 
+        bool IsExpanded(FModelIndex index) const
+        {
+            return m_ExpandedItems.Contains(index);
+        }
+
         // - Layout -
 
         FVec2 MeasureContent(FVec2 availableSize) override;
@@ -66,6 +71,8 @@ namespace Fusion
             self.m_TreeView = value;
             return self;
         }
+
+        friend class FTreeViewRow;
     };
     
 } // namespace Fusion

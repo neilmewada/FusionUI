@@ -32,6 +32,7 @@ namespace Fusion
                 .CanScrollVertical(true)
                 .HorizontalScrollVisibility(EScrollbarVisibility::Auto)
                 .VerticalScrollVisibility(EScrollbarVisibility::Auto)
+                .ScrollSpeed(10.0f)
                 .SubStyle("ScrollBox")
                 .Child(
                     FAssignNew(FTreeViewContent, m_Content)
@@ -45,6 +46,11 @@ namespace Fusion
                 .FillRatio(1.0f)
             )
         );
+    }
+
+    bool FTreeView::IsExpanded(FModelIndex index)
+    {
+        return m_Content->IsExpanded(index);
     }
 
     void FTreeView::OnModelChanged()

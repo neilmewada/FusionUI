@@ -16,5 +16,6 @@ namespace Fusion
         m_RowIconGap = 6.0f;
         m_RowIconWidth = 16.0f;
         m_RowLeftPadding = 4.0f;
+        m_RowIndentWidth = 8.0f;
     }
 }

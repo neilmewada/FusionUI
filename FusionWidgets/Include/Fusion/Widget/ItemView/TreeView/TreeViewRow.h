@@ -28,6 +28,7 @@ namespace Fusion
         void OnMouseEnter(FMouseEvent& event) override;
         FEventReply OnMouseMove(FMouseEvent& event) override;
         void OnMouseLeave(FMouseEvent& event) override;
+        FEventReply OnMouseButtonDown(FMouseEvent& event) override;
 
     protected:
 
@@ -35,6 +36,7 @@ namespace Fusion
         WeakRef<FTreeView> m_TreeView;
         TArray<FModelIndex> m_Columns;
         int m_FlatRowIndex = 0;
+        FModelIndex m_RowIndex;
 
     private:
 

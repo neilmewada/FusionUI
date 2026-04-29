@@ -119,4 +119,19 @@ namespace Fusion
         SetStyleStateFlag(EStyleState::Hovered, false);
     }
 
+    FEventReply FTreeViewRow::OnMouseButtonDown(FMouseEvent& event)
+    {
+        if (event.IsLeftButton())
+        {
+            if (event.ClickCount == 2)
+            {
+                if (Ref<FTreeView> treeView = GetTreeView())
+                {
+                    treeView->GetContent()->ToggleExpanded(m_RowIndex);
+                }
+            }
+            return FEventReply::Handled();
+        }
+        return Super::OnMouseButtonDown(event);
+    }
 } // namespace Fusion
