@@ -41,20 +41,26 @@ namespace Fusion
         struct FTreeViewFlatRow
         {
             FModelIndex index;
-            FModelIndex parentIndex;  // cached to avoid GetParent() calls during scroll
+            FModelIndex parentIndex;    // cached to avoid GetParent() calls during scroll
             int         depth;
             bool        hasChildren;
+            u64         continuationMask = 0; // bit d = 1 → ancestor at depth d has more siblings after this row
         };
 
         Ref<FScrollBox> GetParentScrollBox();
 
         void RebuildFlatRows();
-        void AppendRows(FModelIndex parent, int depth);
-
-        void ToggleExpanded(FModelIndex index);
-        void CollectRows(FModelIndex parent, int depth, TArray<FTreeViewFlatRow>& out);
+        void AppendRows(FModelIndex parent, int depth, u64 parentMask);
+        void CollectRows(FModelIndex parent, int depth, TArray<FTreeViewFlatRow>& out, u64 parentMask);
 
         void UpdateVisibleRows(FVec2 finalSize);
+
+    public:
+
+        // Takes the flat row index directly — O(1), no linear search.
+        void ToggleExpanded(int flatIdx);
+
+    protected:
 
         WeakRef<FTreeView> m_TreeView;
 

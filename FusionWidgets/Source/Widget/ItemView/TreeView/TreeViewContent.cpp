@@ -35,10 +35,10 @@ namespace Fusion
     void FTreeViewContent::RebuildFlatRows()
     {
         m_FlatRows.Clear();
-        AppendRows({}, 0);  // start from root
+        AppendRows({}, 0, 0ULL);
     }
 
-    void FTreeViewContent::AppendRows(FModelIndex parent, int depth)
+    void FTreeViewContent::AppendRows(FModelIndex parent, int depth, u64 parentMask)
     {
         Ref<FTreeView> treeView = GetTreeView();
         if (!treeView)
@@ -51,12 +51,19 @@ namespace Fusion
         u32 count = model->GetRowCount(parent);
         for (u32 i = 0; i < count; i++)
         {
-            FModelIndex index = model->GetIndex(i, 0, parent);
-            u32 childCount    = model->GetRowCount(index);
-            m_FlatRows.Add({ index, parent, depth, childCount > 0 });
+            FModelIndex index  = model->GetIndex(i, 0, parent);
+            u32 childCount     = model->GetRowCount(index);
+            bool isLastChild   = (i == count - 1);
+
+            // Bit at this depth: set if NOT the last child (more siblings follow)
+            u64 mask = isLastChild
+                ? (parentMask & ~(1ULL << depth))
+                : (parentMask |  (1ULL << depth));
+
+            m_FlatRows.Add({ index, parent, depth, childCount > 0, mask });
 
             if (childCount > 0 && m_ExpandedItems.Contains(index))
-                AppendRows(index, depth + 1);
+                AppendRows(index, depth + 1, mask);
         }
     }
 
@@ -86,23 +93,13 @@ namespace Fusion
         UpdateVisibleRows(finalSize);
     }
 
-    void FTreeViewContent::ToggleExpanded(FModelIndex index)
+    void FTreeViewContent::ToggleExpanded(int flatIdx)
     {
-        if (!index.IsValid())
+        if (flatIdx < 0 || flatIdx >= (int)m_FlatRows.Size())
             return;
 
-        // Find the flat index of this node
-        int flatIdx = -1;
-        for (int i = 0; i < (int)m_FlatRows.Size(); i++)
-        {
-            if (m_FlatRows[i].index == index)
-            {
-                flatIdx = i;
-                break;
-            }
-        }
-
-        if (flatIdx == -1)
+        FModelIndex index = m_FlatRows[flatIdx].index;
+        if (!index.IsValid())
             return;
 
         if (m_ExpandedItems.Contains(index))
@@ -110,9 +107,9 @@ namespace Fusion
             // --- Collapse: remove all descendant rows in a single O(n) pass ---
             m_ExpandedItems.Remove(index);
 
-            int nodeDepth    = m_FlatRows[flatIdx].depth;
-            int removeStart  = flatIdx + 1;
-            int removeEnd    = removeStart;
+            int nodeDepth   = m_FlatRows[flatIdx].depth;
+            int removeStart = flatIdx + 1;
+            int removeEnd   = removeStart;
 
             while (removeEnd < (int)m_FlatRows.Size() && m_FlatRows[removeEnd].depth > nodeDepth)
                 removeEnd++;
@@ -129,14 +126,18 @@ namespace Fusion
             // --- Expand: collect child rows, then batch-insert in O(n + k) ---
             m_ExpandedItems.Add(index);
 
+            // Children inherit the expanding row's mask — it already encodes all
+            // ancestor continuation state. CollectRows adds the children's own bits.
+            const u64 parentMask = m_FlatRows[flatIdx].continuationMask;
+            const int childDepth = m_FlatRows[flatIdx].depth + 1;
+
             TArray<FTreeViewFlatRow> toInsert;
-            CollectRows(index, m_FlatRows[flatIdx].depth + 1, toInsert);
+            CollectRows(index, childDepth, toInsert, parentMask);
 
             int insertPos = flatIdx + 1;
             int k         = (int)toInsert.Size();
             int n         = (int)m_FlatRows.Size();
 
-            // Resize to make room, shift tail right by k, then fill
             m_FlatRows.Resize(n + k);
             for (int j = n - 1; j >= insertPos; j--)
                 m_FlatRows[j + k] = std::move(m_FlatRows[j]);
@@ -147,7 +148,7 @@ namespace Fusion
         MarkLayoutDirty();
     }
 
-    void FTreeViewContent::CollectRows(FModelIndex parent, int depth, TArray<FTreeViewFlatRow>& out)
+    void FTreeViewContent::CollectRows(FModelIndex parent, int depth, TArray<FTreeViewFlatRow>& out, u64 parentMask)
     {
         Ref<FTreeView> treeView = GetTreeView();
         if (!treeView)
@@ -162,10 +163,16 @@ namespace Fusion
         {
             FModelIndex index  = model->GetIndex(i, 0, parent);
             u32 childCount     = model->GetRowCount(index);
-            out.Add({ index, parent, depth, childCount > 0 });
+            bool isLastChild   = (i == count - 1);
+
+            u64 mask = isLastChild
+                ? (parentMask & ~(1ULL << depth))
+                : (parentMask |  (1ULL << depth));
+
+            out.Add({ index, parent, depth, childCount > 0, mask });
 
             if (childCount > 0 && m_ExpandedItems.Contains(index))
-                CollectRows(index, depth + 1, out);
+                CollectRows(index, depth + 1, out, mask);
         }
     }
 
@@ -232,7 +239,9 @@ namespace Fusion
         {
             Ref<FTreeViewRow> row = m_Rows[i - firstRow];
             row->Excluded(false);
-            row->m_FlatRowIndex = i;
+            row->m_FlatRowIndex     = i;
+            row->m_Depth            = m_FlatRows[i].depth;
+            row->m_ContinuationMask = m_FlatRows[i].continuationMask;
             FModelIndex index = m_FlatRows[i].index;
             row->m_RowIndex = index;
             row->SubStyle(i % 2 == 0 ? "RowAlternate" : "Row");

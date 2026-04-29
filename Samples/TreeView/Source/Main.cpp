@@ -563,6 +563,19 @@ int main(int argc, char* argv[])
 			Padding = FMargin(1, 1, 1, 1) * 10.0f;
 		}
 
+	    FUSION_STYLE(FTreeView, "FTreeView", TreeLinePen,
+	        RowIndentWidth, RowChevronSize, RowChevronGap, RowIconWidth, RowIconGap, RowLeftPadding)
+		{
+		    TreeLinePen    = FPen::Solid(FColor(0.35f, 0.35f, 0.40f, 0.7f)).Thickness(1.0f);
+
+		    RowIndentWidth = 16.0f;
+		    RowChevronSize = 10.0f;
+		    RowChevronGap  = 4.0f;
+		    RowIconWidth   = 14.0f;
+		    RowIconGap     = 4.0f;
+		    RowLeftPadding = 2.0f;
+		}
+
 	    FUSION_STYLE(FTreeViewHeader, "FTreeView/Header", Background, Border, Padding)
 		{
 		    Background = FColor(0.15f, 0.15f, 0.18f);

@@ -35,7 +35,9 @@ namespace Fusion
         Ref<FHorizontalStack> m_HStack;
         WeakRef<FTreeView> m_TreeView;
         TArray<FModelIndex> m_Columns;
-        int m_FlatRowIndex = 0;
+        int m_FlatRowIndex     = 0;
+        int m_Depth            = 0;
+        u64 m_ContinuationMask = 0;
         FModelIndex m_RowIndex;
 
     private:

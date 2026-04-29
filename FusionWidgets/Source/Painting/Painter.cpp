@@ -606,7 +606,7 @@ namespace Fusion
 			return false;
 
 		FRect minMax = FRect(m_PathMin, m_PathMax);
-		if (minMax.GetWidth() <= 0 || minMax.GetHeight() <= 0)
+		if (minMax.GetWidth() <= 0 && minMax.GetHeight() <= 0)
 			return true;
 
 		f32 thickness = m_CurrentPen.GetThickness();

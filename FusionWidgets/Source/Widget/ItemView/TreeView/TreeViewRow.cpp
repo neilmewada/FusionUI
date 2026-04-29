@@ -78,7 +78,39 @@ namespace Fusion
 
         const f32 colY        = Padding().top;
         const f32 colH        = layoutSize.y - Padding().top - Padding().bottom;
-        const f32 depthIndent = Padding().left;  // set by UpdateVisibleRows: depth * indentWidth
+        const f32 depthIndent = Padding().left;
+
+        // --- Tree connector lines ---
+        if (const FPen treeLinePen = treeView->TreeLinePen(); treeLinePen.IsValid() && m_Depth > 0)
+        {
+            const f32 indentWidth = treeView->RowIndentWidth();
+            const f32 rowHeight   = layoutSize.y;
+            const f32 centerY     = rowHeight * 0.5f;
+
+            painter.SetPen(treeLinePen);
+
+            // Vertical continuation bars for all ancestor depths except the direct parent
+            for (int d = 0; d < m_Depth - 1; d++)
+            {
+                if (m_ContinuationMask & (1ULL << d))
+                {
+                    const f32 x = (f32)d * indentWidth + indentWidth * 0.5f;
+                    painter.DrawLine(FVec2(x, 0.0f), FVec2(x, rowHeight));
+                }
+            }
+
+            // Elbow at the direct parent's indent position (depth - 1)
+            const f32 elbowX  = (f32)(m_Depth - 1) * indentWidth + indentWidth * 0.5f;
+            const bool isLast = !(m_ContinuationMask & (1ULL << m_Depth));
+
+            painter.DrawLine(FVec2(elbowX, 0.0f),    FVec2(elbowX, centerY));     // top half always
+            if (!isLast)
+                painter.DrawLine(FVec2(elbowX, centerY), FVec2(elbowX, rowHeight)); // bottom half if ├
+
+            // Horizontal arm from elbow to the start of content
+            const f32 contentX = (f32)m_Depth * indentWidth;
+            painter.DrawLine(FVec2(elbowX, centerY), FVec2(contentX, centerY));
+        }
 
         for (int i = 0; i < m_Columns.Size(); ++i)
         {
@@ -125,11 +157,12 @@ namespace Fusion
     {
         if (event.IsLeftButton())
         {
-            if (event.ClickCount == 2)
+            if (Ref<FTreeView> treeView = GetTreeView())
             {
-                if (Ref<FTreeView> treeView = GetTreeView())
+                if (event.ClickCount == 2)
                 {
-                    treeView->GetContent()->ToggleExpanded(m_RowIndex);
+                    // Double-click: toggle expand/collapse — O(1) via flat index
+                    treeView->GetContent()->ToggleExpanded(m_FlatRowIndex);
                 }
             }
             return FEventReply::Handled();
