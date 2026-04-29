@@ -30,9 +30,9 @@ This is how you create a basic Fusion UI application:
 
 using namespace Fusion;
 
-class MyWindow : public FDecoratedWidget
+class MyWindow : public FDecoratedBox
 {
-    FUSION_WIDGET(MyWindow, FDecoratedWidget)
+    FUSION_WIDGET(MyWindow, FDecoratedBox)
 public:
     void Construct() override
     {

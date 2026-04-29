@@ -24,6 +24,8 @@ namespace Fusion
 
     void FTreeViewRow::Paint(FPainter& painter)
     {
+        ZoneScoped;
+
         Super::Paint(painter);
 
         Ref<FTreeView> treeView = GetTreeView();
