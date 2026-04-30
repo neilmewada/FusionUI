@@ -52,7 +52,7 @@ namespace Fusion
             .fullscreen = false,
             .resizable = true,
             .hidden = false,
-            .titleBarStyle = ETitleBarStyle::ToolBarWithNativeControls,
+            .titleBarStyle = ETitleBarStyle::Default,
             .openCentered = true,
             .windowFlags = EPlatformWindowFlags::DestroyOnClose
         };

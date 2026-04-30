@@ -648,7 +648,7 @@ int main(int argc, char* argv[])
         .fullscreen = false,
         .resizable = true,
         .hidden = false,
-        .titleBarStyle = ETitleBarStyle::TransparentWithNativeControls,
+        .titleBarStyle = ETitleBarStyle::Default,
         .openCentered = true,
         .windowFlags = EPlatformWindowFlags::DestroyOnClose
     });

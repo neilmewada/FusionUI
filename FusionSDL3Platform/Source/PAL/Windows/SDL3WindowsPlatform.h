@@ -11,12 +11,13 @@ namespace Fusion
     {
     public:
         FSDL3WindowsPlatform() = delete;
-        ~FSDL3WindowsPlatform() = delete;
 
         static f32 GetWindowDpiScale(SDL_Window* sdlWindow)
         {
             return SDL_GetWindowDisplayScale(sdlWindow);
         }
+
+        static void SetupWindow([[maybe_unused]] SDL_Window* sdlWindow, [[maybe_unused]] const FPlatformWindowInfo& info) {}
     };
 
     typedef FSDL3WindowsPlatform FSDL3Platform;
