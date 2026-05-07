@@ -41,6 +41,7 @@ namespace Fusion
         struct FTreeViewFlatRow
         {
             FModelIndex index;
+            TArray<FModelIndex> columnIndices;
             FModelIndex parentIndex;    // cached to avoid GetParent() calls during scroll
             int         depth;
             bool        hasChildren;

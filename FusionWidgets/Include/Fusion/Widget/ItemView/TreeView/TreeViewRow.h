@@ -25,6 +25,8 @@ namespace Fusion
 
         void SetData(const TArray<FModelIndex>& columns);
 
+        void ResetState();
+
         void OnMouseEnter(FMouseEvent& event) override;
         FEventReply OnMouseMove(FMouseEvent& event) override;
         void OnMouseLeave(FMouseEvent& event) override;

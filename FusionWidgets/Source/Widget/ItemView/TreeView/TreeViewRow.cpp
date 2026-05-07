@@ -134,6 +134,11 @@ namespace Fusion
         m_Columns = columns;
     }
 
+    void FTreeViewRow::ResetState()
+    {
+        SetStyleStateFlag(EStyleState::Hovered | EStyleState::Selected, false);
+    }
+
     void FTreeViewRow::OnMouseEnter(FMouseEvent& event)
     {
         Super::OnMouseEnter(event);

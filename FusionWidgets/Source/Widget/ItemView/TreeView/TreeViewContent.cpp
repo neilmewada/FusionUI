@@ -52,6 +52,15 @@ namespace Fusion
         for (u32 i = 0; i < count; i++)
         {
             FModelIndex index  = model->GetIndex(i, 0, parent);
+
+            TArray<FModelIndex> columns{};
+            columns.Resize(model->GetColumnCount(parent));
+
+            for (u32 c = 0; c < columns.Size(); c++)
+            {
+                columns[c] = model->GetIndex(i, c, parent);
+            }
+
             u32 childCount     = model->GetRowCount(index);
             bool isLastChild   = (i == count - 1);
 
@@ -60,7 +69,7 @@ namespace Fusion
                 ? (parentMask & ~(1ULL << depth))
                 : (parentMask |  (1ULL << depth));
 
-            m_FlatRows.Add({ index, parent, depth, childCount > 0, mask });
+            m_FlatRows.Add({ index, MoveTemp(columns), parent, depth, childCount > 0, mask });
 
             if (childCount > 0 && m_ExpandedItems.Contains(index))
                 AppendRows(index, depth + 1, mask);
@@ -165,11 +174,19 @@ namespace Fusion
             u32 childCount     = model->GetRowCount(index);
             bool isLastChild   = (i == count - 1);
 
+            TArray<FModelIndex> columns{};
+            columns.Resize(model->GetColumnCount(parent));
+
+            for (u32 c = 0; c < columns.Size(); c++)
+            {
+                columns[c] = model->GetIndex(i, c, parent);
+            }
+
             u64 mask = isLastChild
                 ? (parentMask & ~(1ULL << depth))
                 : (parentMask |  (1ULL << depth));
 
-            out.Add({ index, parent, depth, childCount > 0, mask });
+            out.Add({ index, MoveTemp(columns), parent, depth, childCount > 0, mask });
 
             if (childCount > 0 && m_ExpandedItems.Contains(index))
                 CollectRows(index, depth + 1, out, mask);
@@ -215,7 +232,7 @@ namespace Fusion
 
         m_FirstVisibleRow = firstRow;  // cache for ToggleExpanded O(1) lookup
 
-        int needed = lastRow - firstRow + 1;
+        const int needed = lastRow - firstRow + 1;
 
         // Grow pool dynamically
         while ((int)m_Rows.Size() < needed)
@@ -243,6 +260,8 @@ namespace Fusion
             row->m_Depth            = m_FlatRows[i].depth;
             row->m_ContinuationMask = m_FlatRows[i].continuationMask;
             FModelIndex index = m_FlatRows[i].index;
+            if (row->m_RowIndex != index)
+                row->ResetState();
             row->m_RowIndex = index;
             row->SubStyle(i % 2 == 0 ? "RowAlternate" : "Row");
             if (index.IsValid())
