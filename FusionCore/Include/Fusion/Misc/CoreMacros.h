@@ -55,6 +55,22 @@
     inline           bool  operator==(Enum E, i64 Rhs) { return (__underlying_type(Enum))E == (__underlying_type(Enum))Rhs; }\
     inline           bool  operator!=(Enum E, i64 Rhs) { return (__underlying_type(Enum))E != (__underlying_type(Enum))Rhs; }
 
+#define FUSION_ENUM_FLAGS(Enum) \
+inline           Enum& operator|=(Enum& Lhs, Enum Rhs) { return Lhs = (Enum)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); } \
+inline           Enum& operator&=(Enum& Lhs, Enum Rhs) { return Lhs = (Enum)((__underlying_type(Enum))Lhs & (__underlying_type(Enum))Rhs); } \
+inline           Enum& operator^=(Enum& Lhs, Enum Rhs) { return Lhs = (Enum)((__underlying_type(Enum))Lhs ^ (__underlying_type(Enum))Rhs); } \
+inline constexpr Enum  operator| (Enum  Lhs, Enum Rhs) { return (Enum)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); } \
+inline constexpr Enum  operator& (Enum  Lhs, Enum Rhs) { return (Enum)((__underlying_type(Enum))Lhs & (__underlying_type(Enum))Rhs); } \
+inline constexpr Enum  operator^ (Enum  Lhs, Enum Rhs) { return (Enum)((__underlying_type(Enum))Lhs ^ (__underlying_type(Enum))Rhs); } \
+inline constexpr bool  operator! (Enum  E)             { return !(__underlying_type(Enum))E; } \
+inline constexpr Enum  operator~ (Enum  E)             { return (Enum)~(__underlying_type(Enum))E; }\
+inline			 bool  operator==(Enum E, i32 Rhs) { return (__underlying_type(Enum))E == (__underlying_type(Enum))Rhs; }\
+inline			 bool  operator!=(Enum E, i32 Rhs) { return (__underlying_type(Enum))E != (__underlying_type(Enum))Rhs; }\
+inline           bool  operator==(Enum E, i64 Rhs) { return (__underlying_type(Enum))E == (__underlying_type(Enum))Rhs; }\
+inline           bool  operator!=(Enum E, i64 Rhs) { return (__underlying_type(Enum))E != (__underlying_type(Enum))Rhs; }\
+inline constexpr u32  operator& (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs & (__underlying_type(Enum))Rhs); }\
+inline constexpr u32  operator| (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); }
+
 #define FUSION_ENUM_CLASS_FLAGS(Enum) \
 	inline           Enum& operator|=(Enum& Lhs, Enum Rhs) { return Lhs = (Enum)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); } \
 	inline           Enum& operator&=(Enum& Lhs, Enum Rhs) { return Lhs = (Enum)((__underlying_type(Enum))Lhs & (__underlying_type(Enum))Rhs); } \

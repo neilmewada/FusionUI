@@ -21,6 +21,8 @@ namespace Fusion
 
         int GetFlatRowIndex() const { return m_FlatRowIndex; }
 
+        bool IsSelected() const { return TestStyleState(EStyleState::Selected); }
+
         void Paint(FPainter& painter) override;
 
         void SetData(const TArray<FModelIndex>& columns);

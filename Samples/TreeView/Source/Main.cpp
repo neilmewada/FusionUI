@@ -318,6 +318,7 @@ public:
 				FNew(FTreeView)
 				.CanResizeColumns(true)
 				.Model(m_TreeModel)
+				.SelectionMode(FItemView::ExtendedSelection)
 				.HAlign(EHAlign::Fill)
 				.RowHeight(32.0f)
 				.FillRatio(1.0f)
@@ -607,6 +608,11 @@ int main(int argc, char* argv[])
 		    FUSION_ON(Hovered)
 		    {
 		        Background = FColor(1.0f, 1.0f, 1.0f, 0.06f);
+		    }
+
+		    FUSION_ON(Selected)
+		    {
+		        Background = FColor(0.23f, 0.51f, 0.96f, 0.45f);
 		    }
         }
 

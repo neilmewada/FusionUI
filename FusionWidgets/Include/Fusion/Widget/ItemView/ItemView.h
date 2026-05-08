@@ -5,6 +5,7 @@
 
 namespace Fusion
 {
+
     class FUSIONWIDGETS_API FItemView : public FDecoratedBox
     {
         FUSION_WIDGET(FItemView, FDecoratedBox)
@@ -12,7 +13,21 @@ namespace Fusion
 
         FItemView();
 
+        void Construct() override;
+
     public:
+
+        enum ESelectionBehavior : u8
+        {
+            SelectRows = 0,
+        };
+
+        enum ESelectionMode : u8
+        {
+            NoSelection = 0,
+            SingleSelection,
+            ExtendedSelection,
+        };
 
         virtual bool IsExpandable() const { return false; }
 
@@ -20,11 +35,14 @@ namespace Fusion
 
     protected:
 
-        virtual void OnModelChanged() {}
+        virtual void OnModelChanged();
+
+        virtual void OnSelectionChanged(const FModelIndexList& added, const FModelIndexList& removed);
 
     private:
 
         Ref<FItemModel> m_Model;
+        Ref<FItemSelectionModel> m_SelectionModel;
 
     public:
 
@@ -44,6 +62,11 @@ namespace Fusion
             return self;
         }
 
+        FUSION_PROPERTY_GET(Ref<FItemSelectionModel>, SelectionModel)
+        {
+            return m_SelectionModel;
+        }
+
         FUSION_STATE_PROPERTY(Ref<FItemViewDelegate>, ItemDelegate);
 
         FUSION_STYLE_PROPERTIES(
@@ -55,5 +78,9 @@ namespace Fusion
             (f32,  RowLeftPadding, Paint),
             (FPen, TreeLinePen,    Paint)
         );
+
+        FUSION_STATE_PROPERTY(ESelectionMode, SelectionMode);
+        FUSION_STATE_PROPERTY(ESelectionBehavior, SelectionBehavior);
     };
+
 }

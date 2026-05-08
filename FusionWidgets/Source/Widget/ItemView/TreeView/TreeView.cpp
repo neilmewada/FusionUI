@@ -77,4 +77,11 @@ namespace Fusion
         }
     }
 
+    void FTreeView::OnSelectionChanged(const FModelIndexList& added, const FModelIndexList& removed)
+    {
+        Super::OnSelectionChanged(added, removed);
+
+        m_Content->UpdateSelection();
+    }
+
 } // namespace Fusion

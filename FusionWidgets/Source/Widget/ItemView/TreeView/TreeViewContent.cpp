@@ -264,6 +264,8 @@ namespace Fusion
                 row->ResetState();
             row->m_RowIndex = index;
             row->SubStyle(i % 2 == 0 ? "RowAlternate" : "Row");
+            const bool isSelected = treeView->SelectionModel()->IsSelected(index);
+            row->SetStyleStateFlag(EStyleState::Selected, isSelected);
             if (index.IsValid())
             {
                 const FModelIndex& parentIndex = m_FlatRows[i].parentIndex;
@@ -286,4 +288,23 @@ namespace Fusion
         }
     }
 
+    void FTreeViewContent::UpdateSelection()
+    {
+        if (Ref<FTreeView> treeView = GetTreeView())
+        {
+            for (int i = 0; i < m_Rows.Size(); i++)
+            {
+                if (m_Rows[i]->Excluded())
+                    continue;
+
+                auto index = m_Rows[i]->m_RowIndex;
+                auto isSelected = treeView->SelectionModel()->IsSelected(index);
+
+                if (m_Rows[i]->IsSelected() != isSelected)
+                {
+                    m_Rows[i]->SetStyleStateFlag(EStyleState::Selected, isSelected);
+                }
+            }
+        }
+    }
 } // namespace Fusion

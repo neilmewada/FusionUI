@@ -164,6 +164,13 @@ namespace Fusion
         {
             if (Ref<FTreeView> treeView = GetTreeView())
             {
+                auto selectionFlags = FItemSelectionModel::Select_Current;
+                if (treeView->SelectionMode() != FItemView::ExtendedSelection || !event.IsCtrlMultiSelectionModifier())
+                    selectionFlags |= FItemSelectionModel::Select_Clear;
+                else if (treeView->SelectionMode() == FItemView::ExtendedSelection && event.IsCtrlMultiSelectionModifier())
+                    selectionFlags = FItemSelectionModel::Select_Toggle;
+
+                treeView->SelectionModel()->Select(m_RowIndex, selectionFlags);
                 if (event.ClickCount == 2)
                 {
                     // Double-click: toggle expand/collapse — O(1) via flat index

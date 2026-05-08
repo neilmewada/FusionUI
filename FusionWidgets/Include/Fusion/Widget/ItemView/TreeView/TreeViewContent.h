@@ -58,6 +58,8 @@ namespace Fusion
 
     public:
 
+        void UpdateSelection();
+
         // Takes the flat row index directly — O(1), no linear search.
         void ToggleExpanded(int flatIdx);
 
@@ -80,6 +82,7 @@ namespace Fusion
         }
 
         friend class FTreeViewRow;
+        friend class FTreeView;
     };
     
 } // namespace Fusion

@@ -98,6 +98,7 @@
 
 // Model
 #include "Model/ItemModel.h"
+#include "Model/ItemSelectionModel.h"
 
 // Item View
 #include "Widget/ItemView/ItemViewDelegate.h"

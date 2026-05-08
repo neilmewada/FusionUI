@@ -136,7 +136,7 @@ namespace Fusion
 
         bool IsMultiSelectionModifier() const
         {
-#if PLATFORM_MAC
+#if FUSION_PLATFORM_MAC
             return FEnumHasFlag(KeyModifiers, EKeyModifier::Gui | EKeyModifier::Shift);
 #else
             return FEnumHasFlag(KeyModifiers, EKeyModifier::Ctrl | EKeyModifier::Shift);
@@ -145,7 +145,7 @@ namespace Fusion
 
         bool IsCtrlMultiSelectionModifier() const
         {
-#if PLATFORM_MAC
+#if FUSION_PLATFORM_MAC
             return FEnumHasFlag(KeyModifiers, EKeyModifier::Gui);
 #else
             return FEnumHasFlag(KeyModifiers, EKeyModifier::Ctrl);

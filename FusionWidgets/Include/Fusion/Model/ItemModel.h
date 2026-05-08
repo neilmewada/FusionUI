@@ -46,8 +46,7 @@ namespace Fusion
         bool operator==(const FModelIndex& rhs) const
         {
             return m_Row == rhs.m_Row && m_Col == rhs.m_Col &&
-                m_InternalId == rhs.m_InternalId && m_InternalPtr == rhs.m_InternalPtr &&
-                    m_Model == rhs.m_Model;
+                m_InternalId == rhs.m_InternalId && m_InternalPtr == rhs.m_InternalPtr;
         }
 
         bool operator!=(const FModelIndex& rhs) const
@@ -79,6 +78,8 @@ namespace Fusion
 
         friend class FItemModel;
     };
+
+    using FModelIndexList = TArray<FModelIndex>;
 
     class FUSIONWIDGETS_API FItemModel : public FObject
     {

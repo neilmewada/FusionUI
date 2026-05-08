@@ -32,6 +32,8 @@ namespace Fusion
 
         void OnModelChanged() override;
 
+        void OnSelectionChanged(const FModelIndexList& added, const FModelIndexList& removed) override;
+
         Ref<FVerticalStack> m_Container;
         Ref<FTreeViewHeader> m_Header;
         Ref<FScrollBox> m_ScrollBox;
