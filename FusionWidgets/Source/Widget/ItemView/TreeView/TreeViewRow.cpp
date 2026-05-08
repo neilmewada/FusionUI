@@ -171,6 +171,7 @@ namespace Fusion
                     selectionFlags = FItemSelectionModel::Select_Toggle;
 
                 treeView->SelectionModel()->Select(m_RowIndex, selectionFlags);
+
                 if (event.ClickCount == 2)
                 {
                     // Double-click: toggle expand/collapse — O(1) via flat index
