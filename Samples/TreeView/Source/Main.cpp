@@ -587,10 +587,10 @@ int main(int argc, char* argv[])
 
 		    RowIndentWidth = 16.0f;
 		    RowChevronSize = 10.0f;
-		    RowChevronGap  = 4.0f;
+		    RowChevronGap  = 6.0f;
 		    RowIconWidth   = 14.0f;
-		    RowIconGap     = 4.0f;
-		    RowLeftPadding = 2.0f;
+		    RowIconGap     = 6.0f;
+		    RowLeftPadding = 10.0f;
 		}
 
 	    FUSION_STYLE(FTreeViewHeader, "FTreeView/Header", Background, Border, Padding)
