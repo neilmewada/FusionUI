@@ -600,10 +600,14 @@ int main(int argc, char* argv[])
 		    Padding    = FMargin(0, 0, 0, 0);
 		}
 
-	    FUSION_STYLE(FTreeViewRow, "FTreeView/ScrollBox/Content/Row_Base", Background, Shape)
+	    FUSION_STYLE(FTreeViewRow, "FTreeView/ScrollBox/Content/Row_Base", Background, Shape,
+	        ChevronColor, ChevronHoverColor, ChevronPressedColor)
         {
 		    Background = FColor(0, 0, 0, 0);  // transparent, shows scrollbox background
 		    Shape = FRoundedRectangle(5.0f);
+		    ChevronColor        = FColors::White.WithAlpha(0.7f);
+		    ChevronHoverColor   = FColors::White;
+		    ChevronPressedColor = FColors::White.WithAlpha(0.5f);
 
 		    FUSION_ON(Hovered)
 		    {

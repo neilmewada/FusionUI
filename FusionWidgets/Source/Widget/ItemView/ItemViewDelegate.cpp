@@ -38,7 +38,7 @@ namespace Fusion
                 thread_local const FName caretRight = "embed:/Icons/CaretRight.png";
                 thread_local const FName caretDown = "embed:/Icons/CaretDown.png";
 
-                FBrush chevronBrush = FBrush::Image(isExpanded ? caretDown : caretRight)
+                FBrush chevronBrush = FBrush::Image(isExpanded ? caretDown : caretRight, info.ChevronColor)
                     .BrushSize(FVec2(chevronSize, chevronSize));
 
                 result.ChevronRect = FRect::FromSize(
@@ -66,7 +66,7 @@ namespace Fusion
 
             if (!iconPath.Empty())
             {
-                FBrush iconBrush = FBrush::Image(iconPath, info.ChevronColor)
+                FBrush iconBrush = FBrush::Image(iconPath)
                     .BrushSize(FVec2(iconWidth, iconWidth));
 
                 painter.SetBrush(iconBrush);

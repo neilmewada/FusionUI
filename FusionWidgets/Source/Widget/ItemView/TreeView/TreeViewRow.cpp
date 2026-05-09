@@ -126,15 +126,17 @@ namespace Fusion
             const f32 colEnd    = boundaries[i + 1];
 
             FItemViewCellInfo paintInfo{};
-            paintInfo.Rect  = FRect(FVec2(colStart, colY), FVec2(colEnd, colY + colH));
-            paintInfo.LeftPadding = treeView->RowLeftPadding();
-            paintInfo.ChevronSize = treeView->RowChevronSize();
-            paintInfo.ChevronGap = treeView->RowChevronGap();
-            paintInfo.IconWidth = treeView->RowIconWidth();
-            paintInfo.IconGap = treeView->RowIconGap();
-            paintInfo.IsExpandable = treeView->IsExpandable();
-            paintInfo.IsExpanded = treeView->IsExpanded(m_RowIndex);
-            paintInfo.ChevronColor = ChevronColor();
+            paintInfo.Rect          = FRect(FVec2(colStart, colY), FVec2(colEnd, colY + colH));
+            paintInfo.LeftPadding   = treeView->RowLeftPadding();
+            paintInfo.ChevronSize   = treeView->RowChevronSize();
+            paintInfo.ChevronGap    = treeView->RowChevronGap();
+            paintInfo.IconWidth     = treeView->RowIconWidth();
+            paintInfo.IconGap       = treeView->RowIconGap();
+            paintInfo.IsExpandable  = treeView->IsExpandable();
+            paintInfo.IsExpanded    = treeView->IsExpanded(m_RowIndex);
+            paintInfo.ChevronColor  = ChevronColor();
+            if ((int)i == m_HoveredCellIndex && m_HoveredCellItem == EHoveredCellItem::Chevron)
+                paintInfo.ChevronColor = m_IsMousePressed ? ChevronPressedColor() : ChevronHoverColor();
 
             FItemViewLayout itemViewLayout = delegate->Paint(painter, m_Cells[i], paintInfo);
             m_CellLayouts.Add(itemViewLayout);
@@ -170,6 +172,8 @@ namespace Fusion
 
         FVec2 localMousePos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
 
+        int prevHoveredCellIndex = m_HoveredCellIndex;
+        EHoveredCellItem prevHoveredCellItem = m_HoveredCellItem;
         m_HoveredCellIndex = -1;
         m_HoveredCellItem = EHoveredCellItem::None;
 
@@ -180,8 +184,17 @@ namespace Fusion
             {
                 m_HoveredCellIndex = (int)i;
                 m_HoveredCellItem = EHoveredCellItem::Chevron;
+                if (m_HoveredCellItem != prevHoveredCellItem || m_HoveredCellIndex != prevHoveredCellIndex)
+                {
+                    MarkPaintDirty();
+                }
                 return FEventReply::Handled();
             }
+        }
+
+        if (m_HoveredCellItem != prevHoveredCellItem || m_HoveredCellIndex != prevHoveredCellIndex)
+        {
+            MarkPaintDirty();
         }
 
         return Super::OnMouseMove(event);
@@ -217,6 +230,7 @@ namespace Fusion
                     auto cell = m_CellLayouts[i];
                     if (event.ClickCount != 2 && !cell.ChevronRect.IsEmpty() && cell.ChevronRect.Contains(localMousePos))
                     {
+                        MarkPaintDirty();
                         treeView->GetContent()->ToggleExpanded(m_FlatRowIndex);
                         break;
                     }
@@ -246,6 +260,10 @@ namespace Fusion
     {
         if (event.IsLeftButton())
         {
+            if (m_HoveredCellIndex >= 0 && m_HoveredCellItem == EHoveredCellItem::Chevron)
+            {
+                MarkPaintDirty();
+            }
             m_IsMousePressed = false;
             return FEventReply::Handled();
         }
