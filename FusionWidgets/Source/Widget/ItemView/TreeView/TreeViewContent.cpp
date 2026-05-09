@@ -288,6 +288,22 @@ namespace Fusion
         }
     }
 
+    FEventReply FTreeViewContent::OnMouseButtonDown(FMouseEvent& event)
+    {
+        if (event.IsLeftButton() || event.IsRightButton())
+        {
+            if (Ref<FTreeView> treeView = GetTreeView())
+            {
+                if (treeView->BackgroundClickDeselects())
+                {
+                    treeView->SelectionModel()->ClearSelection();
+                    return FEventReply::Handled();
+                }
+            }
+        }
+        return Super::OnMouseButtonDown(event);
+    }
+
     void FTreeViewContent::UpdateSelection()
     {
         if (Ref<FTreeView> treeView = GetTreeView())

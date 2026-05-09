@@ -81,6 +81,7 @@ namespace Fusion
 
         FUSION_STATE_PROPERTY(ESelectionMode, SelectionMode);
         FUSION_STATE_PROPERTY(ESelectionBehavior, SelectionBehavior);
+        FUSION_STATE_PROPERTY(bool, BackgroundClickDeselects);
     };
 
 }

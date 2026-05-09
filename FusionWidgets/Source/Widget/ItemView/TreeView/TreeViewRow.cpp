@@ -7,7 +7,9 @@ namespace Fusion
 {
     FTreeViewRow::FTreeViewRow()
     {
-
+        m_ChevronColor = FColors::White;
+        m_ChevronHoverColor = FColors::White;
+        m_ChevronPressedColor = FColors::White;
     }
 
     void FTreeViewRow::Construct()
@@ -29,7 +31,7 @@ namespace Fusion
         Super::Paint(painter);
 
         Ref<FTreeView> treeView = GetTreeView();
-        if (!treeView || m_Columns.Empty())
+        if (!treeView || m_Cells.Empty())
             return;
 
         Ref<FItemModel> model = treeView->Model();
@@ -62,15 +64,15 @@ namespace Fusion
             // No header — divide equally by fill ratio hints
             boundaries.Add(0.0f);
             f32 totalFillRatio = 0.0f;
-            for (int i = 0; i < m_Columns.Size(); i++)
+            for (int i = 0; i < m_Cells.Size(); i++)
                 totalFillRatio += model->GetColumnFillRatioHint(i);
 
             f32 cursor = 0.0f;
-            for (int i = 0; i < m_Columns.Size(); i++)
+            for (int i = 0; i < m_Cells.Size(); i++)
             {
                 f32 ratio = totalFillRatio > 0.001f
                     ? model->GetColumnFillRatioHint(i) / totalFillRatio
-                    : 1.0f / (f32)m_Columns.Size();
+                    : 1.0f / (f32)m_Cells.Size();
                 cursor += ratio * layoutSize.width;
                 boundaries.Add(cursor);
             }
@@ -112,7 +114,10 @@ namespace Fusion
             painter.DrawLine(FVec2(elbowX, centerY), FVec2(contentX, centerY));
         }
 
-        for (int i = 0; i < m_Columns.Size(); ++i)
+        m_CellLayouts.Clear();
+
+        // --- Paint Content ---
+        for (SizeT i = 0; i < m_Cells.Size(); ++i)
         {
             if (i + 1 >= boundaries.Size())
                 break;
@@ -120,18 +125,25 @@ namespace Fusion
             const f32 colStart  = boundaries[i] + (i == 0 ? depthIndent : 0.0f);
             const f32 colEnd    = boundaries[i + 1];
 
-            FItemViewPaintInfo paintInfo{};
+            FItemViewCellInfo paintInfo{};
             paintInfo.Rect  = FRect(FVec2(colStart, colY), FVec2(colEnd, colY + colH));
-            paintInfo.Model = model;
-            paintInfo.View  = treeView;
+            paintInfo.LeftPadding = treeView->RowLeftPadding();
+            paintInfo.ChevronSize = treeView->RowChevronSize();
+            paintInfo.ChevronGap = treeView->RowChevronGap();
+            paintInfo.IconWidth = treeView->RowIconWidth();
+            paintInfo.IconGap = treeView->RowIconGap();
+            paintInfo.IsExpandable = treeView->IsExpandable();
+            paintInfo.IsExpanded = treeView->IsExpanded(m_RowIndex);
+            paintInfo.ChevronColor = ChevronColor();
 
-            delegate->Paint(painter, m_Columns[i], paintInfo);
+            FItemViewLayout itemViewLayout = delegate->Paint(painter, m_Cells[i], paintInfo);
+            m_CellLayouts.Add(itemViewLayout);
         }
     }
 
     void FTreeViewRow::SetData(const TArray<FModelIndex>& columns)
     {
-        m_Columns = columns;
+        m_Cells = columns;
     }
 
     void FTreeViewRow::ResetState()
@@ -148,6 +160,30 @@ namespace Fusion
 
     FEventReply FTreeViewRow::OnMouseMove(FMouseEvent& event)
     {
+        Ref<FTreeView> treeView = GetTreeView();
+        if (!treeView || m_Cells.Empty())
+            return Super::OnMouseMove(event);
+
+        Ref<FItemViewDelegate> delegate = treeView->ItemDelegate();
+        if (!delegate)
+            return Super::OnMouseMove(event);
+
+        FVec2 localMousePos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
+
+        m_HoveredCellIndex = -1;
+        m_HoveredCellItem = EHoveredCellItem::None;
+
+        for (SizeT i = 0; i < m_CellLayouts.Size(); ++i)
+        {
+            auto cell = m_CellLayouts[i];
+            if (!cell.ChevronRect.IsEmpty() && cell.ChevronRect.Contains(localMousePos))
+            {
+                m_HoveredCellIndex = (int)i;
+                m_HoveredCellItem = EHoveredCellItem::Chevron;
+                return FEventReply::Handled();
+            }
+        }
+
         return Super::OnMouseMove(event);
     }
 
@@ -156,6 +192,16 @@ namespace Fusion
         Super::OnMouseLeave(event);
 
         SetStyleStateFlag(EStyleState::Hovered, false);
+
+        Ref<FTreeView> treeView = GetTreeView();
+        if (!treeView || m_Cells.Empty())
+            return;
+
+        Ref<FItemViewDelegate> delegate = treeView->ItemDelegate();
+        if (!delegate)
+            return;
+
+        FVec2 localMousePos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
     }
 
     FEventReply FTreeViewRow::OnMouseButtonDown(FMouseEvent& event)
@@ -164,6 +210,18 @@ namespace Fusion
         {
             if (Ref<FTreeView> treeView = GetTreeView())
             {
+                FVec2 localMousePos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
+
+                for (SizeT i = 0; i < m_CellLayouts.Size(); ++i)
+                {
+                    auto cell = m_CellLayouts[i];
+                    if (event.ClickCount != 2 && !cell.ChevronRect.IsEmpty() && cell.ChevronRect.Contains(localMousePos))
+                    {
+                        treeView->GetContent()->ToggleExpanded(m_FlatRowIndex);
+                        break;
+                    }
+                }
+
                 auto selectionFlags = FItemSelectionModel::Select_Current;
                 if (treeView->SelectionMode() != FItemView::ExtendedSelection || !event.IsCtrlMultiSelectionModifier())
                     selectionFlags |= FItemSelectionModel::Select_Clear;
@@ -178,8 +236,21 @@ namespace Fusion
                     treeView->GetContent()->ToggleExpanded(m_FlatRowIndex);
                 }
             }
+            m_IsMousePressed = true;
             return FEventReply::Handled();
         }
         return Super::OnMouseButtonDown(event);
     }
+
+    FEventReply FTreeViewRow::OnMouseButtonUp(FMouseEvent& event)
+    {
+        if (event.IsLeftButton())
+        {
+            m_IsMousePressed = false;
+            return FEventReply::Handled();
+        }
+
+        return Super::OnMouseButtonUp(event);
+    }
+
 } // namespace Fusion

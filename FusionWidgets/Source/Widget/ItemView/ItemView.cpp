@@ -10,6 +10,8 @@ namespace Fusion
         m_ClipContent    = true;
         m_ClipShape      = FRectangle();
 
+        m_BackgroundClickDeselects = true;
+
         m_ItemDelegate   = CreateSubobject<FItemViewDelegate>();
         m_SelectionModel = CreateSubobject<FItemSelectionModel>();
         m_SelectionMode  = SingleSelection;

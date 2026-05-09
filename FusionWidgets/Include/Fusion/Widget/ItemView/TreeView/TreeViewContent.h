@@ -56,6 +56,8 @@ namespace Fusion
 
         void UpdateVisibleRows(FVec2 finalSize);
 
+        FEventReply OnMouseButtonDown(FMouseEvent& event) override;
+
     public:
 
         void UpdateSelection();

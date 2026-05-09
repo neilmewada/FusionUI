@@ -2,25 +2,31 @@
 
 namespace Fusion
 {
-    void FItemViewDelegate::Paint(FPainter& painter, FModelIndex index, const FItemViewPaintInfo& info)
+    FItemViewLayout FItemViewDelegate::Paint(FPainter& painter, FModelIndex index, const FItemViewCellInfo& info)
     {
-        const f32   leftPadding   = info.View->RowLeftPadding();
-        const f32   chevronSize   = info.View->RowChevronSize();
-        const f32   chevronGap    = info.View->RowChevronGap();
-        const f32   iconGap       = info.View->RowIconGap();
-        const bool  expandable    = index.Column() == 0 && info.View->IsExpandable();
-        const u32   childrenCount = info.Model->GetRowCount(index);
+        Ref<FItemModel> model = index.GetModel();
+        if (!model)
+            return {};
+
+        const f32   leftPadding   = info.LeftPadding;
+        const f32   chevronSize   = info.ChevronSize;
+        const f32   chevronGap    = info.ChevronGap;
+        const f32   iconGap       = info.IconGap;
+        const bool  expandable    = index.Column() == 0 && info.IsExpandable;
+        const u32   childrenCount = model->GetRowCount(index);
         const bool  showExpander  = expandable && childrenCount > 0;
-        const f32   iconWidth     = info.View->RowIconWidth();
-        const bool  hasIcons      = iconWidth > 0.001f && info.Model->HasIcons(index.Column());
+        const f32   iconWidth     = info.IconWidth;
+        const bool  hasIcons      = iconWidth > 0.001f && model->HasIcons(index.Column());
         const FVec2 rectSize      = info.Rect.GetSize();
         const f32   centerY       = info.Rect.min.y + rectSize.height * 0.5f;
-        const bool  isExpanded    = info.View->IsExpanded(index);
+        const bool  isExpanded    = info.IsExpanded;
 
         painter.PushClip(info.Rect, FRectangle());
 
         // Cursor advances left-to-right as elements are placed
         f32 cursorX = info.Rect.min.x + leftPadding;
+
+        FItemViewLayout result{};
 
         // --- Chevron ---
         // Always reserve chevron space for expandable columns so text
@@ -35,10 +41,12 @@ namespace Fusion
                 FBrush chevronBrush = FBrush::Image(isExpanded ? caretDown : caretRight)
                     .BrushSize(FVec2(chevronSize, chevronSize));
 
-                painter.SetBrush(chevronBrush);
-                painter.FillRect(FRect::FromSize(
+                result.ChevronRect = FRect::FromSize(
                     FVec2(cursorX, centerY - chevronSize * 0.5f),
-                    FVec2(chevronSize, chevronSize)));
+                    FVec2(chevronSize, chevronSize));
+
+                painter.SetBrush(chevronBrush);
+                painter.FillRect(result.ChevronRect);
             }
             cursorX += chevronSize + chevronGap;
         }
@@ -48,7 +56,7 @@ namespace Fusion
         // aligns consistently across rows with and without an icon.
         if (hasIcons)
         {
-            FVariant icon = info.Model->GetItemData(index, EItemRole::Icon);
+            FVariant icon = model->GetItemData(index, EItemRole::Icon);
             FString  iconPath;
 
             if (icon.Has<FName>())
@@ -58,7 +66,7 @@ namespace Fusion
 
             if (!iconPath.Empty())
             {
-                FBrush iconBrush = FBrush::Image(iconPath)
+                FBrush iconBrush = FBrush::Image(iconPath, info.ChevronColor)
                     .BrushSize(FVec2(iconWidth, iconWidth));
 
                 painter.SetBrush(iconBrush);
@@ -70,7 +78,7 @@ namespace Fusion
         }
 
         // --- Text ---
-        FVariant content = info.Model->GetItemData(index, EItemRole::Content);
+        FVariant content = model->GetItemData(index, EItemRole::Content);
 
         if (content.Has<FString>())
         {
@@ -83,5 +91,8 @@ namespace Fusion
         }
 
         painter.PopClip();
+
+        return result;
     }
+
 } // namespace Fusion
