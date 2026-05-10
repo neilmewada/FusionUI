@@ -1135,18 +1135,17 @@ TEST(FRectTest, ConstructFromLTRB)
 TEST(FRectTest, ConstructFromMinMax)
 {
     FRect r(FVec2(1.0f, 2.0f), FVec2(5.0f, 6.0f));
-    EXPECT_EQ(r.min, FVec2(1.0f, 2.0f));
-    EXPECT_EQ(r.max, FVec2(5.0f, 6.0f));
+    EXPECT_EQ((FVec2{r.left, r.top}),    FVec2(1.0f, 2.0f));
+    EXPECT_EQ((FVec2{r.right, r.bottom}), FVec2(5.0f, 6.0f));
 }
 
-TEST(FRectTest, UnionLayoutMatchesLTRB)
+TEST(FRectTest, MinMaxConstructorSetsLTRB)
 {
-    // Verify memory aliases are correct
-    FRect r(1.0f, 2.0f, 5.0f, 6.0f);
-    EXPECT_EQ(r.min.x, r.left);
-    EXPECT_EQ(r.min.y, r.top);
-    EXPECT_EQ(r.max.x, r.right);
-    EXPECT_EQ(r.max.y, r.bottom);
+    FRect r(FVec2(1.0f, 2.0f), FVec2(5.0f, 6.0f));
+    EXPECT_EQ(r.left,   1.0f);
+    EXPECT_EQ(r.top,    2.0f);
+    EXPECT_EQ(r.right,  5.0f);
+    EXPECT_EQ(r.bottom, 6.0f);
 }
 
 TEST(FRectTest, FromSize)

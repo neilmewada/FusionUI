@@ -34,5 +34,5 @@ namespace Fusion::Vulkan
 #elif FUSION_PLATFORM_MAC
 #include "Mac/VulkanMacPlatform.h"
 #elif FUSION_PLATFORM_LINUX
-
+#include "Linux/VulkanLinuxPlatform.h"
 #endif

@@ -14,11 +14,7 @@ namespace Fusion
     // ----------------------------------------------------------------
     struct FRect
     {
-        union
-        {
-            struct { float left, top, right, bottom; };
-            struct { FVec2 min, max; };
-        };
+        float left, top, right, bottom;
 
         constexpr FRect() : left(0.0f), top(0.0f), right(0.0f), bottom(0.0f) {}
 
@@ -26,7 +22,7 @@ namespace Fusion
             : left(left), top(top), right(right), bottom(bottom) {}
 
         constexpr FRect(FVec2 min, FVec2 max)
-            : min(min), max(max) {}
+            : left(min.x), top(min.y), right(max.x), bottom(max.y) {}
 
         // Construct from a position and a size (width/height), not two corners
         static constexpr FRect FromSize(FVec2 position, FVec2 size)
@@ -43,13 +39,15 @@ namespace Fusion
         // Properties
         // ----------------------------------------------------------------
 
-        constexpr FVec2 GetSize()    const { return max - min; }
-        constexpr float GetWidth()   const { return right - left; }
-        constexpr float GetHeight()  const { return bottom - top; }
-        constexpr FVec2 GetCenter()  const { return (min + max) * 0.5f; }
-        constexpr float GetArea()    const { return GetWidth() * GetHeight(); }
-        constexpr i32   GetAreaInt() const { return (i32)(GetWidth() * GetHeight()); }
-        constexpr bool  IsEmpty()    const { return left >= right || top >= bottom; }
+        constexpr FVec2 GetSize()        const { return { right - left, bottom - top }; }
+        constexpr float GetWidth()       const { return right - left; }
+        constexpr float GetHeight()      const { return bottom - top; }
+        constexpr FVec2 GetCenter()      const { return FVec2{ (left + right) * 0.5f, (top + bottom) * 0.5f }; }
+        constexpr float GetArea()        const { return GetWidth() * GetHeight(); }
+        constexpr i32   GetAreaInt()     const { return (i32)(GetWidth() * GetHeight()); }
+        constexpr bool  IsEmpty()        const { return left >= right || top >= bottom; }
+        constexpr FVec2 GetTopLeft()     const { return FVec2(left, top); }
+        constexpr FVec2 GetBottomRight() const { return FVec2(right, bottom); }
 
         // ----------------------------------------------------------------
         // Containment / overlap
@@ -57,8 +55,8 @@ namespace Fusion
 
         constexpr bool Contains(FVec2 point) const
         {
-            return point.x >= min.x && point.y >= min.y
-                && point.x <= max.x && point.y <= max.y;
+            return point.x >= left && point.y >= top
+                && point.x <= right && point.y <= bottom;
         }
 
         constexpr bool Overlaps(const FRect& other) const
@@ -73,14 +71,16 @@ namespace Fusion
 
         constexpr FRect Translate(FVec2 offset) const
         {
-            return FRect::FromSize(min + offset, GetSize());
+            return { left + offset.x, top + offset.y, right + offset.x, bottom + offset.y };
         }
 
         constexpr FRect Scale(FVec2 scale) const
         {
             FVec2 center = GetCenter();
             FVec2 half   = GetSize() * 0.5f;
-            return { center - half * scale, center + half * scale };
+            FVec2 mn = center - half * scale;
+            FVec2 mx = center + half * scale;
+            return { mn.x, mn.y, mx.x, mx.y };
         }
 
         constexpr FRect Scale(float scale) const
@@ -102,12 +102,13 @@ namespace Fusion
 
         constexpr FRect Encapsulate(FVec2 point) const
         {
-            return { FVec2::Min(min, point), FVec2::Max(max, point) };
+            return { FVec2::Min({left, top}, point), FVec2::Max({right, bottom}, point) };
         }
 
         constexpr FRect Encapsulate(const FRect& other) const
         {
-            return { FVec2::Min(min, other.min), FVec2::Max(max, other.max) };
+            return { FVec2::Min({left, top}, {other.left, other.top}),
+                     FVec2::Max({right, bottom}, {other.right, other.bottom}) };
         }
 
         // ----------------------------------------------------------------
@@ -119,21 +120,27 @@ namespace Fusion
         {
             if (a.IsEmpty()) return b;
             if (b.IsEmpty()) return a;
-            return { FVec2::Min(a.min, b.min), FVec2::Max(a.max, b.max) };
+            return { FVec2::Min({a.left, a.top}, {b.left, b.top}),
+                     FVec2::Max({a.right, a.bottom}, {b.right, b.bottom}) };
         }
 
         // Overlapping region of a and b, or an empty rect if they don't overlap
         static constexpr FRect Intersection(const FRect& a, const FRect& b)
         {
             if (!a.Overlaps(b)) return {};
-            return { FVec2::Max(a.min, b.min), FVec2::Min(a.max, b.max) };
+            return { FVec2::Max({a.left, a.top}, {b.left, b.top}),
+                     FVec2::Min({a.right, a.bottom}, {b.right, b.bottom}) };
         }
 
         // ----------------------------------------------------------------
         // Operators
         // ----------------------------------------------------------------
 
-        bool operator==(const FRect& rhs) const { return min == rhs.min && max == rhs.max; }
+        bool operator==(const FRect& rhs) const
+        {
+            return FVec2{left, top} == FVec2{rhs.left, rhs.top} &&
+                   FVec2{right, bottom} == FVec2{rhs.right, rhs.bottom};
+        }
         bool operator!=(const FRect& rhs) const { return !(*this == rhs); }
 
         constexpr FRect operator+(const FRect& rhs) const

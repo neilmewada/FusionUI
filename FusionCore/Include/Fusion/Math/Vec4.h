@@ -14,7 +14,6 @@ namespace Fusion
         union
         {
             struct { float x, y, z, w; };
-            struct { FVec2 min, max; };
             struct { float left, top, right, bottom; };
             struct { float topLeft, topRight, bottomRight, bottomLeft; };
             float xyzw[4];

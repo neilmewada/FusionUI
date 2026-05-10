@@ -18,13 +18,13 @@ namespace Fusion
         const f32   iconWidth     = info.IconWidth;
         const bool  hasIcons      = iconWidth > 0.001f && model->HasIcons(index.Column());
         const FVec2 rectSize      = info.Rect.GetSize();
-        const f32   centerY       = info.Rect.min.y + rectSize.height * 0.5f;
+        const f32   centerY       = info.Rect.top + rectSize.height * 0.5f;
         const bool  isExpanded    = info.IsExpanded;
 
         painter.PushClip(info.Rect, FRectangle());
 
         // Cursor advances left-to-right as elements are placed
-        f32 cursorX = info.Rect.min.x + leftPadding;
+        f32 cursorX = info.Rect.left + leftPadding;
 
         FItemViewLayout result{};
 
@@ -85,7 +85,7 @@ namespace Fusion
             painter.SetFont(FFont::Regular(FFont::kDefaultFamilyName, 12.0f));
             painter.SetPen(FColors::White);
 
-            FRect textRect = FRect(FVec2(cursorX, info.Rect.min.y), info.Rect.max);
+            FRect textRect = FRect(FVec2(cursorX, info.Rect.top), FVec2(info.Rect.right, info.Rect.bottom));
             painter.DrawText(textRect, content.Get<FString>(),
                 ETextWrap::None, EHAlign::Left, EVAlign::Center);
         }

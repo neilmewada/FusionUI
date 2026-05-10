@@ -70,12 +70,12 @@ namespace Fusion
 
             bool IsWidthSpan() const
             {
-                return !IsLeaf() && Child[0]->Rect.max.x < Child[1]->Rect.max.x;
+                return !IsLeaf() && Child[0]->Rect.right < Child[1]->Rect.right;
             }
 
             bool IsHeightSpan() const
             {
-                return !IsLeaf() && Child[0]->Rect.max.y < Child[1]->Rect.max.y;
+                return !IsLeaf() && Child[0]->Rect.bottom < Child[1]->Rect.bottom;
             }
 
             bool IsValid() const

@@ -170,6 +170,8 @@ The rendering interface (`IFRenderBackend`) is public API — bring your own bac
 
 **Requirements:** CMake 3.21+, C++23, Vulkan SDK, SDL3, FreeType
 
+If you are using gcc on Linux, make sure that you are on at GCC 14 or later, for full C++23 support.
+
 ```bash
 git clone https://github.com/your-username/FusionUI.git
 cd FusionUI

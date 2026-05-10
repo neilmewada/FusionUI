@@ -189,10 +189,10 @@ namespace Fusion
         {
             ZoneScoped;
 
-            const FVec2 p0 = TransformPoint(FVec2(r.min.x, r.min.y));
-            const FVec2 p1 = TransformPoint(FVec2(r.max.x, r.min.y));
-            const FVec2 p2 = TransformPoint(FVec2(r.min.x, r.max.y));
-            const FVec2 p3 = TransformPoint(FVec2(r.max.x, r.max.y));
+            const FVec2 p0 = TransformPoint(FVec2(r.left,  r.top));
+            const FVec2 p1 = TransformPoint(FVec2(r.right, r.top));
+            const FVec2 p2 = TransformPoint(FVec2(r.left,  r.bottom));
+            const FVec2 p3 = TransformPoint(FVec2(r.right, r.bottom));
 
             FVec2 mn(
                 std::min(std::min(p0.x, p1.x), std::min(p2.x, p3.x)),

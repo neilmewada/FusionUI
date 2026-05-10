@@ -17,8 +17,10 @@ find_program(FUSION_SLANGC
     HINTS "${_vulkan_bin_dir}" "$ENV{VULKAN_SDK}/Bin" "$ENV{VULKAN_SDK}/bin"
 )
 
+message("VK: $ENV{VULKAN_SDK}")
+
 if(NOT FUSION_SLANGC)
-    message(WARNING
+    message(FATAL_ERROR
         "[Fusion] slangc not found -- HLSL shader compilation is unavailable. "
         "Install Vulkan SDK 1.3.268+ and ensure it is on PATH.")
 endif()

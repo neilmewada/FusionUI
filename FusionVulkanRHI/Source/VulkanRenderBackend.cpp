@@ -1212,7 +1212,7 @@ namespace Fusion::Vulkan
 
 		// - Surface -
 
-		FVulkanTempSurface tempSurfaceData = FVulkanPlatform::CreateTempSurface(m_VulkanInstance);
+		FVulkanTempSurface tempSurfaceData = FVulkanPlatform::CreateTempSurface(this, m_VulkanInstance);
 		{
 			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_PhysicalDevice, tempSurfaceData.tempSurface, &m_SurfaceCapabilities);
 
