@@ -21,7 +21,8 @@ namespace Fusion
 		FFontMetrics metrics = atlas->GetScaledMetrics(Font());
 
 		f32 width = 0.0f;
-		for (char32_t cp : Text().Codepoints())
+		FString text = Text();
+		for (char32_t cp : text.Codepoints())
 		{
 			FGlyph glyph = atlas->FindOrAddGlyph(Font(), cp);
 			if (glyph.IsValid())
