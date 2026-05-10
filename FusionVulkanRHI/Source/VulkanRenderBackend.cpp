@@ -864,7 +864,7 @@ namespace Fusion::Vulkan
 			result = vkAcquireNextImageKHR(m_Device, swapChain->m_SwapChain, kSwapChainTimeOut,
 				swapChain->m_ImageAcquiredSemaphores[m_FrameSlot], VK_NULL_HANDLE, &swapChain->m_CurrentImageIndex);
 
-			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+			while (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			{
 				CreateOrUpdateSwapChain(windowHandle);
 
