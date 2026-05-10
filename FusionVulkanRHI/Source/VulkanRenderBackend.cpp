@@ -1237,6 +1237,14 @@ namespace Fusion::Vulkan
 			FUSION_ASSERT(!m_SurfaceFormats.Empty(), "Failed to find any Surface Formats.");
 			FUSION_ASSERT(!m_PresentationModes.Empty(), "Failed to find any Surface Present Modes.");
 
+			// Select swapchain format: prefer R8G8B8A8, then B8G8R8A8, else use first available
+			m_SwapChainFormat = m_SurfaceFormats[0].format;
+			for (const VkSurfaceFormatKHR& sf : m_SurfaceFormats)
+			{
+				if (sf.format == VK_FORMAT_R8G8B8A8_UNORM) { m_SwapChainFormat = sf.format; break; }
+				if (sf.format == VK_FORMAT_B8G8R8A8_UNORM)   m_SwapChainFormat = sf.format;
+			}
+
 			uint32_t queueFamilyCount = 0;
 			vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice, &queueFamilyCount, nullptr);
 			FUSION_ASSERT(queueFamilyCount > 0, "Failed to fetch Queue Family Properties");
@@ -1428,7 +1436,7 @@ namespace Fusion::Vulkan
 			VkAttachmentDescription colorAttachment{};
 			colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-			colorAttachment.format = VK_FORMAT_R8G8B8A8_UNORM;
+			colorAttachment.format = m_SwapChainFormat;
 			colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -2237,7 +2245,7 @@ namespace Fusion::Vulkan
 		swapChainCI.presentMode = presentMode;
 		swapChainCI.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
-		swapChainCI.imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+		swapChainCI.imageFormat = m_SwapChainFormat;
 		swapChainCI.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
 		swapChainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		swapChainCI.imageArrayLayers = 1;
