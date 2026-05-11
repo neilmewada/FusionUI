@@ -19,5 +19,5 @@ namespace Fusion
 #elif FUSION_PLATFORM_MAC
 #include "Mac/SDL3MacPlatform.h"
 #elif FUSION_PLATFORM_LINUX
-
+#include "Linux/SDL3LinuxPlatform.h"
 #endif

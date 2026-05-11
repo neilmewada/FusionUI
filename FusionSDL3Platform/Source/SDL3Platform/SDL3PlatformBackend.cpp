@@ -48,6 +48,10 @@ namespace Fusion
 			SDL_SetHint(SDL_HINT_MAC_SCROLL_MOMENTUM, "1");
 #endif
 
+#if FUSION_PLATFPORM_LINUX
+			SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "wayland")
+#endif
+
 			SDL_SetHint("SDL_BORDERLESS_WINDOWED_STYLE", "1");
 			SDL_SetHint("SDL_BORDERLESS_RESIZABLE_STYLE", "1");
 
@@ -151,6 +155,29 @@ namespace Fusion
 		m_FocusLostWindows.Clear();
 	}
 
+	void* FSDL3PlatformBackend::GetNativeDisplayHandle(FWindowHandle handle)
+	{
+#if FUSION_PLATFORM_LINUX
+		if (m_WindowsByHandle.KeyExists(handle))
+		{
+			FSDL3PlatformWindow* platformWindow = m_WindowsByHandle[handle];
+			if (platformWindow)
+			{
+				SDL_PropertiesID props = SDL_GetWindowProperties(platformWindow->GetSdlHandle());
+				void* display = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, nullptr);
+				if (display)
+					return display;
+				display = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr);
+				if (display)
+					return display;
+			}
+		}
+		return SDL_GetPointerProperty(SDL_GetGlobalProperties(), SDL_PROP_GLOBAL_VIDEO_WAYLAND_WL_DISPLAY_POINTER, nullptr);
+#else
+		return nullptr;
+#endif
+	}
+
 	void* FSDL3PlatformBackend::GetNativeWindowHandle(FWindowHandle handle)
 	{
 		if (!m_WindowsByHandle.KeyExists(handle))
@@ -168,6 +195,14 @@ namespace Fusion
 		return SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
 #elif FUSION_PLATFORM_MAC
 		return SDL_GetPointerProperty(props, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, NULL);
+#elif FUSION_PLATFORM_LINUX
+		{
+			void* surface = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, nullptr);
+			if (surface)
+				return surface;
+			// X11: Window (XID) is an unsigned long — return it as void*
+			return (void*)(uintptr_t)SDL_GetNumberProperty(props, SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+		}
 #else
 		#error Platform Not Supported
 #endif

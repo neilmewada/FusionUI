@@ -50,7 +50,7 @@ namespace Fusion::Vulkan
 #endif
         }
 
-        static FWindowsVulkanTempSurface CreateTempSurface(VkInstance instance)
+        static FWindowsVulkanTempSurface CreateTempSurface(FVulkanRenderBackend* renderBackend, VkInstance instance)
         {
             FWindowsVulkanTempSurface tempSurfaceData;
 

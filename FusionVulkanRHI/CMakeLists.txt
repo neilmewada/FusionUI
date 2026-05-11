@@ -13,6 +13,9 @@ add_fusion_target(FusionVulkanRHI STATIC
     PCHHEADER
         PRIVATE Source/VulkanRHIPrivate.h
     BUILD_DEPENDENCIES
+        PRIVATE
+            $<$<BOOL:${FUSION_PLATFORM_LINUX}>:wayland-client>
+            $<$<BOOL:${FUSION_PLATFORM_LINUX}>:X11>
         PUBLIC
             Fusion::Core
             Fusion::Platform
@@ -32,4 +35,5 @@ if(FUSION_PLATFORM_MAC)
         "-framework QuartzCore"
     )
 endif()
+
 

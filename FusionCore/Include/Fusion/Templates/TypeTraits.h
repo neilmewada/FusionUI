@@ -27,7 +27,7 @@ namespace Fusion
     struct TFIsSameType<T, T> : TFTrueType {};
 
     template<class TBase, class TDerived>
-    using TFIsDerivedClass = TFBoolConst<__is_base_of(TBase, TDerived)>;
+    using TFIsDerivedClass = TFBoolConst<std::is_base_of_v<TBase, TDerived>>;
 
     template<typename T>
     struct TFIsTemplate : TFFalseType {};

@@ -54,6 +54,7 @@ namespace Fusion
         bool IsUserRequestingExit() override { return m_UserRequestedExit; }
 
         void* GetNativeWindowHandle(FWindowHandle handle) override;
+        void* GetNativeDisplayHandle(FWindowHandle handle) override;
 
 		// - Events -
 

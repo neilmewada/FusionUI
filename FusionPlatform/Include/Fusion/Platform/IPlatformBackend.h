@@ -85,6 +85,8 @@ namespace Fusion
 
         virtual void* GetNativeWindowHandle(FWindowHandle handle) = 0;
 
+        virtual void* GetNativeDisplayHandle(FWindowHandle handle) { return nullptr; }
+
 		// - Events -
 
         virtual void PumpEvents() = 0;

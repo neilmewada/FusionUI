@@ -23,7 +23,7 @@ namespace Fusion::Vulkan
         static VkInstanceCreateFlags GetRequiredInstanceFlags();
         static bool IsValidationEnabled();
 
-        static FMacVulkanTempSurface CreateTempSurface(VkInstance instance);
+        static FMacVulkanTempSurface CreateTempSurface(FVulkanRenderBackend* renderBackend, VkInstance instance);
         static void DestroyTempSurface(VkInstance instance, FMacVulkanTempSurface& tempSurface);
         static VkSurfaceKHR CreateSurface(FVulkanRenderBackend* renderBackend, FWindowHandle window);
     };

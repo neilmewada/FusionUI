@@ -121,7 +121,7 @@ namespace Fusion
         auto getUV = [&](int i, FVec2 pos) -> FVec2 {
             return uvXValues 
         		? FVec2(uvXValues[i], 0.5f) 
-        		: minMaxPos ? (pos - minMaxPos->min) / minMaxPos->GetSize() : FVec2(0, 0);
+        		: minMaxPos ? (pos - minMaxPos->GetTopLeft()) / minMaxPos->GetSize() : FVec2(0, 0);
         };
 
         const int count = closed ? numPoints : numPoints - 1; // The number of line segments we need to draw
@@ -464,10 +464,10 @@ namespace Fusion
 
         FUIDrawCmd& drawCmd = AcquireDrawCmd();
 
-        FVec2 topLeft = rect.min;
-        FVec2 topRight = FVec2(rect.max.x, rect.min.y);
-        FVec2 bottomRight = FVec2(rect.max.x, rect.max.y);
-        FVec2 bottomLeft = FVec2(rect.min.x, rect.max.y);
+        FVec2 topLeft     = FVec2(rect.left,  rect.top);
+        FVec2 topRight    = FVec2(rect.right, rect.top);
+        FVec2 bottomRight = FVec2(rect.right, rect.bottom);
+        FVec2 bottomLeft  = FVec2(rect.left,  rect.bottom);
 
         FVec2 topLeftUV = uvMin;
         FVec2 topRightUV = FVec2(uvMax.x, uvMin.y);

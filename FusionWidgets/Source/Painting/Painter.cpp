@@ -216,8 +216,8 @@ namespace Fusion
 
 	void FPainter::PathRect(FRect rect, FVec4 cornerRadius)
 	{
-		const FVec2 min = rect.min;
-		const FVec2 max = rect.max;
+		const FVec2 min = FVec2(rect.left, rect.top);
+		const FVec2 max = FVec2(rect.right, rect.bottom);
 		const FVec2 rectSize = rect.GetSize();
 
 		cornerRadius.topLeft = FMath::Clamp(cornerRadius.topLeft, 0.0f, rectSize.GetMin() * 0.4999f);
@@ -331,7 +331,7 @@ namespace Fusion
 			break;
 		case EShapeType::Circle:
 		{
-			FVec2 center = rect.min + rect.GetSize() / 2.0f;
+			FVec2 center = rect.GetCenter();
 			f32 radius = rect.GetSize().GetMin() / 2.0f;
 			StrokeCircle(center, radius);
 		}
@@ -353,7 +353,7 @@ namespace Fusion
 			break;
 		case EShapeType::Circle:
 		{
-			FVec2 center = rect.min + rect.GetSize() / 2.0f;
+			FVec2 center = rect.GetCenter();
 			f32 radius = rect.GetSize().GetMin() / 2.0f;
 			FillCircle(center, radius);
 		}
@@ -375,7 +375,7 @@ namespace Fusion
 			break;
 		case EShapeType::Circle:
 		{
-			FVec2 center = rect.min + rect.GetSize() / 2.0f;
+			FVec2 center = rect.GetCenter();
 			f32 radius = rect.GetSize().GetMin() / 2.0f;
 			FillAndStrokeCircle(center, radius);
 		}
@@ -438,7 +438,7 @@ namespace Fusion
 			halfSize = FVec2(min, min);
 		}
 
-		FVec2 clipCenter = rect.min + halfSize;
+		FVec2 clipCenter = FVec2(rect.left, rect.top) + halfSize;
 
 		m_DrawList->clipRectArray.Insert(FUIClipRect{
 			.clipInverseTransform = (GetCurrentTransform() * FAffineTransform::Translation(clipCenter)).ToMat4().GetInverse(),
@@ -1179,13 +1179,13 @@ namespace Fusion
 		switch (vAlign)
 		{
 		case EVAlign::Center:
-			startY = rect.min.y + (rect.GetSize().y - totalHeight) * 0.5f + ascender;
+			startY = rect.top + (rect.GetSize().y - totalHeight) * 0.5f + ascender;
 			break;
 		case EVAlign::Bottom:
-			startY = rect.max.y - totalHeight + ascender;
+			startY = rect.bottom - totalHeight + ascender;
 			break;
 		default:  // Top, Fill, Auto
-			startY = rect.min.y + ascender;
+			startY = rect.top + ascender;
 			break;
 		}
 
@@ -1217,13 +1217,13 @@ namespace Fusion
 			switch (hAlign)
 			{
 			case EHAlign::Center:
-				cursorX = rect.min.x + (rectWidth - line.width) * 0.5f;
+				cursorX = rect.left + (rectWidth - line.width) * 0.5f;
 				break;
 			case EHAlign::Right:
-				cursorX = rect.max.x - line.width;
+				cursorX = rect.right - line.width;
 				break;
 			default:  // Left, Fill, Auto
-				cursorX = rect.min.x;
+				cursorX = rect.left;
 				break;
 			}
 

@@ -288,6 +288,7 @@ namespace Fusion::Vulkan
         VkSurfaceCapabilitiesKHR m_SurfaceCapabilities{};   // TestSurface properties: image size, extent, etc
         TArray<VkSurfaceFormatKHR> m_SurfaceFormats;  // TestSurface image supported formats
         TArray<VkPresentModeKHR> m_PresentationModes; // How images should be presented to the screen
+        VkFormat m_SwapChainFormat = VK_FORMAT_UNDEFINED;
 
         // - Device -
 

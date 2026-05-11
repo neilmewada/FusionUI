@@ -58,7 +58,7 @@ namespace Fusion::Vulkan
 
     // ---------------------------------------------------------------------------
 
-    FMacVulkanTempSurface FVulkanMacPlatform::CreateTempSurface(VkInstance instance)
+    FMacVulkanTempSurface FVulkanMacPlatform::CreateTempSurface(FVulkanRenderBackend* renderBackend, VkInstance instance)
     {
         FMacVulkanTempSurface surf{};
 

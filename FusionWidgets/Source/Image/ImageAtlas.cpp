@@ -114,8 +114,8 @@ namespace Fusion
         foundAtlas->Root->UsedArea += textureArea;
         foundAtlas->NodesByImageName[name] = insertNode;
 
-        int posX = FMath::RoundToInt(insertNode->Rect.min.x) + kIconPadding / 2;
-        int posY = FMath::RoundToInt(insertNode->Rect.min.y) + kIconPadding / 2;
+        int posX = FMath::RoundToInt(insertNode->Rect.left) + kIconPadding / 2;
+        int posY = FMath::RoundToInt(insertNode->Rect.top) + kIconPadding / 2;
 
         FVec2 uvMin = FVec2(((f32)posX + 0.5f) / (f32)kAtlasSize, ((f32)posY + 0.5f) / (f32)kAtlasSize);
         FVec2 uvMax = FVec2((f32)(posX + textureSize.width - 0.5f) / (f32)kAtlasSize, (f32)(posY + textureSize.height - 0.5f) / (f32)kAtlasSize);
@@ -300,7 +300,7 @@ namespace Fusion
                     Child[1]->IsWidthSpan() && !Child[1]->Child[0]->IsValidRecursive())
                 {
                     IPtr<FBinaryNode> nodeToMove = Child[1]->Child[1];
-                    Child[0]->Rect.max.x = Child[1]->Child[0]->Rect.max.x;
+                    Child[0]->Rect.right = Child[1]->Child[0]->Rect.right;
                     Child[1] = nodeToMove;
                     nodeToMove->Parent = this;
                 }
@@ -308,7 +308,7 @@ namespace Fusion
                     Child[1]->IsHeightSpan() && !Child[1]->Child[0]->IsValidRecursive())
                 {
                     IPtr<FBinaryNode> nodeToMove = Child[1]->Child[1];
-                    Child[0]->Rect.max.y = Child[1]->Child[0]->Rect.max.y;
+                    Child[0]->Rect.bottom = Child[1]->Child[0]->Rect.bottom;
                     Child[1] = nodeToMove;
                     nodeToMove->Parent = this;
                 }
@@ -342,18 +342,18 @@ namespace Fusion
                     Child[1]->Child[1]->Child[0] != nullptr && !Child[1]->Child[1]->Child[0]->IsValidRecursive())
                 {
                     IPtr<FBinaryNode> nodeToMove = Child[1]->Child[1]->Child[1];
-                    f32 splitX = Child[1]->Child[1]->Child[0]->Rect.max.x;
+                    f32 splitX = Child[1]->Child[1]->Child[0]->Rect.right;
 
-                    Child[0]->Rect.max.x = splitX;
-                    Child[1]->Rect.min.x = splitX + 1;
-                    Child[1]->Child[0]->Rect.min.x = splitX + 1;
+                    Child[0]->Rect.right = splitX;
+                    Child[1]->Rect.left = splitX + 1;
+                    Child[1]->Child[0]->Rect.left = splitX + 1;
                     Child[1]->Child[1] = nodeToMove;
                     nodeToMove->Parent = Child[1]->Child[1];
 
                     if (nodeToMove->IsHeightSpan() && !nodeToMove->Child[0]->IsValidRecursive())
                     {
                         IPtr<FBinaryNode> contentNode = nodeToMove->Child[1];
-                        Child[1]->Child[0]->Rect.max.y = contentNode->Rect.min.y - 1;
+                        Child[1]->Child[0]->Rect.bottom = contentNode->Rect.top - 1;
                         Child[1]->Child[1] = contentNode;
                         contentNode->Parent = Child[1]->Child[1];
                     }
