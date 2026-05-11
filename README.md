@@ -1,14 +1,14 @@
 # FusionUI
 
-A cross-platform C++23 retained-mode UI library with declarative widgets, a type-safe stylesheet system, animations, transitions, and pluggable platform and rendering backends.
+A **cross-platform** C++23 retained-mode UI library with declarative widgets, GPU acceleration, a type-safe stylesheet system, animations, transitions, and pluggable platform and rendering backends.
 
 | Platform | Status | Platform Backend | Render Backend |
 |-|-|-|-|
 | Windows | ✅ | SDL3 | Vulkan |
 | Mac | ✅ | SDL3 | Vulkan (MoltenVk) |
-| Linux | ❌ | ❌ | ❌ |
+| Linux | ✅ | SDL3 | Vulkan |
 
-**Note**: FusionUI is in **experimental** stage, with future plans for linux support.
+**Note**: FusionUI is in **experimental** stage.
 
 ### ⭐ Feel free to star the project to show your support!
 
@@ -188,7 +188,7 @@ cmake --build build
 | `FUSION_USE_VULKAN` | ON | Vulkan render backend |
 | `FUSION_ENABLE_TRACY` | OFF | Tracy profiler integration |
 
-**Platforms:** Windows, macOS
+**Platforms:** Windows, macOS, Linux
 
 **Dependencies:** [Vulkan SDK](https://vulkan.lunarg.com), [SDL3](https://github.com/libsdl-org/SDL), [FreeType](https://freetype.org), [xxHash](https://github.com/Cyan4973/xxHash), [cpptrace](https://github.com/jeremy-rifkin/cpptrace)
 
@@ -203,5 +203,13 @@ cmake --build build
 - **Focus** — full tab order, `FocusVisible` state (ring on keyboard navigation only, not mouse clicks)
 
 ---
+
+## Gallery
+
+### Tree View Sample (FTreeView)
+
+A model based fully virtualized Tree View widget.
+
+![](./Screenshots/TreeViewSample.png)
 
 
