@@ -6,6 +6,7 @@
 namespace Fusion
 {
     class FWidget;
+    class FSurfaceRoot;
     
     class FUSIONWIDGETS_API FSurface : public FObject
     {

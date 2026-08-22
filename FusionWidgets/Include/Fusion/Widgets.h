@@ -84,6 +84,7 @@
 #include "Widget/DecoratedWidget.h"
 #include "Widget/DecoratedBox.h"
 #include "Widget/ContainerWidget.h"
+#include "Widget/SurfaceRoot.h"
 #include "Widget/Layout/StackBox.h"
 #include "Widget/Label.h"
 #include "Widget/Input/Button.h"
