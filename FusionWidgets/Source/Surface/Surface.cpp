@@ -688,6 +688,12 @@ namespace Fusion
 		m_RenderCapabilities = application->GetRenderCapabilities();
 
 		m_LayerTree = NewObject<FLayerTree>(this);
+
+		m_RootWidget = NewObject<FSurfaceRoot>(this);
+		m_RootWidget->SetParentSurfaceRecursive(this);
+		m_RootWidget->UpdateBoundaryFlags();
+		m_RootWidget->MarkLayoutDirty();
+		m_RootWidget->MarkPaintDirty();
 	}
 
 	void FSurface::Shutdown()
@@ -798,27 +804,19 @@ namespace Fusion
 
 	void FSurface::SetOwningWidget(Ref<FWidget> widget)
 	{
-		if (m_RootWidget == widget)
+		if (!m_RootWidget || m_RootWidget->Content() == widget)
 			return;
 
-		if (m_RootWidget)
+		if (!widget)
 		{
-			m_RootWidget->SetParentSurfaceRecursive(nullptr);
+			if (Ref<FWidget> content = m_RootWidget->Content())
+			{
+				m_RootWidget->DetachChild(content);
+			}
+			return;
 		}
 
-		m_RootWidget = widget;
-
-		if (m_RootWidget)
-		{
-			m_RootWidget->SetParentSurfaceRecursive(this);
-
-			AddPendingLayoutRoot(m_RootWidget);
-
-			m_RootWidget->UpdateBoundaryFlags();
-
-			m_RootWidget->MarkLayoutDirty();
-			m_RootWidget->MarkPaintDirty();
-		}
+		m_RootWidget->Content(*widget);
 	}
 
 	void FSurface::AddPendingLayoutRoot(Ref<FWidget> layoutRoot)

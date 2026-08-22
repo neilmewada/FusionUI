@@ -25,7 +25,7 @@ namespace Fusion
 
         f32 GetDpiScale() const { return m_DpiScale; }
 
-        Ref<FWidget> GetRootWidget() const { return m_RootWidget; }
+        Ref<FSurfaceRoot> GetRootWidget() const { return m_RootWidget; }
 
         Ref<FSurface> GetParentSurface() const { return m_ParentSurface.Lock(); }
 
@@ -119,7 +119,7 @@ namespace Fusion
 
         WeakRef<FApplicationInstance> m_Application;
 
-        Ref<FWidget> m_RootWidget;
+        Ref<FSurfaceRoot> m_RootWidget;
 
         FRenderBackendCapabilities m_RenderCapabilities{};
 

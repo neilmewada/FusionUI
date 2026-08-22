@@ -14,6 +14,7 @@ namespace Fusion
 	{
 		Super::Construct();
 
+		OverlayStack(FNew(FContainerWidget));
 	}
 
 	FVec2 FSurfaceRoot::MeasureContent(FVec2 availableSize)
