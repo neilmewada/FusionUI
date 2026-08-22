@@ -32,6 +32,8 @@ namespace Fusion
         ForceLayoutBoundary = FUSION_BIT(12),
 
         TitleBarHint = FUSION_BIT(13),
+
+        SelfHitTestDisabled = FUSION_BIT(14),
     };
     FUSION_ENUM_CLASS_FLAGS(EWidgetFlags);
     
@@ -65,6 +67,8 @@ namespace Fusion
         bool IsPaintDirty() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::PaintDirty); }
 
         bool IsLayoutDirty() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::LayoutDirty); }
+
+        bool IsSelfHitTestEnabled() const { return !FEnumHasFlag(m_WidgetFlags, EWidgetFlags::SelfHitTestDisabled); }
 
         bool IsWidgetPendingConstruction() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::PendingConstruction); }
 
@@ -285,6 +289,20 @@ namespace Fusion
             if (self.Excluded() == value)
                 return self;
             static_cast<FWidget&>(self).SetWidgetFlag(EWidgetFlags::Excluded, value);
+            self.MarkLayoutDirty();
+            return self;
+        }
+
+        FUSION_PROPERTY_GET(bool, SelfHitTestEnabled)
+        {
+            return IsSelfHitTestEnabled();
+        }
+
+        FUSION_PROPERTY_SET(bool, SelfHitTestEnabled)
+        {
+            if (self.IsSelfHitTestEnabled() == value)
+                return self;
+            static_cast<FWidget&>(self).SetWidgetFlag(EWidgetFlags::SelfHitTestDisabled, !value);
             self.MarkLayoutDirty();
             return self;
         }

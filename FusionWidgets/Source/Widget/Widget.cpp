@@ -436,7 +436,7 @@ namespace Fusion
 	{
 		ZoneScoped;
 
-		if (Excluded() || IsFaulted() || !Visible())
+		if (Excluded() || IsFaulted() || !Visible() || !IsSelfHitTestEnabled())
 			return false;
 
 		return FRect::FromSize(FVec2(), m_LayoutSize).Contains(localMousePos);
