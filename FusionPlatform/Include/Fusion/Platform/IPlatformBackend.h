@@ -97,6 +97,23 @@ namespace Fusion
         virtual void DeregisterEventSink(IFPlatformEventSink* eventSink) = 0;
 
         virtual FVec2 GetGlobalMousePosition() = 0;
+
+        //! @brief True when the pointer is over the given window.
+        //! On Wayland the OS only reports pointer coordinates while the pointer is
+        //! over one of our surfaces, so callers must ask this before using
+        //! GetMousePosition().
+        virtual bool IsMouseOverWindow(FWindowHandle window) { return true; }
+
+        //! @brief Pointer position relative to the given window, in window (logical)
+        //! pixels.
+        //! Wayland has no global cursor position, so GetGlobalMousePosition() stays
+        //! at (0,0) there and hit testing must use this instead.
+        virtual FVec2 GetMousePosition(FWindowHandle window) { return GetGlobalMousePosition(); }
+
+        //! @brief True when the backend talks to a Wayland compositor.
+        //! Wayland exposes neither a global pointer nor screen-space window positions.
+        virtual bool IsWayland() { return false; }
+
         virtual FVec2 GetMouseWheelDelta() = 0;
 
         virtual bool IsKeyDown(EKeyCode key) = 0;

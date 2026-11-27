@@ -114,12 +114,12 @@ namespace Fusion
 
         // - Mouse Pos
 
-        FVec2 screenMousePos = application->GetScreenMousePos();
-        FVec2 prevScreenMousePos = application->GetPrevScreenMousePos();
+        FVec2 windowMousePos = application->GetWindowMousePos();
+        FVec2 prevWindowMousePos = application->GetPrevWindowMousePos();
         FVec2 wheelDelta = application->GetMouseWheelDelta();
 
-        FVec2 surfaceMousePos = ScreenToSurfacePoint(screenMousePos);
-        FVec2 prevSurfaceMousePos = ScreenToSurfacePoint(prevScreenMousePos);
+        FVec2 surfaceMousePos = WindowToSurfacePoint(windowMousePos);
+        FVec2 prevSurfaceMousePos = WindowToSurfacePoint(prevWindowMousePos);
         FVec2 surfaceMouseDelta = surfaceMousePos - prevSurfaceMousePos;
 
         // - Mouse Buttons
@@ -150,7 +150,10 @@ namespace Fusion
 
         EKeyModifier keyModifiers = application->GetKeyModifiers();
 
-        bool mouseInSurface = FRect::FromSize(FVec2(), GetAvailableSize()).Contains(surfaceMousePos);
+        // Wayland stops reporting pointer positions once the pointer leaves the
+        // surface, so the last known position must not be treated as a hit.
+        bool mouseInSurface = application->IsMouseOverWindow() &&
+            FRect::FromSize(FVec2(), GetAvailableSize()).Contains(surfaceMousePos);
 
         Ref<FWidget> captured = m_CapturedWidget.Lock();
 

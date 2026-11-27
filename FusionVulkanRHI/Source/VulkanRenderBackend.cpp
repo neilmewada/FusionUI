@@ -1214,6 +1214,10 @@ namespace Fusion::Vulkan
 
 		FVulkanTempSurface tempSurfaceData = FVulkanPlatform::CreateTempSurface(this, m_VulkanInstance);
 		{
+			// Without a surface the queries below get VK_NULL_HANDLE and some drivers
+			// (Intel Mesa) crash instead of returning an error.
+			FUSION_ASSERT(tempSurfaceData.tempSurface != VK_NULL_HANDLE, "Failed to create a temporary Vulkan surface.");
+
 			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_PhysicalDevice, tempSurfaceData.tempSurface, &m_SurfaceCapabilities);
 
 			uint32_t surfaceFormatCount = 0;

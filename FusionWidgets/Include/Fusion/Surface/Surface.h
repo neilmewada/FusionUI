@@ -41,6 +41,9 @@ namespace Fusion
 
         virtual bool IsNativeSurface() const { return false; }
 
+        //! @brief Window this surface belongs to, if any.
+        virtual FWindowHandle GetWindowHandle() const { return FWindowHandle::NullValue; }
+
         virtual ETitleBarStyle GetNativeTitleBarStyle() const { return ETitleBarStyle::NoTitleBar; }
 
         Ref<FTheme> GetTheme() const;
@@ -49,7 +52,10 @@ namespace Fusion
 
         // - Coordinate Transforms -
 
-        virtual FVec2 ScreenToSurfacePoint(FVec2 position) = 0;
+        //! @brief Converts a window-relative point in logical window pixels to
+        //! surface space. Native surfaces cover their whole window, so they return
+        //! it unchanged; nested surfaces offset by their own origin.
+        virtual FVec2 WindowToSurfacePoint(FVec2 position) = 0;
 
         // - Events -
 

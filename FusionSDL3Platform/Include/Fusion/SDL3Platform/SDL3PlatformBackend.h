@@ -70,6 +70,12 @@ namespace Fusion
 
         FVec2 GetGlobalMousePosition() override;
 
+        bool  IsMouseOverWindow(FWindowHandle window) override;
+
+        FVec2 GetMousePosition(FWindowHandle window) override;
+
+        bool IsWayland() override;
+
         FVec2 GetMouseWheelDelta() override;
 
         bool IsKeyDown(EKeyCode key) override;
@@ -143,6 +149,8 @@ namespace Fusion
         u64 m_CurTime = 0;
 
         FWindowHandle m_InputWindowHandle = FWindowHandle::NullValue;
+        // Window the pointer is currently over (SDL_EVENT_WINDOW_MOUSE_ENTER/LEAVE).
+        FWindowHandle m_MouseOverWindow = FWindowHandle::NullValue;
         FVec2 m_GlobalMousePosition{};
         FVec2 m_MousePosition{};
         FVec2 m_PrevGlobalMousePosition{};

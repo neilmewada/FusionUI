@@ -23,7 +23,9 @@ namespace Fusion
 
         bool IsNativeSurface() const final { return true; }
 
-        FVec2 ScreenToSurfacePoint(FVec2 position) override;
+        FWindowHandle GetWindowHandle() const override { return m_WindowHandle; }
+
+        FVec2 WindowToSurfacePoint(FVec2 position) override;
 
         void RequestTextInput() override;
         void ReleaseTextInput() override;

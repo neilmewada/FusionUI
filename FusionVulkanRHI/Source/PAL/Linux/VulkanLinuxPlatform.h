@@ -52,10 +52,16 @@ namespace Fusion::Vulkan
 
         static VkInstanceCreateFlags GetRequiredInstanceFlags() { return 0; }
 
-        static bool IsWayland()
+        // Ask the platform backend which windowing system is in use. Reading
+        // WAYLAND_DISPLAY is not enough: SDL may have fallen back to X11 while
+        // that variable is still set, and then there is no wl_display to bind to.
+        static bool IsWayland(FVulkanRenderBackend* renderBackend)
         {
-            const char* wd = getenv("WAYLAND_DISPLAY");
-            return wd && wd[0] != '\0';
+            if (!renderBackend)
+                return false;
+
+            IFPlatformBackend* platformBackend = renderBackend->GetPlatformBackend();
+            return platformBackend != nullptr && platformBackend->IsWayland();
         }
 
         static bool IsValidationEnabled()
@@ -71,7 +77,7 @@ namespace Fusion::Vulkan
         {
             FLinuxVulkanTempSurface tempSurfaceData;
 
-            if (IsWayland())
+            if (IsWayland(renderBackend))
             {
                 wl_display* display = (wl_display*)renderBackend->GetPlatformBackend()->GetNativeDisplayHandle({});
                 if (!display)
@@ -141,7 +147,7 @@ namespace Fusion::Vulkan
                 tempSurface.tempSurface = VK_NULL_HANDLE;
             }
 
-            if (IsWayland())
+            if (tempSurface.surface || tempSurface.compositor || tempSurface.display)
             {
                 if (tempSurface.surface)
                 {
@@ -155,16 +161,14 @@ namespace Fusion::Vulkan
                 }
                 tempSurface.display = nullptr;
             }
-            else
+
+            if (tempSurface.x11Display)
             {
-                if (tempSurface.x11Display)
-                {
-                    if (tempSurface.x11Window)
-                        XDestroyWindow((Display*)tempSurface.x11Display, (Window)tempSurface.x11Window);
-                    XCloseDisplay((Display*)tempSurface.x11Display);
-                    tempSurface.x11Display = nullptr;
-                    tempSurface.x11Window  = 0;
-                }
+                if (tempSurface.x11Window)
+                    XDestroyWindow((Display*)tempSurface.x11Display, (Window)tempSurface.x11Window);
+                XCloseDisplay((Display*)tempSurface.x11Display);
+                tempSurface.x11Display = nullptr;
+                tempSurface.x11Window  = 0;
             }
         }
 
@@ -180,7 +184,7 @@ namespace Fusion::Vulkan
 
             VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
 
-            if (IsWayland())
+            if (IsWayland(renderBackend))
             {
                 VkWaylandSurfaceCreateInfoKHR surfaceInfo{};
                 surfaceInfo.sType   = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
