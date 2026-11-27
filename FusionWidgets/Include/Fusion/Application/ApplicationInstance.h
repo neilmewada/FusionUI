@@ -40,9 +40,14 @@ namespace Fusion
 
 		// - Input State -
 
-		FVec2 GetScreenMousePos()     const { return m_ScreenMousePos; }
-		FVec2 GetPrevScreenMousePos() const { return m_PrevScreenMousePos; }
+		FVec2 GetWindowMousePos()     const { return m_WindowMousePos; }
+		FVec2 GetPrevWindowMousePos() const { return m_PrevWindowMousePos; }
 		FVec2 GetMouseWheelDelta()    const { return m_WheelDelta; }
+
+		//! @brief Whether the pointer is over the focused window. Wayland does not
+		//! report pointer positions outside the surface, so surfaces must consult
+		//! this before hit testing with the last known position.
+		bool  IsMouseOverWindow() const { return m_bMouseOverWindow; }
 
 		bool 		 IsKeyDown(EKeyCode key)                { return m_PlatformBackend->IsKeyDown(key); }
 		bool 		 IsKeyUp(EKeyCode key)                  { return m_PlatformBackend->IsKeyUp(key); }
@@ -141,8 +146,9 @@ namespace Fusion
 
 		Ref<FTheme> m_RootTheme;
 
-		FVec2 m_ScreenMousePos;
-		FVec2 m_PrevScreenMousePos;
+		FVec2 m_WindowMousePos;
+		FVec2 m_PrevWindowMousePos;
+		bool  m_bMouseOverWindow = false;
 		FVec2 m_WheelDelta;
 
 		bool m_IsFirstTick = true;

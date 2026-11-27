@@ -48,10 +48,6 @@ namespace Fusion
 			SDL_SetHint(SDL_HINT_MAC_SCROLL_MOMENTUM, "1");
 #endif
 
-#if FUSION_PLATFPORM_LINUX
-			SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "wayland")
-#endif
-
 			SDL_SetHint("SDL_BORDERLESS_WINDOWED_STYLE", "1");
 			SDL_SetHint("SDL_BORDERLESS_RESIZABLE_STYLE", "1");
 
@@ -271,6 +267,43 @@ namespace Fusion
 	FVec2 FSDL3PlatformBackend::GetGlobalMousePosition()
 	{
 		return m_InputState.globalMousePosition;
+	}
+
+	bool FSDL3PlatformBackend::IsMouseOverWindow(FWindowHandle window)
+	{
+		if (!IsWayland())
+		{
+			// X11 reports a real global pointer, so coordinates stay meaningful
+			// even when the pointer is outside the window.
+			return true;
+		}
+
+		return !window.IsNull() && m_MouseOverWindow == window;
+	}
+
+	FVec2 FSDL3PlatformBackend::GetMousePosition(FWindowHandle window)
+	{
+		if (window.IsNull())
+			return m_MousePosition;
+
+		if (!IsWayland())
+		{
+			// Keep deriving window-relative coordinates from the global pointer:
+			// X11 reports global positions in physical pixels while
+			// GetWindowPosition() and the surface size are in logical pixels.
+			return (m_InputState.globalMousePosition - GetWindowPosition(window).ToVec2()) / GetDpiScaleForWindow(window);
+		}
+
+		// Wayland has no global pointer. SDL tracks coordinates relative to the
+		// window the pointer is over, in window (logical) pixels, which are the
+		// same units as FSurface::GetAvailableSize().
+		return m_MousePosition;
+	}
+
+	bool FSDL3PlatformBackend::IsWayland()
+	{
+		const char* driver = SDL_GetCurrentVideoDriver();
+		return driver != nullptr && SDL_strcmp(driver, "wayland") == 0;
 	}
 
 	FVec2 FSDL3PlatformBackend::GetMouseWheelDelta()
@@ -686,6 +719,8 @@ namespace Fusion
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MOUSE_ENTER)
 		{
+			m_MouseOverWindow = FWindowHandle(event.window.windowID);
+
 			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)
@@ -701,6 +736,9 @@ namespace Fusion
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MOUSE_LEAVE)
 		{
+			if (m_MouseOverWindow == FWindowHandle(event.window.windowID))
+				m_MouseOverWindow = FWindowHandle::NullValue;
+
 			for (const auto& [instanceHandle, instanceData] : m_Instances)
 			{
 				if (instanceData.eventSink != nullptr)

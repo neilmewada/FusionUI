@@ -150,18 +150,24 @@ namespace Fusion
 
 		// - Events -
 
-		m_PrevScreenMousePos = m_ScreenMousePos;
-		m_ScreenMousePos = m_PlatformBackend->GetGlobalMousePosition();
+		Ref<FSurface> curFocus = m_CurFocusSurface.Lock();
+		Ref<FSurface> focus = m_FocusSurface.Lock();
+
+		// Window-relative, in logical window pixels. SDL_GetGlobalMouseState()
+		// always returns (0,0) on Wayland, so it cannot drive hit testing.
+		FWindowHandle mouseWindow = focus.IsValid() ? focus->GetWindowHandle() : FWindowHandle();
+
+		m_PrevWindowMousePos = m_WindowMousePos;
+		m_bMouseOverWindow = !mouseWindow.IsNull() && m_PlatformBackend->IsMouseOverWindow(mouseWindow);
+		if (m_bMouseOverWindow)
+			m_WindowMousePos = m_PlatformBackend->GetMousePosition(mouseWindow);
 		m_WheelDelta = m_PlatformBackend->GetMouseWheelDelta();
 
 		if (m_IsFirstTick)
 		{
 			m_IsFirstTick = false;
-			m_PrevScreenMousePos = m_ScreenMousePos;
+			m_PrevWindowMousePos = m_WindowMousePos;
 		}
-
-		Ref<FSurface> curFocus = m_CurFocusSurface.Lock();
-		Ref<FSurface> focus = m_FocusSurface.Lock();
 
 		// TODO: Fix Surface focus logic
 

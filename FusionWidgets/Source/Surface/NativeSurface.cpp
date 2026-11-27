@@ -41,17 +41,13 @@ namespace Fusion
         return FSurface::GetNativeTitleBarStyle();
     }
 
-    FVec2 FNativeSurface::ScreenToSurfacePoint(FVec2 position)
+    FVec2 FNativeSurface::WindowToSurfacePoint(FVec2 position)
 	{
-		Ref<FApplicationInstance> application = GetApplication();
-		if (!application)
-			return position;
-		
-#if FUSION_PLATFORM_MAC
-		return (position - application->GetWindowPosition(m_WindowHandle).ToVec2());
-#else
-		return (position - application->GetWindowPosition(m_WindowHandle).ToVec2()) / GetDpiScale();
-#endif
+		// `position` is already relative to this window, in logical window pixels:
+		// the platform backend reports SDL_GetMouseState() coordinates, and
+		// m_AvailableSize is the window size in the same units
+		// (pixel size / dpi scale). Nothing to convert.
+		return position;
 	}
 
 	void FNativeSurface::RequestTextInput()
